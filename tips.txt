@@ -1,0 +1,3 @@
+idiomas - eng, esp, fra, por, arab
+a la gente le gusta el buscador
+filtro para quitar alimentos que no te gustan/halal

@@ -1,0 +1,712 @@
+[
+  {
+    "title": "Ensalada de pollo",
+    "ingredients": "pollo,lechuga,tomate",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "healthy,rápido",
+    "image_url": "https://example.com/ensalada_pollo.jpg",
+    "description": "Corta la lechuga y el tomate. Añade el pollo cocido. Mezcla bien y sirve fresca.",
+    "nutrients": "calories 200"
+  },
+  {
+    "title": "Ensalada de pollo",
+    "ingredients": "pollo,lechuga,tomate",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "healthy,rápido",
+    "image_url": "https://example.com/ensalada_pollo.jpg",
+    "description": "Corta la lechuga y el tomate. Añade el pollo cocido. Mezcla bien y sirve fresca.",
+    "nutrients": "calories 200"
+  },
+  {
+    "title": "Paella valenciana",
+    "ingredients": "arroz,pollo,conejo,judía verde,garrofón,azafrán,tomate",
+    "time_minutes": 90,
+    "difficulty": "Difícil",
+    "tags": "tradicional,gourmet",
+    "image_url": "https://www.spainfoodsherpas.com/sfs/wp-content/uploads/2016/11/paella-valenciana-recipe-1.jpg",
+    "description": "Calienta aceite en la paella y dora pollo y conejo cortados en trozos. Añade judías verdes y sofríe ligeramente. Incorpora tomate rallado y sofríe hasta formar un sofrito consistente. Agrega azafrán, garrofón y arroz, remueve ligeramente. Añade caldo de pollo caliente y cocina a fuego alto 10 minutos, luego reduce el fuego y cocina 10 minutos más hasta que el arroz absorba el caldo y forme un socarrat en la base.",
+    "nutrients": "calories 600"
+  },
+  {
+    "title": "Arroz al horno",
+    "ingredients": "arroz,costilla de cerdo,morcilla,garbanzos,patata,tomate,caldo",
+    "time_minutes": 70,
+    "difficulty": "Media",
+    "tags": "tradicional,gourmet",
+    "image_url": "https://example.com/arroz_horno.jpg",
+    "description": "Cocina la carne, añade arroz y garbanzos, cubre con caldo y hornea hasta dorar.",
+    "nutrients": "calories 650"
+  },
+  {
+    "title": "Tacos al pastor",
+    "ingredients": "carne de cerdo,piña,cilantro,cebolla,tortillas",
+    "time_minutes": 120,
+    "difficulty": "Media",
+    "tags": "mexicano,tradicional,gourmet",
+    "image_url": "https://example.com/tacos_pastor.jpg",
+    "description": "Marina la carne con especias y piña. Cocina lentamente, sirve en tortillas con cilantro y cebolla.",
+    "nutrients": "calories 500"
+  },
+  {
+    "title": "Lentejas estofadas",
+    "ingredients": "lentejas,chorizo,zanahoria,cebolla,ajo,tomate",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "tradicional,saludable",
+    "image_url": "https://example.com/lentejas_estofadas.jpg",
+    "description": "Prepara un sofrito con verduras y chorizo, añade lentejas y cocina lentamente.",
+    "nutrients": "calories 400"
+  },
+  {
+    "title": "Espaguetis carbonara",
+    "ingredients": "espaguetis,huevo,queso parmesano,panceta,pimienta negra",
+    "time_minutes": 25,
+    "difficulty": "Media",
+    "tags": "italiano,gourmet",
+    "image_url": "https://example.com/espaguetis_carbonara.jpg",
+    "description": "Cuece los espaguetis, mezcla rápidamente con huevo, queso y panceta caliente.",
+    "nutrients": "calories 550"
+  },
+  {
+    "title": "Risotto de setas",
+    "ingredients": "arroz arborio,setas,queso parmesano,caldo de verduras,vino blanco",
+    "time_minutes": 40,
+    "difficulty": "Difícil",
+    "tags": "italiano,gourmet",
+    "image_url": "https://example.com/risotto_setas.jpg",
+    "description": "Sofríe las setas, añade arroz y caldo lentamente, revolviendo continuamente hasta que quede cremoso.",
+    "nutrients": "calories 450"
+  },
+  {
+    "title": "Guisado de carne con patatas",
+    "ingredients": "carne de res,patatas,zanahoria,cebolla,caldo,tomate",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "tradicional,saludable",
+    "image_url": "https://example.com/guisado_carne.jpg",
+    "description": "Sofríe la carne, añade verduras y caldo. Cocina lentamente hasta que la carne esté tierna.",
+    "nutrients": "calories 500"
+  },
+  {
+    "title": "Paella de marisco",
+    "ingredients": "arroz,mariscos,azafrán,tomate,pimiento,caldo de pescado",
+    "time_minutes": 60,
+    "difficulty": "Difícil",
+    "tags": "gourmet,tradicional",
+    "image_url": "https://imag.bonviveur.com/paella-marisco.jpg",
+    "description": "Calienta aceite en la paella y sofríe ligeramente los mariscos hasta sellarlos. Retíralos y reserva. Añade el pimiento y tomate picados finamente para hacer un sofrito. Incorpora arroz y azafrán, mezclando bien con el sofrito. Añade caldo de pescado caliente y distribuye uniformemente. Cocina a fuego fuerte durante 10 minutos, reincorpora los mariscos y reduce a fuego medio-bajo otros 8-10 minutos, hasta que el arroz quede ligeramente seco pero jugoso.",
+    "nutrients": "calories 550"
+  },
+  {
+    "title": "Arroz meloso con gambas",
+    "ingredients": "arroz,gambas,caldo de pescado,pimiento rojo,cebolla,azafrán",
+    "time_minutes": 50,
+    "difficulty": "Media",
+    "tags": "gourmet,tradicional",
+    "image_url": "https://example.com/arroz_meloso_gambas.jpg",
+    "description": "Sofríe las gambas con las verduras, añade arroz y caldo gradualmente hasta obtener textura melosa.",
+    "nutrients": "calories 500"
+  },
+  {
+    "title": "Pollo tikka masala",
+    "ingredients": "pollo, yogur, tomate, cebolla, jengibre, garam masala, ajo",
+    "time_minutes": 75,
+    "difficulty": "Media",
+    "tags": "hindú,especiado,gourmet",
+    "image_url": "https://example.com/pollo_tikka_masala.jpg",
+    "description": "Marina el pollo en yogur y especias. Cocina en una salsa de tomate especiada hasta que esté tierno.",
+    "nutrients": "calories 520"
+  },
+  {
+    "title": "Moussaka griega",
+    "ingredients": "berenjena,carne picada,tomate,bechamel,queso,cebolla,ajo",
+    "time_minutes": 90,
+    "difficulty": "Difícil",
+    "tags": "griego,horno,gourmet",
+    "image_url": "https://example.com/moussaka.jpg",
+    "description": "Fríe las berenjenas, prepara carne con tomate y cubre con bechamel. Hornea hasta dorar.",
+    "nutrients": "calories 600"
+  },
+  {
+    "title": "Coq au vin",
+    "ingredients": "pollo,vino tinto,cebolla,zanahoria,tocino,ajo,caldo",
+    "time_minutes": 120,
+    "difficulty": "Difícil",
+    "tags": "francés,tradicional,gourmet",
+    "image_url": "https://example.com/coq_au_vin.jpg",
+    "description": "Marina el pollo en vino, luego cocínalo lentamente con verduras y panceta.",
+    "nutrients": "calories 580"
+  },
+  {
+    "title": "Ramen japonés",
+    "ingredients": "fideos ramen,caldo de cerdo,huevo,alga nori,cerdo marinado,cebolla verde",
+    "time_minutes": 120,
+    "difficulty": "Difícil",
+    "tags": "japonés,caliente,gourmet",
+    "image_url": "https://example.com/ramen.jpg",
+    "description": "Prepara un caldo rico y complejo, cocina los fideos, sirve con toppings tradicionales.",
+    "nutrients": "calories 700"
+  },
+  {
+    "title": "Canelones rellenos de carne",
+    "ingredients": "pasta para canelones,carne picada,tomate,cebolla,queso,bechamel",
+    "time_minutes": 85,
+    "difficulty": "Media",
+    "tags": "italiano,horno,gourmet",
+    "image_url": "https://example.com/canelones_carne.jpg",
+    "description": "Rellena los canelones cocidos con carne, cúbrelos con salsa y queso, y hornea.",
+    "nutrients": "calories 650"
+  },
+  {
+    "title": "Goulash húngaro",
+    "ingredients": "carne de ternera,pimiento rojo,cebolla,pimentón,caldo,ajo",
+    "time_minutes": 100,
+    "difficulty": "Media",
+    "tags": "húngaro,guiso,gourmet",
+    "image_url": "https://example.com/goulash.jpg",
+    "description": "Cocina la carne a fuego lento con pimentón y verduras hasta que esté muy tierna.",
+    "nutrients": "calories 540"
+  },
+  {
+    "title": "Pato a la naranja",
+    "ingredients": "pato,naranja,miel,vinagre,bouillon,cebolla",
+    "time_minutes": 120,
+    "difficulty": "Difícil",
+    "tags": "francés,gourmet,festivo",
+    "image_url": "https://example.com/pato_naranja.jpg",
+    "description": "Hornea el pato y báñalo en una salsa cítrica y dulce reducida con naranja.",
+    "nutrients": "calories 720"
+  },
+  {
+    "title": "Fajitas de res",
+    "ingredients": "carne de res,pimiento,cebolla,especias,tortillas de harina",
+    "time_minutes": 40,
+    "difficulty": "Media",
+    "tags": "mexicano,gourmet,rápido",
+    "image_url": "https://example.com/fajitas_res.jpg",
+    "description": "Saltea la carne con especias y verduras, sirve en tortillas calientes.",
+    "nutrients": "calories 480"
+  },
+  {
+    "title": "Curry verde tailandés",
+    "ingredients": "pollo,leche de coco,pasta de curry verde,berenjena tailandesa,albahaca,tallarines de arroz",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "tailandés,especiado,exótico",
+    "image_url": "https://example.com/curry_verde.jpg",
+    "description": "Cocina el pollo con curry y leche de coco, añade verduras y sirve con arroz o fideos.",
+    "nutrients": "calories 560"
+  },
+  {
+    "title": "Boeuf Bourguignon",
+    "ingredients": "carne de res,vino tinto,zanaoria,cebolla,ajo,caldo,champiñones",
+    "time_minutes": 150,
+    "difficulty": "Difícil",
+    "tags": "francés,clásico,gourmet",
+    "image_url": "https://example.com/boeuf_bourguignon.jpg",
+    "description": "Dora la carne, cocínala a fuego lento en vino con verduras hasta que esté tierna.",
+    "nutrients": "calories 630"
+  },
+  {
+    "title": "Lasagna de berenjena",
+    "ingredients": "berenjena,tomate,queso ricotta,queso mozzarella,albahaca,ajo",
+    "time_minutes": 80,
+    "difficulty": "Media",
+    "tags": "vegetariano,italiano,horno",
+    "image_url": "https://example.com/lasagna_berenjena.jpg",
+    "description": "Asa las berenjenas y alterna capas con salsas y quesos. Hornea hasta que gratine.",
+    "nutrients": "calories 520"
+  },
+  {
+    "title": "Cuscús con cordero y verduras",
+    "ingredients": "cuscús,carne de cordero,zanahoria,calabacín,garbanzos,especias marroquíes",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "marroquí,exótico,guiso",
+    "image_url": "https://example.com/cuscus_cordero.jpg",
+    "description": "Cocina el cordero con verduras y especias, sirve sobre cuscús cocido al vapor.",
+    "nutrients": "calories 610"
+  },
+  {
+    "title": "Sopa pho vietnamita",
+    "ingredients": "fideos de arroz,caldo de res,anís estrellado,jengibre,carne de res,cebolla",
+    "time_minutes": 120,
+    "difficulty": "Difícil",
+    "tags": "vietnamita,exótico,sopa",
+    "image_url": "https://example.com/pho.jpg",
+    "description": "Prepara un caldo especiado, cocina los fideos y sirve con carne y hierbas frescas.",
+    "nutrients": "calories 500"
+  },
+  {
+    "title": "Polenta cremosa con setas",
+    "ingredients": "polenta,setas,queso parmesano,mantequilla,ajo,romero",
+    "time_minutes": 45,
+    "difficulty": "Media",
+    "tags": "vegetariano,italiano,cremoso",
+    "image_url": "https://example.com/polenta_setas.jpg",
+    "description": "Cocina la polenta lentamente hasta cremosa y acompaña con setas salteadas.",
+    "nutrients": "calories 430"
+  },
+  {
+    "title": "Pollo korma",
+    "ingredients": "pollo,yogur,nata,almendras,especias garam masala,cebolla,ajo",
+    "time_minutes": 80,
+    "difficulty": "Media",
+    "tags": "hindú,especiado,cremoso",
+    "image_url": "https://example.com/pollo_korma.jpg",
+    "description": "Marina y cocina el pollo en una salsa suave de yogur y especias con frutos secos.",
+    "nutrients": "calories 560"
+  },
+  {
+    "title": "Bacalao a la vizcaína",
+    "ingredients": "bacalao,pimientos choriceros,cebolla,ajo,tomate,aceite de oliva",
+    "time_minutes": 75,
+    "difficulty": "Media",
+    "tags": "español,pescado,tradicional",
+    "image_url": "https://example.com/bacalao_vizcaina.jpg",
+    "description": "Desala el bacalao, cocina en salsa de pimientos y tomate hasta espesar.",
+    "nutrients": "calories 450"
+  },
+  {
+    "title": "Tagine de pollo con limón y aceitunas",
+    "ingredients": "pollo,limón en conserva,aceitunas,cebolla,especias marroquíes,cilantro",
+    "time_minutes": 95,
+    "difficulty": "Media",
+    "tags": "marroquí,guiso,exótico",
+    "image_url": "https://example.com/tagine_pollo.jpg",
+    "description": "Cocina lentamente el pollo en un tagine con especias, aceitunas y limón.",
+    "nutrients": "calories 520"
+  },
+  {
+    "title": "Pierogi rellenos de patata y cebolla",
+    "ingredients": "harina,huevo,patata,cebolla,mantequilla,nata agria",
+    "time_minutes": 70,
+    "difficulty": "Media",
+    "tags": "polaco,vegetariano,tradicional",
+    "image_url": "https://example.com/pierogi.jpg",
+    "description": "Prepara la masa, rellena con puré y cebolla, hierve y sofríe ligeramente.",
+    "nutrients": "calories 460"
+  },
+  {
+    "title": "Ragú de cordero con pasta",
+    "ingredients": "carne de cordero,tomate,zanahoria,apio,vino tinto,pasta",
+    "time_minutes": 95,
+    "difficulty": "Media",
+    "tags": "italiano,guiso,pasta",
+    "image_url": "https://example.com/ragu_cordero.jpg",
+    "description": "Cocina lentamente el cordero con verduras y vino, sirve con pasta al dente.",
+    "nutrients": "calories 630"
+  },
+  {
+    "title": "Tarta tatin de tomate y queso de cabra",
+    "ingredients": "tomate cherry,queso de cabra,masa brisa,azúcar moreno,romero",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "francés,vegetariano,horno",
+    "image_url": "https://example.com/tatin_tomate.jpg",
+    "description": "Carameliza los tomates, cubre con masa y hornea al revés. Desmolda y sirve tibio.",
+    "nutrients": "calories 470"
+  },
+  {
+    "title": "Empanadas salteñas",
+    "ingredients": "carne de res,cebolla,papa,huevo duro,ají,masa de empanada",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "boliviano,horno,tradicional",
+    "image_url": "https://example.com/empanadas_saltenas.jpg",
+    "description": "Prepara un guiso jugoso con carne y papa, rellena las empanadas y hornéalas hasta dorar.",
+    "nutrients": "calories 480"
+  },
+  {
+    "title": "Pastel de choclo chileno",
+    "ingredients": "maíz molido,pollo,carne picada,aceitunas,huevo duro,cebolla",
+    "time_minutes": 75,
+    "difficulty": "Media",
+    "tags": "chileno,horno,tradicional",
+    "image_url": "https://example.com/pastel_choclo.jpg",
+    "description": "Prepara un pino de carne y cubre con una mezcla dulce de maíz. Hornea hasta dorado.",
+    "nutrients": "calories 520"
+  },
+  {
+    "title": "Ñoquis con salsa de gorgonzola",
+    "ingredients": "patata,harina,huevo,queso gorgonzola,nata,cebollino",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "italiano,vegetariano,pasta",
+    "image_url": "https://example.com/gnocchi_gorgonzola.jpg",
+    "description": "Haz ñoquis caseros con patata y acompaña con una salsa cremosa de queso azul.",
+    "nutrients": "calories 570"
+  },
+  {
+    "title": "Yakitori de pollo",
+    "ingredients": "pollo,salsa de soja,mirin,azúcar,brochetas,cebolla verde",
+    "time_minutes": 45,
+    "difficulty": "Media",
+    "tags": "japonés,parrilla,brochetas",
+    "image_url": "https://example.com/yakitori.jpg",
+    "description": "Ensarta el pollo en brochetas, báñalo en salsa dulce-salada y cocínalo a la parrilla.",
+    "nutrients": "calories 430"
+  },
+  {
+    "title": "Kefta con cuscús",
+    "ingredients": "carne de cordero,cebolla,comino,cuscús,cilantro,yogur",
+    "time_minutes": 55,
+    "difficulty": "Media",
+    "tags": "árabe,especiado,gourmet",
+    "image_url": "https://example.com/kefta_cuscus.jpg",
+    "description": "Forma las keftas con especias, cocínalas a la plancha y sirve con cuscús y yogur.",
+    "nutrients": "calories 590"
+  },
+  {
+    "title": "Milanesa napolitana",
+    "ingredients": "carne de ternera,huevo,pan rallado,jamón,tomate,queso mozzarella",
+    "time_minutes": 65,
+    "difficulty": "Media",
+    "tags": "argentino,horno,frito",
+    "image_url": "https://example.com/milanesa_napolitana.jpg",
+    "description": "Empana y fríe la carne, cubre con salsa y queso, y hornea hasta gratinar.",
+    "nutrients": "calories 700"
+  },
+  {
+    "title": "Cazuela de mariscos",
+    "ingredients": "mariscos,caldo de pescado,leche,ajo,ají,cebolla,patata",
+    "time_minutes": 85,
+    "difficulty": "Media",
+    "tags": "chileno,pescado,guiso",
+    "image_url": "https://example.com/cazuela_mariscos.jpg",
+    "description": "Hierve mariscos en un caldo especiado con vegetales hasta lograr una sopa espesa.",
+    "nutrients": "calories 510"
+  },
+  {
+    "title": "Biryani de cordero",
+    "ingredients": "arroz basmati,carne de cordero,yogur,especias,cebolla,frescos",
+    "time_minutes": 100,
+    "difficulty": "Difícil",
+    "tags": "hindú,arroz,gourmet",
+    "image_url": "https://example.com/biryani_cordero.jpg",
+    "description": "Marina y cocina el cordero, alterna con arroz especiado y hornea en capas.",
+    "nutrients": "calories 620"
+  },
+  {
+    "title": "Tamales mexicanos",
+    "ingredients": "masa de maíz,relleno de carne,hojas de maíz,chile rojo,especias",
+    "time_minutes": 90,
+    "difficulty": "Difícil",
+    "tags": "mexicano,tradicional,maíz",
+    "image_url": "https://example.com/tamales.jpg",
+    "description": "Prepara la masa, rellena con carne y salsa, envuelve en hojas y cuece al vapor.",
+    "nutrients": "calories 540"
+  },
+  {
+    "title": "Ratatouille al horno",
+    "ingredients": "berenjena,calabacín,pimiento,tomate,cebolla,ajo,aceite de oliva",
+    "time_minutes": 70,
+    "difficulty": "Media",
+    "tags": "francés,vegetariano,horno",
+    "image_url": "https://example.com/ratatouille.jpg",
+    "description": "Corta las verduras finamente, ordénalas en capas y hornea con especias y aceite.",
+    "nutrients": "calories 400"
+  },
+  {
+    "title": "Canelones de espinaca y ricotta",
+    "ingredients": "pasta para canelones,espinaca,queso ricotta,queso parmesano,salsa bechamel",
+    "time_minutes": 70,
+    "difficulty": "Media",
+    "tags": "italiano,vegetariano,horno",
+    "image_url": "https://example.com/canelones_espinaca.jpg",
+    "description": "Rellena los canelones con espinaca y ricotta, cubre con bechamel y hornea hasta gratinar.",
+    "nutrients": "calories 550"
+  },
+  {
+    "title": "Pollo tikka masala",
+    "ingredients": "pollo,yogur,garam masala,jengibre,ajo,tomate,nata",
+    "time_minutes": 75,
+    "difficulty": "Media",
+    "tags": "hindú,especiado,gourmet",
+    "image_url": "https://example.com/tikka_masala.jpg",
+    "description": "Marina el pollo con especias y yogur, ásalo y cocina en una salsa cremosa especiada.",
+    "nutrients": "calories 600"
+  },
+  {
+    "title": "Moussaka griega",
+    "ingredients": "berenjena,carne picada,patata,salsa bechamel,tomate,canela",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "griego,horno,tradicional",
+    "image_url": "https://example.com/moussaka.jpg",
+    "description": "Alterna capas de berenjena, carne y bechamel. Hornea hasta que esté bien dorado.",
+    "nutrients": "calories 670"
+  },
+  {
+    "title": "Fideuá de sepia y alioli",
+    "ingredients": "fideos finos,sepia,caldo de pescado,pimiento,tomate,alioli",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "español,mariscos,tradicional",
+    "image_url": "https://example.com/fideua.jpg",
+    "description": "Sofríe los fideos con la sepia y verduras, añade caldo y cocina sin remover. Sirve con alioli.",
+    "nutrients": "calories 530"
+  },
+  {
+    "title": "Goulash húngaro",
+    "ingredients": "carne de res,pimentón dulce,cebolla,patata,tomate,caldo",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "húngaro,guiso,tradicional",
+    "image_url": "https://example.com/goulash.jpg",
+    "description": "Cocina la carne con pimentón y verduras lentamente hasta que esté muy tierna.",
+    "nutrients": "calories 590"
+  },
+  {
+    "title": "Shakshuka con queso feta",
+    "ingredients": "huevos,tomate,cebolla,pimiento,ajo,queso feta,comino",
+    "time_minutes": 45,
+    "difficulty": "Media",
+    "tags": "israelí,vegetariano,huevo",
+    "image_url": "https://example.com/shakshuka.jpg",
+    "description": "Cocina los vegetales con especias, añade los huevos y hornea hasta que cuajen.",
+    "nutrients": "calories 480"
+  },
+  {
+    "title": "Curry verde tailandés",
+    "ingredients": "pollo,leche de coco,curry verde,bambú,berenjena tailandesa,albahaca",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "tailandés,exótico,especiado",
+    "image_url": "https://example.com/curry_verde.jpg",
+    "description": "Cocina el pollo con la pasta de curry y leche de coco, añade verduras y hierbas.",
+    "nutrients": "calories 540"
+  },
+  {
+    "title": "Enchiladas rojas de pollo",
+    "ingredients": "tortillas de maíz,pollo,queso,salsa roja,chile guajillo,cebolla",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "mexicano,horno,tradicional",
+    "image_url": "https://example.com/enchiladas.jpg",
+    "description": "Rellena tortillas con pollo, baña en salsa y hornea con queso hasta derretido.",
+    "nutrients": "calories 520"
+  },
+  {
+    "title": "Bibimbap coreano",
+    "ingredients": "arroz,huevo,espinaca,zanahoria,carne de res,brotes,gohchujang",
+    "time_minutes": 50,
+    "difficulty": "Media",
+    "tags": "coreano,arroz,gourmet",
+    "image_url": "https://example.com/bibimbap.jpg",
+    "description": "Sirve arroz con verduras salteadas, carne y huevo frito. Añade salsa picante coreana.",
+    "nutrients": "calories 580"
+  },
+  {
+    "title": "Pulpo a la gallega",
+    "ingredients": "pulpo,patata,pimentón,aceite de oliva,sal gruesa",
+    "time_minutes": 70,
+    "difficulty": "Media",
+    "tags": "gallego,mariscos,tradicional",
+    "image_url": "https://example.com/pulpo_gallega.jpg",
+    "description": "Cuece el pulpo y las patatas, corta en rodajas y sirve con aceite y pimentón.",
+    "nutrients": "calories 450"
+  },
+  {
+    "title": "Tagine de cordero con ciruelas",
+    "ingredients": "cordero,cebolla,canela,ciruelas pasas,almendras,miel",
+    "time_minutes": 120,
+    "difficulty": "Difícil",
+    "tags": "marroquí,dulce-salado,guiso",
+    "image_url": "https://example.com/tagine_cordero.jpg",
+    "description": "Cocina el cordero lentamente con especias y añade ciruelas y miel para un sabor agridulce.",
+    "nutrients": "calories 620"
+  },
+  {
+    "title": "Ravioles de calabaza y salvia",
+    "ingredients": "harina,huevo,calabaza,ricotta,parmesano,mantequilla,salvia",
+    "time_minutes": 75,
+    "difficulty": "Difícil",
+    "tags": "italiano,vegetariano,pasta fresca",
+    "image_url": "https://example.com/ravioles_calabaza.jpg",
+    "description": "Prepara la pasta, rellena con calabaza y sirve con salsa de mantequilla y salvia.",
+    "nutrients": "calories 570"
+  },
+  {
+    "title": "Sopa pho vietnamita",
+    "ingredients": "fideos de arroz,carne de res,anís estrellado,jengibre,canela,brotes",
+    "time_minutes": 120,
+    "difficulty": "Media",
+    "tags": "vietnamita,sopa,aromático",
+    "image_url": "https://example.com/pho.jpg",
+    "description": "Prepara un caldo especiado, añade fideos y carne en rodajas finas. Sirve con brotes y lima.",
+    "nutrients": "calories 490"
+  },
+  {
+    "title": "Lasagna de berenjena",
+    "ingredients": "berenjena,tomate,queso mozzarella,queso parmesano,albahaca,aceite de oliva",
+    "time_minutes": 80,
+    "difficulty": "Media",
+    "tags": "italiano,vegetariano,horno",
+    "image_url": "https://example.com/lasagna_berenjena.jpg",
+    "description": "Intercala capas de berenjena asada, tomate y queso. Hornea hasta gratinar.",
+    "nutrients": "calories 520"
+  },
+  {
+    "title": "Shawarma de cordero",
+    "ingredients": "pierna de cordero,ajo,limón,yogur,comino,pan pita",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "árabe,especiado,carne",
+    "image_url": "https://example.com/shawarma_cordero.jpg",
+    "description": "Marina el cordero, ásalo lentamente y sirve en pan pita con verduras y salsa.",
+    "nutrients": "calories 610"
+  },
+  {
+    "title": "Curry de garbanzos y espinacas",
+    "ingredients": "garbanzos,espinacas,leche de coco,tomate,curry en polvo,cebolla",
+    "time_minutes": 50,
+    "difficulty": "Media",
+    "tags": "vegano,indio,curry",
+    "image_url": "https://example.com/curry_garbanzos.jpg",
+    "description": "Saltea especias, añade tomate, garbanzos y espinacas. Cocina hasta que espese.",
+    "nutrients": "calories 480"
+  },
+  {
+    "title": "Bacalao a la vizcaína",
+    "ingredients": "bacalao,cebolla,pimiento choricero,ajo,tomate,aceite de oliva",
+    "time_minutes": 70,
+    "difficulty": "Media",
+    "tags": "vasco,pescado,tradicional",
+    "image_url": "https://example.com/bacalao_vizcaina.jpg",
+    "description": "Desala el bacalao y cocínalo lentamente en una salsa espesa de pimientos y tomate.",
+    "nutrients": "calories 530"
+  },
+  {
+    "title": "Ramen de cerdo tonkotsu",
+    "ingredients": "huesos de cerdo,fideos,jengibre,ajo,huevo,soja,misô",
+    "time_minutes": 240,
+    "difficulty": "Difícil",
+    "tags": "japonés,sopa,gourmet",
+    "image_url": "https://example.com/ramen_tonkotsu.jpg",
+    "description": "Hierve huesos durante horas para obtener un caldo blanco. Sirve con fideos y toppings.",
+    "nutrients": "calories 650"
+  },
+  {
+    "title": "Arepas rellenas de carne mechada",
+    "ingredients": "harina de maíz precocida,agua,sal,carne de res,cebolla,pimiento,ajo",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "venezolano,relleno,tradicional",
+    "image_url": "https://example.com/arepas_mechada.jpg",
+    "description": "Prepara las arepas, rellénalas con carne mechada jugosa y bien sazonada.",
+    "nutrients": "calories 580"
+  },
+  {
+    "title": "Coq au vin",
+    "ingredients": "pollo,vino tinto,zanahoria,cebolla,ajo,champiñones,tomillo",
+    "time_minutes": 120,
+    "difficulty": "Difícil",
+    "tags": "francés,guiso,tradicional",
+    "image_url": "https://example.com/coq_au_vin.jpg",
+    "description": "Marina el pollo en vino tinto, luego cocínalo lentamente con verduras y champiñones.",
+    "nutrients": "calories 600"
+  },
+  {
+    "title": "Ropa vieja cubana",
+    "ingredients": "carne de res deshebrada,pimiento,cebolla,ajo,tomate,comino",
+    "time_minutes": 120,
+    "difficulty": "Media",
+    "tags": "cubano,guiso,carne",
+    "image_url": "https://example.com/ropa_vieja.jpg",
+    "description": "Cocina carne de res hasta que se deshaga, sofríe con verduras y especias. Sirve con arroz.",
+    "nutrients": "calories 590"
+  },
+  {
+    "title": "Yakisoba japonés",
+    "ingredients": "fideos de trigo,cerdo,col,zanahoria,salsa yakisoba,cebolla",
+    "time_minutes": 40,
+    "difficulty": "Media",
+    "tags": "japonés,fideos,salteado",
+    "image_url": "https://example.com/yakisoba.jpg",
+    "description": "Saltea carne y verduras, añade los fideos y la salsa yakisoba. Cocina hasta dorar.",
+    "nutrients": "calories 530"
+  },
+  {
+    "title": "Feijoada brasileña",
+    "ingredients": "frijoles negros,carne de cerdo,chorizo,ajo,laurel,naranja",
+    "time_minutes": 180,
+    "difficulty": "Difícil",
+    "tags": "brasileño,guiso,tradicional",
+    "image_url": "https://example.com/feijoada.jpg",
+    "description": "Cuece los frijoles con las carnes y condimentos lentamente. Sirve con arroz y naranja.",
+    "nutrients": "calories 700"
+  },
+  {
+    "title": "Biryani de cordero",
+    "ingredients": "arroz basmati,cordejo,yogur,azafrán,especias,cebolla frita",
+    "time_minutes": 90,
+    "difficulty": "Difícil",
+    "tags": "indio,arroz,gourmet",
+    "image_url": "https://example.com/biryani_cordero.jpg",
+    "description": "Marina el cordero, cocínalo con arroz aromático y especias, y termina al horno.",
+    "nutrients": "calories 650"
+  },
+  {
+    "title": "Pad thai clásico",
+    "ingredients": "fideos de arroz,pollo,huevo,brotes de soja,cacahuetes,tamarindo",
+    "time_minutes": 40,
+    "difficulty": "Media",
+    "tags": "tailandés,fideos,especiado",
+    "image_url": "https://example.com/pad_thai.jpg",
+    "description": "Saltea los ingredientes con salsa de tamarindo y termina con cacahuetes y lima.",
+    "nutrients": "calories 520"
+  },
+  {
+    "title": "Polenta con ragú de setas",
+    "ingredients": "polenta,setas,ajo,cebolla,parmesano,mantequilla,caldo vegetal",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "italiano,vegetariano,gourmet",
+    "image_url": "https://example.com/polenta_setas.jpg",
+    "description": "Cocina la polenta y acompáñala con un ragú de setas salteadas y queso.",
+    "nutrients": "calories 480"
+  },
+  {
+    "title": "Chiles en nogada",
+    "ingredients": "chiles poblanos,carne molida,frutas secas,nuez,crema,granada",
+    "time_minutes": 90,
+    "difficulty": "Difícil",
+    "tags": "mexicano,tradicional,festivo",
+    "image_url": "https://example.com/chiles_nogada.jpg",
+    "description": "Rellena los chiles con picadillo, cúbrelos con salsa de nuez y adorna con granada.",
+    "nutrients": "calories 680"
+  },
+  {
+    "title": "Empanadas salteñas",
+    "ingredients": "harina,carne de res,patata,pimentón,huevo duro,ají",
+    "time_minutes": 80,
+    "difficulty": "Media",
+    "tags": "boliviano,horno,tradicional",
+    "image_url": "https://example.com/empanadas_saltenas.jpg",
+    "description": "Prepara un relleno jugoso de carne y patata. Hornea las empanadas hasta que estén doradas.",
+    "nutrients": "calories 510"
+  },
+  {
+    "title": "Tajine de verduras",
+    "ingredients": "zanahoria,calabacín,garbanzos,calabaza,comino,limón encurtido",
+    "time_minutes": 75,
+    "difficulty": "Media",
+    "tags": "marroquí,vegetariano,guiso",
+    "image_url": "https://example.com/tajine_verduras.jpg",
+    "description": "Cocina lentamente las verduras con especias hasta obtener una mezcla tierna y sabrosa.",
+    "nutrients": "calories 460"
+  },
+  {
+    "title": "Pastitsio griego",
+    "ingredients": "macarrones,carne picada,canela,salsa bechamel,queso,tomate",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "griego,horno,pasta",
+    "image_url": "https://example.com/pastitsio.jpg",
+    "description": "Alterna capas de pasta, carne especiada y bechamel. Hornea hasta dorar por encima.",
+    "nutrients": "calories 610"
+  }  
+]

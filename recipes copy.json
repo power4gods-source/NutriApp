@@ -1,0 +1,167 @@
+[
+    {
+      "title": "A Ensalada de pollo",
+      "ingredients": ["pollo", "lechuga", "tomate"],
+      "time_minutes": 15,
+      "difficulty": "Fácil",
+      "tags": ["healthy", "rápido"],
+      "image_url": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.myplate.gov%2Fes%2Frecipes%2Fensalada-griega-con-pollo&psig=AOvVaw0V6Ycp9CFFafoS9gsQjBag&ust=1745865009240000&source=images&cd=vfe&opi=89978449&ved=0CBAQjRxqFwoTCLCQwJLs-IwDFQAAAAAdAAAAABAE",
+      "description": "Corta la lechuga y el tomate. Añade el pollo cocido. Mezcla bien y sirve fresca.",
+      "nutrients": {
+        "calories": 250,
+        "protein": 30,
+        "fat": 8,
+        "carbohydrates": 10
+      }
+    },
+    {
+      "title": "Arroz con pollo",
+      "ingredients": ["arroz", "pollo", "pimientos"],
+      "time_minutes": 30,
+      "difficulty": "Media",
+      "tags": ["tradicional"],
+      "image_url": "https://example.com/arroz_pollo.jpg",
+      "description": "Sofríe los pimientos, añade el pollo y el arroz. Cocina a fuego lento.",
+      "nutrients": {
+        "calories": 480,
+        "protein": 35,
+        "fat": 12,
+        "carbohydrates": 55
+      }
+    },
+    {
+        "title": "Paella valenciana",
+        "ingredients": ["arroz", "pollo", "conejo", "judía verde", "garrofón", "tomate"],
+        "time_minutes": 60,
+        "difficulty": "Difícil",
+        "tags": ["tradicional", "gourmet"],
+        "image_url": "https://example.com/paella_valenciana.jpg",
+        "description": "Dora el pollo y conejo, añade verduras, arroz y caldo. Cocina hasta que el arroz esté seco.",
+        "nutrients": {
+        "calories": 650,
+        "protein": 40,
+        "fat": 18,
+        "carbohydrates": 70
+    }
+  },
+  {
+    "title": "Pizza casera",
+    "ingredients": ["harina", "levadura", "tomate", "queso", "jamón"],
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": ["gourmet", "tradicional"],
+    "image_url": "https://example.com/pizza_casera.jpg",
+    "description": "Prepara la masa, deja reposar, añade salsa de tomate y toppings. Hornea hasta dorar.",
+    "nutrients": {
+      "calories": 800,
+      "protein": 30,
+      "fat": 35,
+      "carbohydrates": 85
+    }
+  },
+  {
+    "title": "Lentejas con chorizo",
+    "ingredients": ["lentejas", "chorizo", "zanahoria", "cebolla"],
+    "time_minutes": 50,
+    "difficulty": "Media",
+    "tags": ["tradicional"],
+    "image_url": "https://example.com/lentejas_chorizo.jpg",
+    "description": "Cuece las lentejas junto al sofrito de chorizo y verduras.",
+    "nutrients": {
+      "calories": 550,
+      "protein": 25,
+      "fat": 22,
+      "carbohydrates": 40
+    }
+  },
+  {
+    "title": "Arroz al horno",
+    "ingredients": ["arroz", "costilla de cerdo", "morcilla", "garbanzos", "tomate"],
+    "time_minutes": 60,
+    "difficulty": "Difícil",
+    "tags": ["tradicional"],
+    "image_url": "https://example.com/arroz_horno.jpg",
+    "description": "Dora las carnes, monta el arroz con los ingredientes y hornea.",
+    "nutrients": {
+      "calories": 720,
+      "protein": 35,
+      "fat": 28,
+      "carbohydrates": 65
+    }
+  },
+  {
+    "title": "Tortilla de patatas",
+    "ingredients": ["patatas", "huevos", "cebolla"],
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "tags": ["tradicional", "rápido"],
+    "image_url": "https://example.com/tortilla_patatas.jpg",
+    "description": "Fríe las patatas y la cebolla, mezcla con huevo batido y cocina en sartén.",
+    "nutrients": {
+      "calories": 400,
+      "protein": 15,
+      "fat": 20,
+      "carbohydrates": 30
+    }
+  },
+  {
+    "title": "Gazpacho andaluz",
+    "ingredients": ["tomate", "pepino", "pimiento", "aceite de oliva"],
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": ["healthy", "rápido"],
+    "image_url": "https://example.com/gazpacho.jpg",
+    "description": "Tritura todos los ingredientes hasta obtener una crema fina. Sirve bien frío.",
+    "nutrients": {
+      "calories": 120,
+      "protein": 3,
+      "fat": 7,
+      "carbohydrates": 10
+    }
+  },
+  {
+    "title": "Pasta carbonara",
+    "ingredients": ["espaguetis", "huevo", "queso parmesano", "panceta"],
+    "time_minutes": 20,
+    "difficulty": "Media",
+    "tags": ["rápido", "tradicional"],
+    "image_url": "https://example.com/pasta_carbonara.jpg",
+    "description": "Cocina la pasta y mezcla fuera del fuego con huevo batido, parmesano y panceta.",
+    "nutrients": {
+      "calories": 600,
+      "protein": 20,
+      "fat": 25,
+      "carbohydrates": 65
+    }
+  },
+  {
+    "title": "Hamburguesa casera",
+    "ingredients": ["carne picada", "pan de hamburguesa", "lechuga", "tomate"],
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "tags": ["rápido"],
+    "image_url": "https://example.com/hamburguesa_casera.jpg",
+    "description": "Forma la hamburguesa, cocina a la plancha y monta con ingredientes frescos.",
+    "nutrients": {
+      "calories": 700,
+      "protein": 35,
+      "fat": 30,
+      "carbohydrates": 40
+    }
+  },
+  {
+    "title": "Crema de calabaza",
+    "ingredients": ["calabaza", "patata", "cebolla", "nata líquida"],
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "tags": ["healthy"],
+    "image_url": "https://example.com/crema_calabaza.jpg",
+    "description": "Hierve las verduras, tritura hasta obtener una crema suave y añade nata.",
+    "nutrients": {
+      "calories": 220,
+      "protein": 4,
+      "fat": 10,
+      "carbohydrates": 28
+    }
+  }
+]
