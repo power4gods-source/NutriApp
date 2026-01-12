@@ -1,0 +1,94 @@
+{
+  "power4gods_at_gmail_com": {
+    "daily_stats": {
+      "2026-01-09": {
+        "consumed_calories": 586.5,
+        "nutrition": {
+          "protein": 66.7,
+          "carbohydrates": 37.5,
+          "fat": 16.9
+        },
+        "meals_count": 3
+      },
+      "2026-01-11": {
+        "consumed_calories": 1300.0,
+        "nutrition": {
+          "protein": 27.0,
+          "carbohydrates": 280.0,
+          "fat": 3.0
+        },
+        "meals_count": 1
+      }
+    },
+    "weekly_stats": {
+      "2026-W02": {
+        "total_calories": 1886.5,
+        "avg_daily_calories": 269.5,
+        "total_nutrition": {
+          "protein": 93.7,
+          "carbohydrates": 317.5,
+          "fat": 19.9,
+          "fiber": 6.2,
+          "sugar": 1.9,
+          "sodium": 207.5
+        },
+        "avg_daily_nutrition": {
+          "protein": 13.4,
+          "carbohydrates": 45.4,
+          "fat": 2.8,
+          "fiber": 0.9,
+          "sugar": 0.3,
+          "sodium": 29.6
+        },
+        "days": 7
+      }
+    },
+    "monthly_stats": {
+      "2026-01": {
+        "total_calories": 1886.5,
+        "avg_daily_calories": 60.9,
+        "total_nutrition": {
+          "protein": 93.7,
+          "carbohydrates": 317.5,
+          "fat": 19.9,
+          "fiber": 6.2,
+          "sugar": 1.9,
+          "sodium": 207.5
+        },
+        "avg_daily_nutrition": {
+          "protein": 3.0,
+          "carbohydrates": 10.2,
+          "fat": 0.6,
+          "fiber": 0.2,
+          "sugar": 0.1,
+          "sodium": 6.7
+        },
+        "days": 31
+      }
+    },
+    "yearly_stats": {
+      "2026": {
+        "total_calories": 1886.5,
+        "avg_daily_calories": 5.2,
+        "total_nutrition": {
+          "protein": 93.7,
+          "carbohydrates": 317.5,
+          "fat": 19.9,
+          "fiber": 6.2,
+          "sugar": 1.9,
+          "sodium": 207.5
+        },
+        "avg_daily_nutrition": {
+          "protein": 0.3,
+          "carbohydrates": 0.9,
+          "fat": 0.1,
+          "fiber": 0.0,
+          "sugar": 0.0,
+          "sodium": 0.6
+        },
+        "days": 365
+      }
+    },
+    "last_updated": "2026-01-11T18:23:20.796025"
+  }
+}

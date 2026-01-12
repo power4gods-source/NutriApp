@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv*/
+ENV/
+*.egg-info/
+dist/
+build/
+*.pyc
+*.pyo
+*.pyd
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+*.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Windows batch files (local development only)
+*.bat
+
+# Local documentation (troubleshooting guides)
+CONFIGURACION_BACKEND.md
+TROUBLESHOOTING.md
+SOLUCION_MOVIL.md
+TESTING_ALTERNATIVES.md
+SOLUCION_GRADLE_JAVA.md
+
+# ngrok config (if used)
+ngrok.yml
+
+
+
+
+
+
+

@@ -1,0 +1,1984 @@
+[
+    {
+      "food_id": "food_001",
+      "name": "pollo",
+      "name_variations": ["pollo", "pollo cocido", "pechuga de pollo", "pollo asado"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 195,
+        "protein": 29.6,
+        "carbohydrates": 0.0,
+        "fat": 7.7,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 98.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 150.0 }
+    },
+    {
+      "food_id": "food_002",
+      "name": "lechuga",
+      "name_variations": ["lechuga", "lechuga romana"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 15,
+        "protein": 1.4,
+        "carbohydrates": 2.9,
+        "fat": 0.2,
+        "fiber": 1.3,
+        "sugar": 0.8,
+        "sodium": 28.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 50.0 }
+    },
+    {
+      "food_id": "food_003",
+      "name": "tomate",
+      "name_variations": ["tomate", "jitomate"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 18,
+        "protein": 0.9,
+        "carbohydrates": 3.9,
+        "fat": 0.2,
+        "fiber": 1.2,
+        "sugar": 2.6,
+        "sodium": 5.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 150.0 }
+    },
+    {
+      "food_id": "food_004",
+      "name": "arroz blanco cocido",
+      "name_variations": ["arroz", "arroz blanco", "arroz cocido"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 130,
+        "protein": 2.7,
+        "carbohydrates": 28.0,
+        "fat": 0.3,
+        "fiber": 0.4,
+        "sugar": 0.1,
+        "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 200.0 }
+    },
+    {
+      "food_id": "food_005",
+      "name": "huevo",
+      "name_variations": ["huevo", "huevo cocido"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 143,
+        "protein": 12.6,
+        "carbohydrates": 0.7,
+        "fat": 9.5,
+        "fiber": 0.0,
+        "sugar": 1.1,
+        "sodium": 140.0
+      },
+      "default_unit": "unidades",
+      "unit_conversions": { "gramos": 1.0, "unidades": 50.0 }
+    },
+  
+    {
+      "food_id": "food_006",
+      "name": "zanahoria",
+      "name_variations": ["zanahoria"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 41,
+        "protein": 0.9,
+        "carbohydrates": 9.6,
+        "fat": 0.2,
+        "fiber": 2.8,
+        "sugar": 4.7,
+        "sodium": 69.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 60.0 }
+    },
+    {
+      "food_id": "food_007",
+      "name": "brócoli",
+      "name_variations": ["brocoli", "brócoli"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 34,
+        "protein": 2.8,
+        "carbohydrates": 6.6,
+        "fat": 0.4,
+        "fiber": 2.6,
+        "sugar": 1.7,
+        "sodium": 33.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_008",
+      "name": "espinaca",
+      "name_variations": ["espinaca"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 23,
+        "protein": 2.9,
+        "carbohydrates": 3.6,
+        "fat": 0.4,
+        "fiber": 2.2,
+        "sugar": 0.4,
+        "sodium": 79.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 30.0 }
+    },
+    {
+      "food_id": "food_009",
+      "name": "pepino",
+      "name_variations": ["pepino"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 15,
+        "protein": 0.7,
+        "carbohydrates": 3.6,
+        "fat": 0.1,
+        "fiber": 0.5,
+        "sugar": 1.5,
+        "sodium": 2.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_010",
+      "name": "cebolla",
+      "name_variations": ["cebolla"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 40,
+        "protein": 1.1,
+        "carbohydrates": 9.3,
+        "fat": 0.1,
+        "fiber": 1.7,
+        "sugar": 4.2,
+        "sodium": 4.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_011",
+      "name": "pimiento",
+      "name_variations": ["pimiento", "pimiento rojo"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 31,
+        "protein": 1.0,
+        "carbohydrates": 6.0,
+        "fat": 0.3,
+        "fiber": 2.1,
+        "sugar": 4.2,
+        "sodium": 4.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_012",
+      "name": "calabacín",
+      "name_variations": ["calabacín", "zucchini"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 17,
+        "protein": 1.2,
+        "carbohydrates": 3.1,
+        "fat": 0.3,
+        "fiber": 1.0,
+        "sugar": 2.5,
+        "sodium": 8.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_013",
+      "name": "berenjena",
+      "name_variations": ["berenjena"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 25,
+        "protein": 1.0,
+        "carbohydrates": 5.9,
+        "fat": 0.2,
+        "fiber": 3.0,
+        "sugar": 3.5,
+        "sodium": 2.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_014",
+      "name": "coliflor",
+      "name_variations": ["coliflor"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 25,
+        "protein": 1.9,
+        "carbohydrates": 5.0,
+        "fat": 0.3,
+        "fiber": 2.0,
+        "sugar": 1.9,
+        "sodium": 30.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_015",
+      "name": "apio",
+      "name_variations": ["apio"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 16,
+        "protein": 0.7,
+        "carbohydrates": 3.0,
+        "fat": 0.2,
+        "fiber": 1.6,
+        "sugar": 1.3,
+        "sodium": 80.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+  
+    {
+      "food_id": "food_016",
+      "name": "manzana",
+      "name_variations": ["manzana"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 52,
+        "protein": 0.3,
+        "carbohydrates": 14.0,
+        "fat": 0.2,
+        "fiber": 2.4,
+        "sugar": 10.4,
+        "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 180.0 }
+    },
+    {
+      "food_id": "food_017",
+      "name": "plátano",
+      "name_variations": ["plátano", "banana"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 89,
+        "protein": 1.1,
+        "carbohydrates": 22.8,
+        "fat": 0.3,
+        "fiber": 2.6,
+        "sugar": 12.2,
+        "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 120.0 }
+    },
+    {
+      "food_id": "food_018",
+      "name": "naranja",
+      "name_variations": ["naranja"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 47,
+        "protein": 0.9,
+        "carbohydrates": 11.8,
+        "fat": 0.1,
+        "fiber": 2.4,
+        "sugar": 9.4,
+        "sodium": 0.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 150.0 }
+    },
+    {
+      "food_id": "food_019",
+      "name": "fresa",
+      "name_variations": ["fresa", "fresas"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 32,
+        "protein": 0.7,
+        "carbohydrates": 7.7,
+        "fat": 0.3,
+        "fiber": 2.0,
+        "sugar": 4.9,
+        "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+  
+    {
+      "food_id": "food_020",
+      "name": "carne de res",
+      "name_variations": ["res", "ternera"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 250,
+        "protein": 26.0,
+        "carbohydrates": 0.0,
+        "fat": 17.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 72.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_021",
+      "name": "cerdo",
+      "name_variations": ["cerdo", "carne de cerdo"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 242,
+        "protein": 27.0,
+        "carbohydrates": 0.0,
+        "fat": 14.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 62.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_022",
+      "name": "salmón",
+      "name_variations": ["salmón"],
+      "category": "pescado",
+      "nutrition_per_100g": {
+        "calories": 208,
+        "protein": 20.0,
+        "carbohydrates": 0.0,
+        "fat": 13.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 59.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_023",
+      "name": "atún",
+      "name_variations": ["atún"],
+      "category": "pescado",
+      "nutrition_per_100g": {
+        "calories": 132,
+        "protein": 28.0,
+        "carbohydrates": 0.0,
+        "fat": 1.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 50.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_024",
+      "name": "lentejas cocidas",
+      "name_variations": ["lentejas"],
+      "category": "legumbre",
+      "nutrition_per_100g": {
+        "calories": 116,
+        "protein": 9.0,
+        "carbohydrates": 20.0,
+        "fat": 0.4,
+        "fiber": 7.9,
+        "sugar": 1.8,
+        "sodium": 2.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_025",
+      "name": "garbanzos cocidos",
+      "name_variations": ["garbanzos"],
+      "category": "legumbre",
+      "nutrition_per_100g": {
+        "calories": 164,
+        "protein": 8.9,
+        "carbohydrates": 27.4,
+        "fat": 2.6,
+        "fiber": 7.6,
+        "sugar": 4.8,
+        "sodium": 7.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0 }
+    },
+    {
+      "food_id": "food_026",
+      "name": "aceite de oliva",
+      "name_variations": ["aceite de oliva", "aceite oliva virgen"],
+      "category": "grasa",
+      "nutrition_per_100g": {
+        "calories": 884,
+        "protein": 0.0,
+        "carbohydrates": 0.0,
+        "fat": 100.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 0.0
+      },
+      "default_unit": "mililitros",
+      "unit_conversions": { "mililitros": 1.0, "cucharadas": 15.0 }
+    },
+    {
+      "food_id": "food_027",
+      "name": "aguacate",
+      "name_variations": ["aguacate", "palta"],
+      "category": "grasa",
+      "nutrition_per_100g": {
+        "calories": 160,
+        "protein": 2.0,
+        "carbohydrates": 8.5,
+        "fat": 14.7,
+        "fiber": 6.7,
+        "sugar": 0.7,
+        "sodium": 7.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 200.0 }
+    },
+    {
+      "food_id": "food_028",
+      "name": "pasta cocida",
+      "name_variations": ["pasta", "espaguetis", "macarrones"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 131,
+        "protein": 5.0,
+        "carbohydrates": 25.0,
+        "fat": 1.0,
+        "fiber": 1.5,
+        "sugar": 0.6,
+        "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 125.0 }
+    },
+    {
+      "food_id": "food_029",
+      "name": "pan integral",
+      "name_variations": ["pan integral", "pan de trigo integral"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 247,
+        "protein": 13.0,
+        "carbohydrates": 41.0,
+        "fat": 3.4,
+        "fiber": 7.0,
+        "sugar": 4.3,
+        "sodium": 430.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "rebanadas": 35.0 }
+    },
+    {
+      "food_id": "food_030",
+      "name": "yogur natural",
+      "name_variations": ["yogur", "yogur natural", "yogur griego"],
+      "category": "lácteo",
+      "nutrition_per_100g": {
+        "calories": 59,
+        "protein": 10.0,
+        "carbohydrates": 3.6,
+        "fat": 0.4,
+        "fiber": 0.0,
+        "sugar": 3.2,
+        "sodium": 36.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 245.0 }
+    },
+    {
+      "food_id": "food_031",
+      "name": "queso fresco",
+      "name_variations": ["queso fresco", "queso blanco"],
+      "category": "lácteo",
+      "nutrition_per_100g": {
+        "calories": 98,
+        "protein": 11.0,
+        "carbohydrates": 3.0,
+        "fat": 5.0,
+        "fiber": 0.0,
+        "sugar": 3.0,
+        "sodium": 300.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 225.0 }
+    },
+    {
+      "food_id": "food_032",
+      "name": "leche entera",
+      "name_variations": ["leche", "leche de vaca"],
+      "category": "lácteo",
+      "nutrition_per_100g": {
+        "calories": 61,
+        "protein": 3.3,
+        "carbohydrates": 4.8,
+        "fat": 3.3,
+        "fiber": 0.0,
+        "sugar": 4.8,
+        "sodium": 40.0
+      },
+      "default_unit": "mililitros",
+      "unit_conversions": { "mililitros": 1.0, "tazas": 244.0 }
+    },
+    {
+      "food_id": "food_033",
+      "name": "almendras",
+      "name_variations": ["almendras", "almendra cruda"],
+      "category": "fruto seco",
+      "nutrition_per_100g": {
+        "calories": 579,
+        "protein": 21.0,
+        "carbohydrates": 21.6,
+        "fat": 49.9,
+        "fiber": 12.5,
+        "sugar": 4.4,
+        "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 143.0 }
+    },
+    {
+      "food_id": "food_034",
+      "name": "nueces",
+      "name_variations": ["nueces", "nuez"],
+      "category": "fruto seco",
+      "nutrition_per_100g": {
+        "calories": 654,
+        "protein": 15.2,
+        "carbohydrates": 13.7,
+        "fat": 65.2,
+        "fiber": 6.7,
+        "sugar": 2.6,
+        "sodium": 2.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 120.0 }
+    },
+    {
+      "food_id": "food_035",
+      "name": "chocolate negro 70%",
+      "name_variations": ["chocolate negro", "chocolate amargo"],
+      "category": "dulce",
+      "nutrition_per_100g": {
+        "calories": 598,
+        "protein": 7.8,
+        "carbohydrates": 45.9,
+        "fat": 42.6,
+        "fiber": 10.9,
+        "sugar": 23.9,
+        "sodium": 20.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "onzas": 28.35 }
+    },
+    {
+      "food_id": "food_036",
+      "name": "miel",
+      "name_variations": ["miel", "miel de abeja"],
+      "category": "dulce",
+      "nutrition_per_100g": {
+        "calories": 304,
+        "protein": 0.3,
+        "carbohydrates": 82.4,
+        "fat": 0.0,
+        "fiber": 0.2,
+        "sugar": 82.1,
+        "sodium": 4.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharadas": 21.0 }
+    },
+    {
+      "food_id": "food_037",
+      "name": "azúcar blanco",
+      "name_variations": ["azúcar", "azúcar refinado"],
+      "category": "dulce",
+      "nutrition_per_100g": {
+        "calories": 387,
+        "protein": 0.0,
+        "carbohydrates": 100.0,
+        "fat": 0.0,
+        "fiber": 0.0,
+        "sugar": 100.0,
+        "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharadas": 12.5 }
+    },
+    {
+      "food_id": "food_038",
+      "name": "sal",
+      "name_variations": ["sal", "sal de mesa"],
+      "category": "condimento",
+      "nutrition_per_100g": {
+        "calories": 0,
+        "protein": 0.0,
+        "carbohydrates": 0.0,
+        "fat": 0.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 38758.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharaditas": 5.0 }
+    },
+    {
+      "food_id": "food_039",
+      "name": "vinagre",
+      "name_variations": ["vinagre", "vinagre de manzana"],
+      "category": "condimento",
+      "nutrition_per_100g": {
+        "calories": 18,
+        "protein": 0.0,
+        "carbohydrates": 0.9,
+        "fat": 0.0,
+        "fiber": 0.0,
+        "sugar": 0.4,
+        "sodium": 2.0
+      },
+      "default_unit": "mililitros",
+      "unit_conversions": { "mililitros": 1.0, "cucharadas": 15.0 }
+    },
+    {
+      "food_id": "food_040",
+      "name": "limón",
+      "name_variations": ["limón", "limón amarillo"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 29,
+        "protein": 1.1,
+        "carbohydrates": 9.3,
+        "fat": 0.3,
+        "fiber": 2.8,
+        "sugar": 2.5,
+        "sodium": 2.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 58.0 }
+    },
+    {
+      "food_id": "food_041",
+      "name": "ajo",
+      "name_variations": ["ajo", "diente de ajo"],
+      "category": "condimento",
+      "nutrition_per_100g": {
+        "calories": 149,
+        "protein": 6.4,
+        "carbohydrates": 33.1,
+        "fat": 0.5,
+        "fiber": 2.1,
+        "sugar": 1.0,
+        "sodium": 17.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "dientes": 3.0 }
+    },
+    {
+      "food_id": "food_042",
+      "name": "jengibre",
+      "name_variations": ["jengibre", "jengibre fresco"],
+      "category": "condimento",
+      "nutrition_per_100g": {
+        "calories": 80,
+        "protein": 1.8,
+        "carbohydrates": 17.8,
+        "fat": 0.8,
+        "fiber": 2.0,
+        "sugar": 1.7,
+        "sodium": 13.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharadas": 6.0 }
+    },
+    {
+      "food_id": "food_043",
+      "name": "perejil",
+      "name_variations": ["perejil", "perejil fresco"],
+      "category": "condimento",
+      "nutrition_per_100g": {
+        "calories": 36,
+        "protein": 3.0,
+        "carbohydrates": 6.3,
+        "fat": 0.8,
+        "fiber": 3.3,
+        "sugar": 0.9,
+        "sodium": 56.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 60.0 }
+    },
+    {
+      "food_id": "food_044",
+      "name": "cilantro",
+      "name_variations": ["cilantro", "cilantro fresco"],
+      "category": "condimento",
+      "nutrition_per_100g": {
+        "calories": 23,
+        "protein": 2.1,
+        "carbohydrates": 3.7,
+        "fat": 0.5,
+        "fiber": 2.8,
+        "sugar": 0.9,
+        "sodium": 46.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 16.0 }
+    },
+    {
+      "food_id": "food_045",
+      "name": "papa",
+      "name_variations": ["papa", "patata"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 77,
+        "protein": 2.0,
+        "carbohydrates": 17.5,
+        "fat": 0.1,
+        "fiber": 2.2,
+        "sugar": 0.8,
+        "sodium": 6.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 150.0 }
+    },
+    {
+      "food_id": "food_046",
+      "name": "batata",
+      "name_variations": ["batata", "boniato", "camote"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 86,
+        "protein": 1.6,
+        "carbohydrates": 20.1,
+        "fat": 0.1,
+        "fiber": 3.0,
+        "sugar": 4.2,
+        "sodium": 55.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 130.0 }
+    },
+    {
+      "food_id": "food_047",
+      "name": "aceitunas",
+      "name_variations": ["aceitunas", "aceitunas verdes"],
+      "category": "grasa",
+      "nutrition_per_100g": {
+        "calories": 115,
+        "protein": 0.8,
+        "carbohydrates": 6.3,
+        "fat": 10.7,
+        "fiber": 3.2,
+        "sugar": 0.0,
+        "sodium": 872.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 3.5 }
+    },
+    {
+      "food_id": "food_048",
+      "name": "queso parmesano",
+      "name_variations": ["parmesano", "queso parmesano rallado"],
+      "category": "lácteo",
+      "nutrition_per_100g": {
+        "calories": 431,
+        "protein": 38.5,
+        "carbohydrates": 4.1,
+        "fat": 29.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 1529.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 100.0 }
+    },
+    {
+      "food_id": "food_049",
+      "name": "café",
+      "name_variations": ["café", "café negro"],
+      "category": "bebida",
+      "nutrition_per_100g": {
+        "calories": 0,
+        "protein": 0.1,
+        "carbohydrates": 0.0,
+        "fat": 0.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 2.0
+      },
+      "default_unit": "mililitros",
+      "unit_conversions": { "mililitros": 1.0, "tazas": 240.0 }
+    },
+    {
+      "food_id": "food_050",
+      "name": "té verde",
+      "name_variations": ["té verde", "té"],
+      "category": "bebida",
+      "nutrition_per_100g": {
+        "calories": 1,
+        "protein": 0.2,
+        "carbohydrates": 0.0,
+        "fat": 0.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 1.0
+      },
+      "default_unit": "mililitros",
+      "unit_conversions": { "mililitros": 1.0, "tazas": 240.0 }
+    },
+    {
+      "food_id": "food_051",
+      "name": "pechuga de pavo",
+      "name_variations": ["pavo", "pechuga pavo", "fiambre de pavo"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 105, "protein": 24.0, "carbohydrates": 0.0, "fat": 1.0, "fiber": 0.0, "sugar": 0.0, "sodium": 50.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "lonchas": 30.0 }
+    },
+    {
+      "food_id": "food_052",
+      "name": "tofu firme",
+      "name_variations": ["tofu"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 83, "protein": 10.0, "carbohydrates": 1.2, "fat": 4.8, "fiber": 0.3, "sugar": 0.0, "sodium": 7.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "bloque": 250.0 }
+    },
+    {
+      "food_id": "food_053",
+      "name": "champiñones",
+      "name_variations": ["setas", "champiñón"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 22, "protein": 3.1, "carbohydrates": 3.3, "fat": 0.3, "fiber": 1.0, "sugar": 2.0, "sodium": 5.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 70.0 }
+    },
+    {
+      "food_id": "food_054",
+      "name": "arándanos",
+      "name_variations": ["arándano azul", "blueberries"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 57, "protein": 0.7, "carbohydrates": 14.5, "fat": 0.3, "fiber": 2.4, "sugar": 10.0, "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 150.0 }
+    },
+    {
+      "food_id": "food_055",
+      "name": "quinoa cocida",
+      "name_variations": ["quinoa"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 120, "protein": 4.4, "carbohydrates": 21.3, "fat": 1.9, "fiber": 2.8, "sugar": 0.9, "sodium": 7.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 185.0 }
+    },
+    {
+      "food_id": "food_056",
+      "name": "hummus",
+      "name_variations": ["hummus de garbanzo"],
+      "category": "legumbre",
+      "nutrition_per_100g": {
+        "calories": 166, "protein": 7.9, "carbohydrates": 14.3, "fat": 9.6, "fiber": 6.0, "sugar": 0.3, "sodium": 379.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharadas": 15.0 }
+    },
+    {
+      "food_id": "food_057",
+      "name": "avena",
+      "name_variations": ["copos de avena", "avena integral"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 389, "protein": 16.9, "carbohydrates": 66.3, "fat": 6.9, "fiber": 10.6, "sugar": 0.0, "sodium": 2.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 90.0 }
+    },
+    {
+      "food_id": "food_058",
+      "name": "queso cottage",
+      "name_variations": ["cottage"],
+      "category": "lácteo",
+      "nutrition_per_100g": {
+        "calories": 98, "protein": 11.1, "carbohydrates": 3.4, "fat": 4.3, "fiber": 0.0, "sugar": 2.7, "sodium": 364.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 225.0 }
+    },
+    {
+      "food_id": "food_059",
+      "name": "mantequilla de cacahuete",
+      "name_variations": ["crema de maní"],
+      "category": "grasa",
+      "nutrition_per_100g": {
+        "calories": 588, "protein": 25.0, "carbohydrates": 20.0, "fat": 50.0, "fiber": 6.0, "sugar": 9.0, "sodium": 400.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharadas": 16.0 }
+    },
+    {
+      "food_id": "food_060",
+      "name": "gambas",
+      "name_variations": ["camarones", "gambas peladas"],
+      "category": "pescado",
+      "nutrition_per_100g": {
+        "calories": 99, "protein": 24.0, "carbohydrates": 0.2, "fat": 0.3, "fiber": 0.0, "sugar": 0.0, "sodium": 111.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 15.0 }
+    },
+    {
+      "food_id": "food_061",
+      "name": "kiwi",
+      "name_variations": ["kiwi"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 61, "protein": 1.1, "carbohydrates": 15.0, "fat": 0.5, "fiber": 3.0, "sugar": 9.0, "sodium": 3.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 70.0 }
+    },
+    {
+      "food_id": "food_062",
+      "name": "espárragos",
+      "name_variations": ["espárrago triguero"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 20, "protein": 2.2, "carbohydrates": 3.9, "fat": 0.1, "fiber": 2.1, "sugar": 1.9, "sodium": 2.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 20.0 }
+    },
+    {
+      "food_id": "food_063",
+      "name": "maíz dulce",
+      "name_variations": ["maíz en conserva"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 86, "protein": 3.2, "carbohydrates": 19.0, "fat": 1.2, "fiber": 2.7, "sugar": 6.3, "sodium": 15.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 160.0 }
+    },
+    {
+      "food_id": "food_064",
+      "name": "semillas de chía",
+      "name_variations": ["chía"],
+      "category": "grasa",
+      "nutrition_per_100g": {
+        "calories": 486, "protein": 16.5, "carbohydrates": 42.1, "fat": 30.7, "fiber": 34.4, "sugar": 0.0, "sodium": 16.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharadas": 12.0 }
+    },
+    {
+      "food_id": "food_065",
+      "name": "jamón serrano",
+      "name_variations": ["jamón", "jamón curado"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 240, "protein": 30.0, "carbohydrates": 0.0, "fat": 13.0, "fiber": 0.0, "sugar": 0.0, "sodium": 2100.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "lonchas": 20.0 }
+    },
+    {
+      "food_id": "food_066",
+      "name": "pistachos",
+      "name_variations": ["pistacho"],
+      "category": "fruto seco",
+      "nutrition_per_100g": {
+        "calories": 562, "protein": 20.0, "carbohydrates": 27.0, "fat": 45.0, "fiber": 10.0, "sugar": 7.7, "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 125.0 }
+    },
+    {
+      "food_id": "food_067",
+      "name": "yogur griego 0%",
+      "name_variations": ["yogur griego desnatado"],
+      "category": "lácteo",
+      "nutrition_per_100g": {
+        "calories": 57, "protein": 10.3, "carbohydrates": 3.6, "fat": 0.0, "fiber": 0.0, "sugar": 3.2, "sodium": 35.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "unidades": 125.0 }
+    },
+    {
+      "food_id": "food_068",
+      "name": "kale",
+      "name_variations": ["col rizada"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 49, "protein": 4.3, "carbohydrates": 8.8, "fat": 0.9, "fiber": 3.6, "sugar": 2.3, "sodium": 38.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 67.0 }
+    },
+    {
+      "food_id": "food_069",
+      "name": "mostaza",
+      "name_variations": ["mostaza dijon"],
+      "category": "condimento",
+      "nutrition_per_100g": {
+        "calories": 66, "protein": 4.4, "carbohydrates": 6.4, "fat": 3.4, "fiber": 3.3, "sugar": 0.9, "sodium": 1100.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "cucharaditas": 5.0 }
+    },
+    {
+      "food_id": "food_070",
+      "name": "leche de almendras",
+      "name_variations": ["bebida de almendras"],
+      "category": "bebida",
+      "nutrition_per_100g": {
+        "calories": 13, "protein": 0.4, "carbohydrates": 0.1, "fat": 1.1, "fiber": 0.3, "sugar": 0.0, "sodium": 140.0
+      },
+      "default_unit": "mililitros",
+      "unit_conversions": { "mililitros": 1.0, "tazas": 240.0 }
+    },
+    {
+      "food_id": "food_071",
+      "name": "edamame cocido",
+      "name_variations": ["soja verde"],
+      "category": "legumbre",
+      "nutrition_per_100g": {
+        "calories": 122, "protein": 11.0, "carbohydrates": 10.0, "fat": 5.0, "fiber": 5.0, "sugar": 2.2, "sodium": 6.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 155.0 }
+    },
+    {
+      "food_id": "food_072",
+      "name": "pavo cocido",
+      "name_variations": ["pechuga de pavo fiambre"],
+      "category": "proteína",
+      "nutrition_per_100g": {
+        "calories": 101, "protein": 18.0, "carbohydrates": 1.0, "fat": 2.0, "fiber": 0.0, "sugar": 1.0, "sodium": 900.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "lonchas": 20.0 }
+    },
+    {
+      "food_id": "food_073",
+      "name": "frambuesas",
+      "name_variations": ["frambuesa"],
+      "category": "fruta",
+      "nutrition_per_100g": {
+        "calories": 52, "protein": 1.2, "carbohydrates": 12.0, "fat": 0.7, "fiber": 6.5, "sugar": 4.4, "sodium": 1.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 125.0 }
+    },
+    {
+      "food_id": "food_074",
+      "name": "tortilla de maíz",
+      "name_variations": ["tortilla"],
+      "category": "carbohidrato",
+      "nutrition_per_100g": {
+        "calories": 218, "protein": 5.7, "carbohydrates": 45.0, "fat": 2.8, "fiber": 6.3, "sugar": 0.9, "sodium": 45.0
+      },
+      "default_unit": "unidades",
+      "unit_conversions": { "gramos": 1.0, "unidades": 30.0 }
+    },
+    {
+      "food_id": "food_075",
+      "name": "canónigos",
+      "name_variations": ["hierba de los canónigos"],
+      "category": "verdura",
+      "nutrition_per_100g": {
+        "calories": 21, "protein": 2.0, "carbohydrates": 3.6, "fat": 0.4, "fiber": 1.5, "sugar": 0.0, "sodium": 4.0
+      },
+      "default_unit": "gramos",
+      "unit_conversions": { "gramos": 1.0, "tazas": 30.0 }
+    },
+  {
+    "food_id": "food_051",
+    "name": "quinoa cocida",
+    "name_variations": ["quinoa", "quinoa cocida"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 120,
+      "protein": 4.4,
+      "carbohydrates": 21.3,
+      "fat": 1.9,
+      "fiber": 2.8,
+      "sugar": 0.9,
+      "sodium": 7.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 185.0 }
+  },
+  {
+    "food_id": "food_052",
+    "name": "avena",
+    "name_variations": ["avena", "avena en hojuelas"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 389,
+      "protein": 16.9,
+      "carbohydrates": 66.3,
+      "fat": 6.9,
+      "fiber": 10.6,
+      "sugar": 0.0,
+      "sodium": 2.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 80.0 }
+  },
+  {
+    "food_id": "food_053",
+    "name": "arroz integral cocido",
+    "name_variations": ["arroz integral"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 123,
+      "protein": 2.7,
+      "carbohydrates": 25.6,
+      "fat": 1.0,
+      "fiber": 1.8,
+      "sugar": 0.4,
+      "sodium": 5.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 195.0 }
+  },
+  {
+    "food_id": "food_054",
+    "name": "tofu",
+    "name_variations": ["tofu", "tofu firme"],
+    "category": "proteína",
+    "nutrition_per_100g": {
+      "calories": 76,
+      "protein": 8.0,
+      "carbohydrates": 1.9,
+      "fat": 4.8,
+      "fiber": 0.3,
+      "sugar": 0.3,
+      "sodium": 7.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_055",
+    "name": "tempeh",
+    "name_variations": ["tempeh"],
+    "category": "proteína",
+    "nutrition_per_100g": {
+      "calories": 193,
+      "protein": 19.0,
+      "carbohydrates": 9.4,
+      "fat": 11.0,
+      "fiber": 5.4,
+      "sugar": 0.0,
+      "sodium": 9.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_056",
+    "name": "pechuga de pavo",
+    "name_variations": ["pavo", "pechuga de pavo"],
+    "category": "proteína",
+    "nutrition_per_100g": {
+      "calories": 135,
+      "protein": 29.0,
+      "carbohydrates": 0.0,
+      "fat": 1.6,
+      "fiber": 0.0,
+      "sugar": 0.0,
+      "sodium": 50.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_057",
+    "name": "jamón cocido",
+    "name_variations": ["jamón", "jamón cocido"],
+    "category": "proteína",
+    "nutrition_per_100g": {
+      "calories": 145,
+      "protein": 21.0,
+      "carbohydrates": 1.5,
+      "fat": 5.0,
+      "fiber": 0.0,
+      "sugar": 1.5,
+      "sodium": 1200.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_058",
+    "name": "champiñones",
+    "name_variations": ["champiñones", "setas"],
+    "category": "verdura",
+    "nutrition_per_100g": {
+      "calories": 22,
+      "protein": 3.1,
+      "carbohydrates": 3.3,
+      "fat": 0.3,
+      "fiber": 1.0,
+      "sugar": 2.0,
+      "sodium": 5.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_059",
+    "name": "maíz cocido",
+    "name_variations": ["maíz", "elote"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 96,
+      "protein": 3.4,
+      "carbohydrates": 21.0,
+      "fat": 1.5,
+      "fiber": 2.4,
+      "sugar": 4.5,
+      "sodium": 15.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_060",
+    "name": "frijoles negros cocidos",
+    "name_variations": ["frijoles negros"],
+    "category": "legumbre",
+    "nutrition_per_100g": {
+      "calories": 132,
+      "protein": 8.9,
+      "carbohydrates": 23.7,
+      "fat": 0.5,
+      "fiber": 8.7,
+      "sugar": 0.3,
+      "sodium": 1.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_061",
+    "name": "requesón",
+    "name_variations": ["requesón"],
+    "category": "lácteo",
+    "nutrition_per_100g": {
+      "calories": 98,
+      "protein": 11.1,
+      "carbohydrates": 3.4,
+      "fat": 4.3,
+      "fiber": 0.0,
+      "sugar": 2.7,
+      "sodium": 364.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_062",
+    "name": "yogur griego",
+    "name_variations": ["yogur griego"],
+    "category": "lácteo",
+    "nutrition_per_100g": {
+      "calories": 59,
+      "protein": 10.0,
+      "carbohydrates": 3.6,
+      "fat": 0.4,
+      "fiber": 0.0,
+      "sugar": 3.2,
+      "sodium": 36.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_063",
+    "name": "mantequilla",
+    "name_variations": ["mantequilla"],
+    "category": "grasa",
+    "nutrition_per_100g": {
+      "calories": 717,
+      "protein": 0.9,
+      "carbohydrates": 0.1,
+      "fat": 81.0,
+      "fiber": 0.0,
+      "sugar": 0.1,
+      "sodium": 11.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "cucharadas": 14.0 }
+  },
+  {
+    "food_id": "food_064",
+    "name": "harina de trigo",
+    "name_variations": ["harina", "harina de trigo"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 364,
+      "protein": 10.3,
+      "carbohydrates": 76.3,
+      "fat": 1.0,
+      "fiber": 2.7,
+      "sugar": 0.3,
+      "sodium": 2.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 120.0 }
+  },
+  {
+    "food_id": "food_065",
+    "name": "pan blanco",
+    "name_variations": ["pan blanco"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 265,
+      "protein": 9.0,
+      "carbohydrates": 49.0,
+      "fat": 3.2,
+      "fiber": 2.4,
+      "sugar": 5.0,
+      "sodium": 491.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "rebanadas": 30.0 }
+  },
+  {
+    "food_id": "food_066",
+    "name": "mermelada",
+    "name_variations": ["mermelada"],
+    "category": "dulce",
+    "nutrition_per_100g": {
+      "calories": 278,
+      "protein": 0.3,
+      "carbohydrates": 69.0,
+      "fat": 0.2,
+      "fiber": 1.0,
+      "sugar": 60.0,
+      "sodium": 13.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_067",
+    "name": "cacahuates",
+    "name_variations": ["cacahuates", "maní"],
+    "category": "fruto seco",
+    "nutrition_per_100g": {
+      "calories": 567,
+      "protein": 25.8,
+      "carbohydrates": 16.1,
+      "fat": 49.2,
+      "fiber": 8.5,
+      "sugar": 4.7,
+      "sodium": 18.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_068",
+    "name": "crema de cacahuate",
+    "name_variations": ["crema de cacahuate", "mantequilla de maní"],
+    "category": "grasa",
+    "nutrition_per_100g": {
+      "calories": 588,
+      "protein": 25.0,
+      "carbohydrates": 20.0,
+      "fat": 50.0,
+      "fiber": 6.0,
+      "sugar": 9.0,
+      "sodium": 17.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "cucharadas": 16.0 }
+  },
+  {
+    "food_id": "food_069",
+    "name": "espárragos",
+    "name_variations": ["espárragos"],
+    "category": "verdura",
+    "nutrition_per_100g": {
+      "calories": 20,
+      "protein": 2.2,
+      "carbohydrates": 3.9,
+      "fat": 0.1,
+      "fiber": 2.1,
+      "sugar": 1.9,
+      "sodium": 2.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_070",
+    "name": "remolacha cocida",
+    "name_variations": ["remolacha"],
+    "category": "verdura",
+    "nutrition_per_100g": {
+      "calories": 44,
+      "protein": 1.7,
+      "carbohydrates": 10.0,
+      "fat": 0.2,
+      "fiber": 2.0,
+      "sugar": 6.8,
+      "sodium": 78.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_071",
+    "name": "camarones",
+    "name_variations": ["camarones", "gambas"],
+    "category": "pescado",
+    "nutrition_per_100g": {
+      "calories": 99,
+      "protein": 24.0,
+      "carbohydrates": 0.2,
+      "fat": 0.3,
+      "fiber": 0.0,
+      "sugar": 0.0,
+      "sodium": 111.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_072",
+    "name": "pan pita",
+    "name_variations": ["pan pita"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 275,
+      "protein": 9.1,
+      "carbohydrates": 55.7,
+      "fat": 1.2,
+      "fiber": 2.2,
+      "sugar": 1.6,
+      "sodium": 536.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "unidades": 60.0 }
+  },
+  {
+    "food_id": "food_073",
+    "name": "mostaza",
+    "name_variations": ["mostaza"],
+    "category": "condimento",
+    "nutrition_per_100g": {
+      "calories": 66,
+      "protein": 4.4,
+      "carbohydrates": 5.8,
+      "fat": 4.4,
+      "fiber": 3.3,
+      "sugar": 1.6,
+      "sodium": 1135.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "cucharadas": 15.0 }
+  },
+  {
+    "food_id": "food_074",
+    "name": "mayonesa",
+    "name_variations": ["mayonesa"],
+    "category": "grasa",
+    "nutrition_per_100g": {
+      "calories": 680,
+      "protein": 1.0,
+      "carbohydrates": 0.6,
+      "fat": 75.0,
+      "fiber": 0.0,
+      "sugar": 0.6,
+      "sodium": 635.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "cucharadas": 13.0 }
+  },
+  {
+    "food_id": "food_075",
+    "name": "ketchup",
+    "name_variations": ["ketchup", "catsup"],
+    "category": "condimento",
+    "nutrition_per_100g": {
+      "calories": 112,
+      "protein": 1.3,
+      "carbohydrates": 26.0,
+      "fat": 0.2,
+      "fiber": 0.3,
+      "sugar": 22.0,
+      "sodium": 907.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "cucharadas": 17.0 }
+  },
+  {
+    "food_id": "food_076",
+    "name": "arroz basmati cocido",
+    "name_variations": ["arroz basmati"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 121,
+      "protein": 3.5,
+      "carbohydrates": 25.0,
+      "fat": 0.4,
+      "fiber": 0.6,
+      "sugar": 0.1,
+      "sodium": 2.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 190.0 }
+  },
+  {
+    "food_id": "food_077",
+    "name": "cuscús cocido",
+    "name_variations": ["cuscús"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 112,
+      "protein": 3.8,
+      "carbohydrates": 23.2,
+      "fat": 0.2,
+      "fiber": 1.4,
+      "sugar": 0.1,
+      "sodium": 5.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 157.0 }
+  },
+  {
+    "food_id": "food_078",
+    "name": "pan de centeno",
+    "name_variations": ["pan de centeno"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 259,
+      "protein": 9.0,
+      "carbohydrates": 48.3,
+      "fat": 3.3,
+      "fiber": 5.8,
+      "sugar": 4.0,
+      "sodium": 600.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "rebanadas": 40.0 }
+  },
+  {
+    "food_id": "food_079",
+    "name": "tortilla de trigo",
+    "name_variations": ["wrap de trigo"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 305,
+      "protein": 8.0,
+      "carbohydrates": 49.0,
+      "fat": 8.0,
+      "fiber": 2.7,
+      "sugar": 2.0,
+      "sodium": 650.0
+    },
+    "default_unit": "unidades",
+    "unit_conversions": { "gramos": 1.0, "unidades": 60.0 }
+  },
+  {
+    "food_id": "food_080",
+    "name": "pollo desmenuzado",
+    "name_variations": ["pollo deshebrado"],
+    "category": "proteína",
+    "nutrition_per_100g": {
+      "calories": 165,
+      "protein": 31.0,
+      "carbohydrates": 0.0,
+      "fat": 3.6,
+      "fiber": 0.0,
+      "sugar": 0.0,
+      "sodium": 74.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_081",
+    "name": "huevo duro",
+    "name_variations": ["huevo cocido"],
+    "category": "proteína",
+    "nutrition_per_100g": {
+      "calories": 155,
+      "protein": 13.0,
+      "carbohydrates": 1.1,
+      "fat": 11.0,
+      "fiber": 0.0,
+      "sugar": 1.1,
+      "sodium": 124.0
+    },
+    "default_unit": "unidades",
+    "unit_conversions": { "gramos": 1.0, "unidades": 50.0 }
+  },
+  {
+    "food_id": "food_082",
+    "name": "bacalao",
+    "name_variations": ["bacalao fresco"],
+    "category": "pescado",
+    "nutrition_per_100g": {
+      "calories": 82,
+      "protein": 18.0,
+      "carbohydrates": 0.0,
+      "fat": 0.7,
+      "fiber": 0.0,
+      "sugar": 0.0,
+      "sodium": 54.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_083",
+    "name": "merluza",
+    "name_variations": ["filete de merluza"],
+    "category": "pescado",
+    "nutrition_per_100g": {
+      "calories": 90,
+      "protein": 18.5,
+      "carbohydrates": 0.0,
+      "fat": 1.3,
+      "fiber": 0.0,
+      "sugar": 0.0,
+      "sodium": 70.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_084",
+    "name": "queso mozzarella",
+    "name_variations": ["mozzarella"],
+    "category": "lácteo",
+    "nutrition_per_100g": {
+      "calories": 280,
+      "protein": 28.0,
+      "carbohydrates": 3.1,
+      "fat": 17.0,
+      "fiber": 0.0,
+      "sugar": 1.0,
+      "sodium": 627.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_085",
+    "name": "ricotta",
+    "name_variations": ["queso ricotta"],
+    "category": "lácteo",
+    "nutrition_per_100g": {
+      "calories": 174,
+      "protein": 11.3,
+      "carbohydrates": 3.0,
+      "fat": 13.0,
+      "fiber": 0.0,
+      "sugar": 0.3,
+      "sodium": 84.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_086",
+    "name": "cebada cocida",
+    "name_variations": ["cebada perlada"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 123,
+      "protein": 2.3,
+      "carbohydrates": 28.2,
+      "fat": 0.4,
+      "fiber": 3.8,
+      "sugar": 0.3,
+      "sodium": 5.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 157.0 }
+  },
+  {
+    "food_id": "food_087",
+    "name": "bulgur cocido",
+    "name_variations": ["bulgur"],
+    "category": "carbohidrato",
+    "nutrition_per_100g": {
+      "calories": 83,
+      "protein": 3.1,
+      "carbohydrates": 18.6,
+      "fat": 0.2,
+      "fiber": 4.5,
+      "sugar": 0.1,
+      "sodium": 5.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_088",
+    "name": "caldo de verduras",
+    "name_variations": ["caldo vegetal"],
+    "category": "bebida",
+    "nutrition_per_100g": {
+      "calories": 6,
+      "protein": 0.3,
+      "carbohydrates": 0.9,
+      "fat": 0.1,
+      "fiber": 0.2,
+      "sugar": 0.3,
+      "sodium": 240.0
+    },
+    "default_unit": "mililitros",
+    "unit_conversions": { "mililitros": 1.0, "tazas": 240.0 }
+  },
+  {
+    "food_id": "food_089",
+    "name": "caldo de pollo",
+    "name_variations": ["caldo de pollo casero"],
+    "category": "bebida",
+    "nutrition_per_100g": {
+      "calories": 15,
+      "protein": 2.0,
+      "carbohydrates": 0.5,
+      "fat": 0.5,
+      "fiber": 0.0,
+      "sugar": 0.0,
+      "sodium": 343.0
+    },
+    "default_unit": "mililitros",
+    "unit_conversions": { "mililitros": 1.0, "tazas": 240.0 }
+  },
+  {
+    "food_id": "food_090",
+    "name": "puerro",
+    "name_variations": ["puerro fresco"],
+    "category": "verdura",
+    "nutrition_per_100g": {
+      "calories": 61,
+      "protein": 1.5,
+      "carbohydrates": 14.1,
+      "fat": 0.3,
+      "fiber": 1.8,
+      "sugar": 3.9,
+      "sodium": 20.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_091",
+    "name": "rúcula",
+    "name_variations": ["rúgula"],
+    "category": "verdura",
+    "nutrition_per_100g": {
+      "calories": 25,
+      "protein": 2.6,
+      "carbohydrates": 3.7,
+      "fat": 0.7,
+      "fiber": 1.6,
+      "sugar": 2.1,
+      "sodium": 27.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "tazas": 20.0 }
+  },
+  {
+    "food_id": "food_092",
+    "name": "endibia",
+    "name_variations": ["endivias"],
+    "category": "verdura",
+    "nutrition_per_100g": {
+      "calories": 17,
+      "protein": 1.3,
+      "carbohydrates": 4.0,
+      "fat": 0.2,
+      "fiber": 3.1,
+      "sugar": 0.6,
+      "sodium": 22.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_093",
+    "name": "melocotón",
+    "name_variations": ["durazno"],
+    "category": "fruta",
+    "nutrition_per_100g": {
+      "calories": 39,
+      "protein": 0.9,
+      "carbohydrates": 9.5,
+      "fat": 0.3,
+      "fiber": 1.5,
+      "sugar": 8.4,
+      "sodium": 0.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0, "unidades": 150.0 }
+  },
+  {
+    "food_id": "food_094",
+    "name": "piña",
+    "name_variations": ["piña fresca"],
+    "category": "fruta",
+    "nutrition_per_100g": {
+      "calories": 50,
+      "protein": 0.5,
+      "carbohydrates": 13.1,
+      "fat": 0.1,
+      "fiber": 1.4,
+      "sugar": 9.9,
+      "sodium": 1.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_095",
+    "name": "mango",
+    "name_variations": ["mango maduro"],
+    "category": "fruta",
+    "nutrition_per_100g": {
+      "calories": 60,
+      "protein": 0.8,
+      "carbohydrates": 15.0,
+      "fat": 0.4,
+      "fiber": 1.6,
+      "sugar": 13.7,
+      "sodium": 1.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_096",
+    "name": "ciruelas",
+    "name_variations": ["ciruela"],
+    "category": "fruta",
+    "nutrition_per_100g": {
+      "calories": 46,
+      "protein": 0.7,
+      "carbohydrates": 11.4,
+      "fat": 0.3,
+      "fiber": 1.4,
+      "sugar": 9.9,
+      "sodium": 0.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_097",
+    "name": "semillas de girasol",
+    "name_variations": ["pipas de girasol"],
+    "category": "fruto seco",
+    "nutrition_per_100g": {
+      "calories": 584,
+      "protein": 20.8,
+      "carbohydrates": 20.0,
+      "fat": 51.5,
+      "fiber": 8.6,
+      "sugar": 2.6,
+      "sodium": 9.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_098",
+    "name": "semillas de calabaza",
+    "name_variations": ["pepitas"],
+    "category": "fruto seco",
+    "nutrition_per_100g": {
+      "calories": 559,
+      "protein": 30.0,
+      "carbohydrates": 10.7,
+      "fat": 49.0,
+      "fiber": 6.0,
+      "sugar": 1.4,
+      "sodium": 7.0
+    },
+    "default_unit": "gramos",
+    "unit_conversions": { "gramos": 1.0 }
+  },
+  {
+    "food_id": "food_099",
+    "name": "salsa de soja",
+    "name_variations": ["soja", "soy sauce"],
+    "category": "condimento",
+    "nutrition_per_100g": {
+      "calories": 53,
+      "protein": 8.1,
+      "carbohydrates": 4.9,
+      "fat": 0.6,
+      "fiber": 0.8,
+      "sugar": 0.4,
+      "sodium": 5493.0
+    },
+    "default_unit": "mililitros",
+    "unit_conversions": { "mililitros": 1.0, "cucharadas": 15.0 }
+  },
+  {
+    "food_id": "food_100",
+    "name": "vinagre balsámico",
+    "name_variations": ["vinagre balsámico de módena"],
+    "category": "condimento",
+    "nutrition_per_100g": {
+      "calories": 88,
+      "protein": 0.5,
+      "carbohydrates": 17.0,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "sugar": 15.0,
+      "sodium": 23.0
+    },
+    "default_unit": "mililitros",
+    "unit_conversions": { "mililitros": 1.0, "cucharadas": 15.0 }
+  }
+]      
+    
+
+
+

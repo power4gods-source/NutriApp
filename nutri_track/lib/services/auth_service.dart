@@ -1,0 +1,754 @@
+import 'dart:convert';
+import 'dart:math';
+import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
+import 'package:crypto/crypto.dart';
+import '../config/app_config.dart';
+import 'firebase_user_service.dart';
+
+class AuthService extends ChangeNotifier {
+  String? _token;
+  String? _userId;
+  String? _email;
+  String? _username;
+  String? _role;
+  
+  static const String _localUsersKey = 'local_users';
+  final FirebaseUserService _firebaseUserService = FirebaseUserService();
+  
+  /// Obtiene la URL del backend configurada
+  Future<String> get baseUrl async => await AppConfig.getBackendUrl();
+  
+  String? get token => _token;
+  String? get userId => _userId;
+  String? get email => _email;
+  String? get username => _username;
+  String? get role => _role;
+  bool get isAuthenticated => _token != null;
+  bool get isAdmin => _role == 'admin';
+
+  AuthService() {
+    _loadAuthData();
+  }
+
+  Future<void> _loadAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('auth_token');
+    _userId = prefs.getString('user_id');
+    _email = prefs.getString('user_email');
+    _username = prefs.getString('username');
+    _role = prefs.getString('user_role');
+    // Si el email es power4gods@gmail.com, asegurar que sea admin
+    if (_email == 'power4gods@gmail.com' && _role != 'admin') {
+      _role = 'admin';
+      await prefs.setString('user_role', 'admin');
+    }
+    notifyListeners();
+  }
+  
+  // Método público para recargar datos de autenticación
+  Future<void> reloadAuthData() async {
+    await _loadAuthData();
+  }
+
+  Future<void> _saveAuthData(String token, String userId, String email, String? username, {String? role}) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', token);
+    await prefs.setString('user_id', userId);
+    await prefs.setString('user_email', email);
+    if (username != null) {
+      await prefs.setString('username', username);
+    }
+    // Determinar el rol: admin para power4gods@gmail.com, user para el resto
+    final userRole = role ?? (email == 'power4gods@gmail.com' ? 'admin' : 'user');
+    await prefs.setString('user_role', userRole);
+    _token = token;
+    _userId = userId;
+    _email = email;
+    _username = username;
+    _role = userRole;
+    notifyListeners();
+  }
+
+  /// Verifica si el backend está disponible
+  Future<bool> isBackendAvailable() async {
+    try {
+      final url = await baseUrl;
+      final response = await http
+          .get(Uri.parse('$url/health'))
+          .timeout(const Duration(seconds: 3)); // Reducido a 3 segundos para respuesta más rápida
+      return response.statusCode == 200;
+    } catch (e) {
+      // Backend no disponible - esto es normal en móvil sin PC encendido
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    // Siempre intentar primero con el backend
+    final backendAvailable = await isBackendAvailable();
+    
+    if (backendAvailable) {
+      // Usar backend si está disponible
+      try {
+        final url = await baseUrl;
+        final response = await http
+            .post(
+              Uri.parse('$url/auth/login'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'email': email,
+                'password': password,
+              }),
+            )
+            .timeout(const Duration(seconds: 10));
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          await _saveAuthData(
+            data['access_token'],
+            data['user_id'],
+            data['email'],
+            null,
+            role: data['role'] ?? (data['email'] == 'power4gods@gmail.com' ? 'admin' : 'user'),
+          );
+          return {'success': true, 'data': data};
+        } else {
+          final error = jsonDecode(response.body);
+          return {'success': false, 'error': error['detail'] ?? 'Login failed'};
+        }
+      } catch (e) {
+        // Si hay un error de conexión, verificar si hay credenciales guardadas
+        final prefs = await SharedPreferences.getInstance();
+        final savedEmail = prefs.getString('user_email');
+        if (savedEmail == email && _token != null) {
+          // Usar credenciales guardadas
+          await _loadAuthData();
+          return {
+            'success': true,
+            'data': {
+              'email': _email,
+              'user_id': _userId,
+              'message': 'Modo offline: usando credenciales guardadas'
+            },
+            'offline': true
+          };
+        }
+        // Si falla el backend, intentar con Firebase primero, luego local
+        return await _loginFirebase(email, password);
+      }
+    } else {
+      // Backend no disponible, intentar Firebase primero, luego local
+      return await _loginFirebase(email, password);
+    }
+  }
+  
+  /// Login desde Firebase (sin backend)
+  Future<Map<String, dynamic>> _loginFirebase(String email, String password) async {
+    try {
+      final normalizedEmail = email.toLowerCase().trim();
+      final passwordHash = _hashPassword(password);
+      
+      // Verificar credenciales en Firebase
+      final isValid = await _firebaseUserService.verifyUser(normalizedEmail, passwordHash);
+      
+      if (isValid) {
+        // Obtener userId
+        final userId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
+        if (userId == null) {
+          throw Exception('Usuario no encontrado en Firebase');
+        }
+        
+        // Obtener datos del usuario
+        final userData = await _firebaseUserService.getUser(userId);
+        final username = userData?['username'] ?? normalizedEmail.split('@')[0];
+        
+        // Intentar hacer login en el backend para obtener JWT válido
+        String? jwtToken;
+        try {
+          final url = await baseUrl;
+          print('🔄 Intentando login en backend después de login en Firebase...');
+          final loginResponse = await http.post(
+            Uri.parse('$url/auth/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': normalizedEmail,
+              'password': password,
+            }),
+          ).timeout(const Duration(seconds: 5));
+          
+          if (loginResponse.statusCode == 200) {
+            final loginData = jsonDecode(loginResponse.body);
+            jwtToken = loginData['access_token'];
+            print('✅ Login en backend exitoso, JWT obtenido');
+          } else {
+            print('⚠️ Login en backend falló: ${loginResponse.statusCode}');
+            // Si el usuario no existe, intentar registrar
+            if (loginResponse.statusCode == 401 || loginResponse.statusCode == 404) {
+              print('🔄 Usuario no existe en backend, intentando registrar...');
+              try {
+                final registerResponse = await http.post(
+                  Uri.parse('$url/auth/register'),
+                  headers: {'Content-Type': 'application/json'},
+                  body: jsonEncode({
+                    'email': normalizedEmail,
+                    'password': password,
+                    'username': username,
+                  }),
+                ).timeout(const Duration(seconds: 5));
+                
+                if (registerResponse.statusCode == 200 || registerResponse.statusCode == 201) {
+                  final registerData = jsonDecode(registerResponse.body);
+                  jwtToken = registerData['access_token'];
+                  print('✅ Usuario registrado en backend, JWT obtenido');
+                }
+              } catch (e) {
+                print('⚠️ Error al registrar en backend: $e');
+              }
+            }
+          }
+        } catch (e) {
+          print('⚠️ No se pudo hacer login/registro en backend: $e');
+        }
+        
+        // Usar JWT del backend si está disponible, sino usar token local
+        final token = jwtToken ?? _generateLocalToken(userId, normalizedEmail);
+        
+        if (jwtToken == null) {
+          print('❌ ADVERTENCIA: No se pudo obtener JWT del backend');
+          print('❌ El token local NO funcionará para endpoints protegidos');
+        }
+        
+        final role = normalizedEmail == 'power4gods@gmail.com' ? 'admin' : 'user';
+        await _saveAuthData(token, userId, normalizedEmail, username, role: role);
+        
+        // Cargar datos del usuario desde Firebase
+        await _loadUserDataFromFirebase(userId);
+        
+        return {
+          'success': true,
+          'data': {
+            'email': normalizedEmail,
+            'user_id': userId,
+            'username': username,
+            'access_token': token,
+          },
+          'firebase': true,
+          'jwt_token': jwtToken != null,  // Indicar si se obtuvo JWT válido
+        };
+      } else {
+        // Si no es válido en Firebase, intentar login local
+        return await _loginLocal(email, password);
+      }
+    } catch (e) {
+      print('Error en login Firebase: $e');
+      // Fallback a login local
+      return await _loginLocal(email, password);
+    }
+  }
+  
+  /// Carga datos del usuario desde Firebase
+  Future<void> _loadUserDataFromFirebase(String userId) async {
+    try {
+      final userData = await _firebaseUserService.getUser(userId);
+      if (userData != null) {
+        print('✅ Datos del usuario cargados desde Firebase');
+        // Guardar datos localmente para acceso rápido
+        final prefs = await SharedPreferences.getInstance();
+        
+        // Guardar ingredientes
+        if (userData['ingredients'] != null) {
+          await prefs.setString('ingredients_$userId', jsonEncode(userData['ingredients']));
+          print('✅ Ingredientes cargados: ${(userData['ingredients'] as List).length}');
+        }
+        
+        // Guardar favoritos
+        if (userData['favorites'] != null) {
+          await prefs.setString('favorites_$userId', jsonEncode(userData['favorites']));
+          print('✅ Favoritos cargados: ${(userData['favorites'] as List).length}');
+        }
+        
+        // Guardar objetivos
+        if (userData['goals'] != null) {
+          await prefs.setString('goals_$userId', jsonEncode(userData['goals']));
+          print('✅ Objetivos cargados');
+        }
+        
+        // Guardar cesta de la compra
+        if (userData['shopping_list'] != null) {
+          await prefs.setString('shopping_list_$userId', jsonEncode(userData['shopping_list']));
+          print('✅ Lista de compra cargada: ${(userData['shopping_list'] as List).length}');
+        }
+        
+        // Guardar recetas privadas (referencias)
+        if (userData['private_recipes'] != null) {
+          await prefs.setString('private_recipes_$userId', jsonEncode(userData['private_recipes']));
+          print('✅ Recetas privadas cargadas: ${(userData['private_recipes'] as List).length}');
+        }
+        
+        print('✅ Datos del usuario cargados desde Firebase');
+      }
+    } catch (e) {
+      print('Error cargando datos del usuario desde Firebase: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> register(String email, String password, {String? username}) async {
+    // Siempre intentar primero con el backend
+    final backendAvailable = await isBackendAvailable();
+    
+    if (backendAvailable) {
+      // Usar backend si está disponible
+      try {
+        final url = await baseUrl;
+        final response = await http
+            .post(
+              Uri.parse('$url/auth/register'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'email': email,
+                'password': password,
+                if (username != null) 'username': username,
+              }),
+            )
+            .timeout(const Duration(seconds: 10));
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final data = jsonDecode(response.body);
+          final userId = data['user_id'];
+          final passwordHash = _hashPassword(password);
+          
+          // Registrar también en Firebase (sin esperar, en segundo plano para no bloquear)
+          _firebaseUserService.registerUser(
+            userId: userId,
+            email: email,
+            passwordHash: passwordHash,
+            username: username ?? data['username'],
+          ).catchError((e) {
+            print('⚠️ Error al registrar en Firebase (no crítico): $e');
+          });
+          
+          await _saveAuthData(
+            data['access_token'],
+            userId,
+            data['email'],
+            data['username'],
+            role: data['role'] ?? (data['email'] == 'power4gods@gmail.com' ? 'admin' : 'user'),
+          );
+          return {'success': true, 'data': data};
+        } else {
+          final error = jsonDecode(response.body);
+          return {'success': false, 'error': error['detail'] ?? 'Registration failed'};
+        }
+      } catch (e) {
+        // Si falla el backend, intentar registro en Firebase directamente
+        return await _registerFirebase(email, password, username: username);
+      }
+    } else {
+      // Backend no disponible, registrar directamente en Firebase
+      return await _registerFirebase(email, password, username: username);
+    }
+  }
+  
+  /// Registro en Firebase (sin backend)
+  Future<Map<String, dynamic>> _registerFirebase(String email, String password, {String? username}) async {
+    try {
+      final normalizedEmail = email.toLowerCase().trim();
+      
+      // Verificar si el usuario ya existe en Firebase
+      final existingUserId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
+      if (existingUserId != null) {
+        return {
+          'success': false,
+          'error': 'Este email ya está registrado. Por favor, inicia sesión.'
+        };
+      }
+      
+      // Validar contraseña
+      if (password.length < 6) {
+        return {
+          'success': false,
+          'error': 'La contraseña debe tener al menos 6 caracteres.'
+        };
+      }
+      
+      // Crear nuevo usuario
+      final userId = _generateUserId(normalizedEmail);
+      final passwordHash = _hashPassword(password);
+      
+      // Registrar en Firebase (con timeout extendido para operaciones críticas)
+      bool firebaseSuccess = false;
+      try {
+        print('🔄 Registrando en Firebase con timeout extendido (60s)...');
+        firebaseSuccess = await _firebaseUserService.registerUser(
+          userId: userId,
+          email: normalizedEmail,
+          passwordHash: passwordHash,
+          username: username ?? normalizedEmail.split('@')[0],
+        ).timeout(
+          const Duration(seconds: 60), // Aumentado de 5 a 60 segundos
+          onTimeout: () {
+            print('⚠️ Timeout al registrar en Firebase (60s)');
+            return false;
+          },
+        );
+        
+        if (firebaseSuccess) {
+          print('✅ Usuario registrado exitosamente en Firebase');
+        } else {
+          print('⚠️ Fallo al registrar en Firebase, pero continuando con registro local y backend');
+        }
+      } catch (e) {
+        print('❌ Error al registrar en Firebase: $e');
+        firebaseSuccess = false;
+      }
+      
+      // Continuar con el registro local y backend incluso si Firebase falla
+      // Esto asegura que el usuario pueda usar la app aunque Firebase tenga problemas
+      
+      // Guardar también localmente para acceso rápido
+      final prefs = await SharedPreferences.getInstance();
+      final usersJson = prefs.getString(_localUsersKey);
+      Map<String, dynamic> users = {};
+      if (usersJson != null) {
+        users = jsonDecode(usersJson) as Map<String, dynamic>;
+      }
+      
+      users[normalizedEmail] = {
+        'email': normalizedEmail,
+        'password': passwordHash,
+        'user_id': userId,
+        'username': username ?? normalizedEmail.split('@')[0],
+        'created_at': DateTime.now().toIso8601String(),
+        'firebase_synced': true,
+      };
+      await prefs.setString(_localUsersKey, jsonEncode(users));
+      
+      // CRÍTICO: Intentar registrar en el backend para obtener JWT válido
+      // Aumentar timeout y manejar errores mejor
+      String? backendToken;
+      try {
+        final url = await baseUrl;
+        print('🔄 Registrando en backend para obtener JWT válido (timeout: 30s)...');
+        final registerResponse = await http.post(
+          Uri.parse('$url/auth/register'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': normalizedEmail,
+            'password': password,
+            if (username != null) 'username': username,
+          }),
+        ).timeout(
+          const Duration(seconds: 30),  // Aumentado de 10 a 30 segundos para operaciones críticas
+          onTimeout: () {
+            throw TimeoutException('Timeout al registrar en backend (30s)');
+          },
+        );
+        
+        if (registerResponse.statusCode == 200 || registerResponse.statusCode == 201) {
+          final registerData = jsonDecode(registerResponse.body);
+          backendToken = registerData['access_token'];
+          print('✅ Usuario registrado en backend, JWT obtenido: ${backendToken?.substring(0, 20)}...');
+        } else {
+          print('⚠️ Registro en backend falló: ${registerResponse.statusCode} - ${registerResponse.body}');
+          // Si el usuario ya existe (400/409), intentar login
+          if (registerResponse.statusCode == 400 || registerResponse.statusCode == 409) {
+            print('🔄 Usuario ya existe, intentando login...');
+            try {
+              final loginResponse = await http.post(
+                Uri.parse('$url/auth/login'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode({
+                  'email': normalizedEmail,
+                  'password': password,
+                }),
+              ).timeout(const Duration(seconds: 30));
+              
+              if (loginResponse.statusCode == 200) {
+                final loginData = jsonDecode(loginResponse.body);
+                backendToken = loginData['access_token'];
+                print('✅ Login exitoso, JWT obtenido: ${backendToken?.substring(0, 20)}...');
+              } else {
+                print('❌ Login falló: ${loginResponse.statusCode} - ${loginResponse.body}');
+              }
+            } catch (e) {
+              print('❌ Error al hacer login: $e');
+            }
+          }
+        }
+      } catch (e) {
+        print('❌ ERROR: No se pudo registrar/login en el backend: $e');
+        print('❌ El usuario tendrá un token local que NO funcionará');
+      }
+      
+      // Usar el token del backend obtenido arriba, sino usar token local (NO funcionará)
+      final token = backendToken ?? _generateLocalToken(userId, normalizedEmail);
+      
+      if (backendToken == null) {
+        print('❌ ADVERTENCIA CRÍTICA: No se obtuvo JWT del backend');
+        print('❌ El token local NO funcionará para endpoints protegidos');
+        print('❌ El usuario necesitará cerrar sesión y volver a iniciar cuando el backend esté disponible');
+        print('❌ Para solucionar ahora: cierra sesión y vuelve a iniciar sesión');
+      } else {
+        print('✅ Token JWT válido obtenido del backend');
+      }
+      
+      final role = normalizedEmail == 'power4gods@gmail.com' ? 'admin' : 'user';
+      await _saveAuthData(token, userId, normalizedEmail, username ?? normalizedEmail.split('@')[0], role: role);
+      
+      return {
+        'success': true,
+        'data': {
+          'email': normalizedEmail,
+          'user_id': userId,
+          'username': username ?? normalizedEmail.split('@')[0],
+          'access_token': token,
+        },
+        'firebase': true,
+        'jwt_token': backendToken != null,  // Indicar si se obtuvo token JWT válido
+      };
+    } catch (e) {
+      print('Error en registro Firebase: $e');
+      // Fallback a registro local
+      return await _registerLocal(email, password, username: username);
+    }
+  }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('user_id');
+    await prefs.remove('user_email');
+    await prefs.remove('username');
+    await prefs.remove('user_role');
+    _token = null;
+    _userId = null;
+    _email = null;
+    _username = null;
+    _role = null;
+    notifyListeners();
+  }
+
+  Future<Map<String, String>> getAuthHeaders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    return {
+      'Content-Type': 'application/json',
+      if (token != null) 'Authorization': 'Bearer $token',
+    };
+  }
+
+  /// Intenta refrescar el token automáticamente cuando expira
+  /// Retorna true si se pudo refrescar, false si no
+  /// Nota: Actualmente no se puede refrescar sin contraseña, pero este método
+  /// puede ser extendido en el futuro si se implementa un endpoint de refresh token
+  Future<bool> tryRefreshToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final email = prefs.getString('user_email');
+      
+      if (email == null) {
+        print('❌ No hay email guardado para refrescar token');
+        return false;
+      }
+      
+      // Verificar que el usuario existe en Firebase
+      final normalizedEmail = email.toLowerCase().trim();
+      final userId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
+      
+      if (userId == null) {
+        print('❌ Usuario no encontrado en Firebase');
+        return false;
+      }
+      
+      // Por ahora, no podemos refrescar el token sin la contraseña original
+      // En el futuro, se podría implementar un endpoint de refresh token en el backend
+      print('⚠️ No se puede refrescar token automáticamente sin contraseña');
+      print('ℹ️ El usuario debe cerrar sesión y volver a iniciar sesión');
+      
+      return false;
+    } catch (e) {
+      print('❌ Error en tryRefreshToken: $e');
+      return false;
+    }
+  }
+
+  /// Login local (sin backend)
+  Future<Map<String, dynamic>> _loginLocal(String email, String password) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Cargar usuarios locales
+      final usersJson = prefs.getString(_localUsersKey);
+      if (usersJson == null) {
+        return {
+          'success': false,
+          'error': 'No hay usuarios registrados localmente. Por favor, regístrate primero.'
+        };
+      }
+      
+      final users = jsonDecode(usersJson) as Map<String, dynamic>;
+      final normalizedEmail = email.toLowerCase().trim();
+      
+      // Buscar usuario
+      if (!users.containsKey(normalizedEmail)) {
+        return {
+          'success': false,
+          'error': 'Email o contraseña incorrectos.'
+        };
+      }
+      
+      final userData = users[normalizedEmail] as Map<String, dynamic>;
+      final savedPassword = userData['password'] as String;
+      
+      // Verificar contraseña (SHA256 hash)
+      final passwordHash = _hashPassword(password);
+      if (passwordHash != savedPassword) {
+        return {
+          'success': false,
+          'error': 'Email o contraseña incorrectos.'
+        };
+      }
+      
+      // Login exitoso - crear token local
+      final userId = userData['user_id'] as String;
+      final username = userData['username'] as String?;
+      final localToken = _generateLocalToken(userId, email);
+      
+      final role = email == 'power4gods@gmail.com' ? 'admin' : 'user';
+      await _saveAuthData(localToken, userId, email, username, role: role);
+      
+      return {
+        'success': true,
+        'data': {
+          'email': email,
+          'user_id': userId,
+          'username': username,
+          'access_token': localToken,
+        },
+        'offline': true
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'error': 'Error al iniciar sesión: $e'
+      };
+    }
+  }
+
+  /// Registro local (sin backend)
+  Future<Map<String, dynamic>> _registerLocal(String email, String password, {String? username}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final normalizedEmail = email.toLowerCase().trim();
+      
+      // Cargar usuarios locales
+      final usersJson = prefs.getString(_localUsersKey);
+      Map<String, dynamic> users = {};
+      if (usersJson != null) {
+        users = jsonDecode(usersJson) as Map<String, dynamic>;
+      }
+      
+      // Verificar si el usuario ya existe
+      if (users.containsKey(normalizedEmail)) {
+        return {
+          'success': false,
+          'error': 'Este email ya está registrado. Por favor, inicia sesión.'
+        };
+      }
+      
+      // Validar contraseña
+      if (password.length < 6) {
+        return {
+          'success': false,
+          'error': 'La contraseña debe tener al menos 6 caracteres.'
+        };
+      }
+      
+      // Crear nuevo usuario
+      final userId = _generateUserId(normalizedEmail);
+      final passwordHash = _hashPassword(password);
+      
+      users[normalizedEmail] = {
+        'email': normalizedEmail,
+        'password': passwordHash,
+        'user_id': userId,
+        'username': username ?? normalizedEmail.split('@')[0],
+        'created_at': DateTime.now().toIso8601String(),
+      };
+      
+      // Guardar usuarios
+      await prefs.setString(_localUsersKey, jsonEncode(users));
+      
+      // Intentar hacer login en el backend para obtener token válido
+      String? backendToken;
+      try {
+        final url = await baseUrl;
+        final loginResponse = await http.post(
+          Uri.parse('$url/auth/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': normalizedEmail,
+            'password': password,
+          }),
+        ).timeout(const Duration(seconds: 5));
+        
+        if (loginResponse.statusCode == 200) {
+          final loginData = jsonDecode(loginResponse.body);
+          backendToken = loginData['access_token'];
+          print('✅ Token del backend obtenido después del registro local');
+        }
+      } catch (e) {
+        print('⚠️ No se pudo obtener token del backend (puede no estar disponible): $e');
+      }
+      
+      // Usar token del backend si está disponible, sino usar token local
+      final token = backendToken ?? _generateLocalToken(userId, normalizedEmail);
+      final role = normalizedEmail == 'power4gods@gmail.com' ? 'admin' : 'user';
+      await _saveAuthData(token, userId, normalizedEmail, username ?? normalizedEmail.split('@')[0], role: role);
+      
+      return {
+        'success': true,
+        'data': {
+          'email': normalizedEmail,
+          'user_id': userId,
+          'username': username ?? normalizedEmail.split('@')[0],
+          'access_token': token,
+        },
+        'offline': true
+      };
+    } catch (e) {
+      return {
+        'success': false,
+        'error': 'Error al registrar: $e'
+      };
+    }
+  }
+
+  /// Genera un hash SHA256 de la contraseña (compatible con el backend)
+  String _hashPassword(String password) {
+    final bytes = utf8.encode(password);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  /// Genera un ID de usuario único
+  String _generateUserId(String email) {
+    return email.replaceAll('@', '_at_').replaceAll('.', '_');
+  }
+
+  /// Genera un token local simple
+  String _generateLocalToken(String userId, String email) {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final random = Random().nextInt(1000000);
+    final tokenData = '$userId:$email:$timestamp:$random';
+    return base64Encode(utf8.encode(tokenData));
+  }
+}
+
+
+
+
+

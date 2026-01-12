@@ -1,0 +1,15 @@
+[
+  {
+    "title": "Paella valenciana",
+    "ingredients": "pollos: 300 gramos, conejos: 1 unidades, arroz: 500 gramos",
+    "time_minutes": 120,
+    "difficulty": "Media",
+    "tags": "",
+    "image_url": "",
+    "description": "mejor paella de tu puta vida\n\nInstrucciones:\n1. poner la paella y cocinar el pollo\n2. añadir el conejo pocos segundos despues\n3. añadir las verduras\n4. añadir tomate",
+    "nutrients": "calories 0",
+    "user_id": "power4gods_at_gmail_com",
+    "created_at": "2026-01-05T14:24:57.681430",
+    "is_public": false
+  }
+]

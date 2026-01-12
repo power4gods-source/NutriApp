@@ -1,0 +1,138 @@
+{
+  "power4gods_at_gmail_com": {
+    "entries": [
+      {
+        "entry_id": "entry_1767918638.852704",
+        "date": "2026-01-09",
+        "meal_type": "comida",
+        "foods": [
+          {
+            "food_id": "food_001",
+            "name": "pollo",
+            "quantity": 100.0,
+            "unit": "gramos",
+            "calories": 195.0,
+            "nutrition": {
+              "calories": 195.0,
+              "protein": 29.6,
+              "carbohydrates": 0.0,
+              "fat": 7.7,
+              "fiber": 0.0,
+              "sugar": 0.0,
+              "sodium": 98.0
+            }
+          }
+        ],
+        "total_calories": 195.0,
+        "total_nutrition": {
+          "protein": 29.6,
+          "carbohydrates": 0.0,
+          "fat": 7.7,
+          "fiber": 0.0,
+          "sugar": 0.0,
+          "sodium": 98.0
+        },
+        "created_at": "2026-01-09T01:30:38.854299"
+      },
+      {
+        "entry_id": "entry_1767948728.878432",
+        "date": "2026-01-09",
+        "meal_type": "comida",
+        "foods": [
+          {
+            "food_id": "food_001",
+            "name": "pollo",
+            "quantity": 100.0,
+            "unit": "gramos",
+            "calories": 195.0,
+            "nutrition": {
+              "calories": 195.0,
+              "protein": 29.6,
+              "carbohydrates": 0.0,
+              "fat": 7.7,
+              "fiber": 0.0,
+              "sugar": 0.0,
+              "sodium": 98.0
+            }
+          }
+        ],
+        "total_calories": 195.0,
+        "total_nutrition": {
+          "protein": 29.6,
+          "carbohydrates": 0.0,
+          "fat": 7.7,
+          "fiber": 0.0,
+          "sugar": 0.0,
+          "sodium": 98.0
+        },
+        "created_at": "2026-01-09T09:52:08.880678"
+      },
+      {
+        "entry_id": "entry_1767955969.904181",
+        "date": "2026-01-09",
+        "meal_type": "comida",
+        "foods": [
+          {
+            "food_id": "food_028",
+            "name": "pasta cocida",
+            "quantity": 150.0,
+            "unit": "gramos",
+            "calories": 196.5,
+            "nutrition": {
+              "calories": 196.5,
+              "protein": 7.5,
+              "carbohydrates": 37.5,
+              "fat": 1.5,
+              "fiber": 2.2,
+              "sugar": 0.9,
+              "sodium": 1.5
+            }
+          }
+        ],
+        "total_calories": 196.5,
+        "total_nutrition": {
+          "protein": 7.5,
+          "carbohydrates": 37.5,
+          "fat": 1.5,
+          "fiber": 2.2,
+          "sugar": 0.9,
+          "sodium": 1.5
+        },
+        "created_at": "2026-01-09T11:52:49.904496"
+      },
+      {
+        "entry_id": "entry_1768152200.791974",
+        "date": "2026-01-11",
+        "meal_type": "comida",
+        "foods": [
+          {
+            "food_id": "food_004",
+            "name": "arroz blanco cocido",
+            "quantity": 1000.0,
+            "unit": "gramos",
+            "calories": 1300.0,
+            "nutrition": {
+              "calories": 1300.0,
+              "protein": 27.0,
+              "carbohydrates": 280.0,
+              "fat": 3.0,
+              "fiber": 4.0,
+              "sugar": 1.0,
+              "sodium": 10.0
+            }
+          }
+        ],
+        "total_calories": 1300.0,
+        "total_nutrition": {
+          "protein": 27.0,
+          "carbohydrates": 280.0,
+          "fat": 3.0,
+          "fiber": 4.0,
+          "sugar": 1.0,
+          "sodium": 10.0
+        },
+        "created_at": "2026-01-11T18:23:20.792018"
+      }
+    ]
+  }
+}

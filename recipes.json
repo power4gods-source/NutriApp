@@ -1,0 +1,2229 @@
+[
+  {
+    "title": "Bowl de quinoa con verduras y pollo",
+    "ingredients": "quinoa,pollo,brócoli,zanahoria,aguacate,limón,aceite de oliva,semillas de sésamo",
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "tags": "saludable,proteína,quinoa,bowl,meal prep",
+    "image_url": "https://example.com/quinoa_bowl_pollo.jpg",
+    "description": "Un bowl nutritivo y completo con quinoa, pollo a la plancha y verduras frescas, perfecto para una comida saludable.",
+    "nutrients": "calories 480,protein 32.0g,carbs 45.0g,fat 18.0g",
+    "ingredients_detailed": [
+      {
+        "name": "quinoa",
+        "quantity": 200,
+        "unit": "gramos",
+        "notes": "enjuagada"
+      },
+      {
+        "name": "pollo",
+        "quantity": 400,
+        "unit": "gramos",
+        "notes": "pechuga cortada en tiras"
+      },
+      {
+        "name": "brócoli",
+        "quantity": 200,
+        "unit": "gramos",
+        "notes": "en ramilletes pequeños"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": 2,
+        "unit": "unidades",
+        "notes": "rallada o en juliana"
+      },
+      {
+        "name": "aguacate",
+        "quantity": 1,
+        "unit": "unidades",
+        "notes": "maduro, cortado en rodajas"
+      },
+      {
+        "name": "limón",
+        "quantity": 1,
+        "unit": "unidades",
+        "notes": "jugo y ralladura"
+      },
+      {
+        "name": "aceite de oliva",
+        "quantity": 3,
+        "unit": "cucharadas",
+        "notes": ""
+      },
+      {
+        "name": "semillas de sésamo",
+        "quantity": 1,
+        "unit": "cucharada",
+        "notes": "tostadas"
+      },
+      {
+        "name": "salsa de soja",
+        "quantity": 2,
+        "unit": "cucharadas",
+        "notes": "baja en sodio"
+      }
+    ],
+    "instructions": [
+      "Cocina la quinoa: enjuágala bien bajo agua fría. Hierve 400ml de agua, añade la quinoa y cocina a fuego bajo durante 15 minutos hasta que absorba el agua. Deja reposar 5 minutos y esponja con un tenedor.",
+      "Mientras se cocina la quinoa, corta el pollo en tiras y sazona con sal, pimienta y un poco de salsa de soja.",
+      "Cocina el pollo en una sartén o plancha a fuego medio-alto durante 6-8 minutos hasta que esté dorado y cocido por completo.",
+      "Cocina el brócoli al vapor durante 4-5 minutos hasta que esté tierno pero aún crujiente.",
+      "Prepara el aliño mezclando el jugo de limón, aceite de oliva, salsa de soja y la ralladura de limón.",
+      "Monta los bowls: coloca una base de quinoa en cada bowl.",
+      "Añade el pollo cocido, el brócoli, las zanahorias ralladas y las rodajas de aguacate.",
+      "Rocía con el aliño y espolvorea las semillas de sésamo tostadas.",
+      "Sirve inmediatamente o guarda en el refrigerador para comer más tarde."
+    ],
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 25,
+    "servings": 4,
+    "cuisine": "internacional",
+    "meal_type": "comida",
+    "dietary_tags": [
+      "alto en proteína",
+      "sin gluten",
+      "rico en fibra",
+      "meal prep"
+    ]
+  },
+  {
+    "title": "Consomé Clara de Setas con Trufa Negra",
+    "ingredients": "Setas variadas (porcini,shiitake),Clara de huevo,Jerez seco,Trufa negra fresca,Puerro,Apio",
+    "time_minutes": 150,
+    "difficulty": "Difícil",
+    "tags": "consomé,setas,trufa,tecnica clasica",
+    "image_url": "https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Elaborar un caldo concentrado de setas. Clarificar con claras de huevo batidas y un raft de verduras picadas. Cocinar a fuego suave sin remover y colar con tela. Añadir unas gotas de jerez. Servir muy caliente con láminas finas de trufa negra fresca al momento.",
+    "nutrients": "calories 120,protein 8g,fat 4g,carbs 10g"
+  },
+  {
+    "title": "Ensalada de pollo mediterránea",
+    "ingredients": "pollo,lechuga,tomate,aceitunas,queso feta,aceite de oliva,vinagre balsámico",
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "tags": "healthy,rápido,ensalada,mediterránea",
+    "image_url": "https://example.com/ensalada_pollo_mediterranea.jpg",
+    "description": "Una ensalada fresca y nutritiva con pollo, verduras mediterráneas y queso feta.",
+    "nutrients": "calories 350,protein 35.0g,carbs 12.0g,fat 18.0g",
+    "ingredients_detailed": [
+      {
+        "name": "pollo",
+        "quantity": 300,
+        "unit": "gramos",
+        "notes": "pechuga cocida y cortada en tiras"
+      },
+      {
+        "name": "lechuga",
+        "quantity": 200,
+        "unit": "gramos",
+        "notes": "variedad romana o iceberg"
+      },
+      {
+        "name": "tomate",
+        "quantity": 2,
+        "unit": "unidades",
+        "notes": "cherry o pera, cortados por la mitad"
+      },
+      {
+        "name": "aceitunas",
+        "quantity": 50,
+        "unit": "gramos",
+        "notes": "negras sin hueso"
+      },
+      {
+        "name": "queso feta",
+        "quantity": 100,
+        "unit": "gramos",
+        "notes": "en cubos"
+      },
+      {
+        "name": "aceite de oliva",
+        "quantity": 3,
+        "unit": "cucharadas",
+        "notes": "extra virgen"
+      },
+      {
+        "name": "vinagre balsámico",
+        "quantity": 1,
+        "unit": "cucharada",
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "Cocina la pechuga de pollo a la plancha o hervida hasta que esté completamente cocida. Deja enfriar y corta en tiras.",
+      "Lava y corta la lechuga en trozos medianos. Colócala en un bol grande.",
+      "Corta los tomates cherry por la mitad y añádelos a la ensalada.",
+      "Añade las aceitunas negras y el queso feta en cubos.",
+      "Prepara el aliño mezclando el aceite de oliva, vinagre balsámico, sal y pimienta al gusto.",
+      "Añade el pollo cortado a la ensalada.",
+      "Vierte el aliño sobre la ensalada y mezcla suavemente.",
+      "Sirve inmediatamente para disfrutar de todos los sabores frescos."
+    ],
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 5,
+    "servings": 2,
+    "cuisine": "mediterránea",
+    "meal_type": "comida",
+    "dietary_tags": [
+      "alto en proteína",
+      "sin gluten"
+    ]
+  },
+  {
+    "title": "Espuma Fría de Pepino con Cangrejo y Eneldo",
+    "ingredients": "Pepino,Cangrejo fresco o buey de mar,Nata líquida,Gelatina en láminas,Limón,Eneldo fresco,Pimienta de Sichuan",
+    "time_minutes": 60,
+    "difficulty": "Media",
+    "tags": "entrante,marisco,espuma fria",
+    "image_url": "https://images.unsplash.com/photo-1563379091339-03246963d9d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Licuar pepino colado con un poco de nata, sal, limón y gelatina hidratada. Colar finamente y cargar en sifón. Refrigerar 2h. Mezclar la carne de cangrejo con mayonesa de eneldo. En un vaso, colocar el cangrejo, espumar la crema de pepino encima y terminar con eneldo y pimienta de Sichuan molida.",
+    "nutrients": "calories 180,protein 15g,fat 12g,carbs 5g"
+  },
+  {
+    "title": "Pasta carbonara auténtica",
+    "ingredients": "espaguetis,huevo,queso parmesano,panceta,pimienta negra,aceite de oliva",
+    "time_minutes": 25,
+    "difficulty": "Media",
+    "tags": "italiano,gourmet,pasta,clásico",
+    "image_url": "https://example.com/carbonara_autentica.jpg",
+    "description": "La auténtica carbonara italiana, cremosa y deliciosa, sin nata. Solo huevo, queso y panceta.",
+    "nutrients": "calories 580,protein 28.0g,carbs 75.0g,fat 22.0g",
+    "ingredients_detailed": [
+      {
+        "name": "espaguetis",
+        "quantity": 400,
+        "unit": "gramos",
+        "notes": "frescos o secos"
+      },
+      {
+        "name": "huevo",
+        "quantity": 4,
+        "unit": "unidades",
+        "notes": "yemas solamente"
+      },
+      {
+        "name": "queso parmesano",
+        "quantity": 100,
+        "unit": "gramos",
+        "notes": "recién rallado"
+      },
+      {
+        "name": "panceta",
+        "quantity": 200,
+        "unit": "gramos",
+        "notes": "guanciale o pancetta, cortada en cubos"
+      },
+      {
+        "name": "pimienta negra",
+        "quantity": 1,
+        "unit": "cucharadita",
+        "notes": "recién molida"
+      },
+      {
+        "name": "sal",
+        "quantity": 1,
+        "unit": "cucharadita",
+        "notes": "para el agua de cocción"
+      }
+    ],
+    "instructions": [
+      "Pon a hervir una olla grande de agua con sal para los espaguetis.",
+      "Mientras tanto, corta la panceta en cubos pequeños y fríela en una sartén grande a fuego medio hasta que esté crujiente (5-7 minutos). Reserva el aceite de la panceta.",
+      "Separa las yemas de los huevos y bátelas en un bol. Añade el queso parmesano rallado y la pimienta negra. Mezcla bien.",
+      "Cuando el agua hierva, añade los espaguetis y cocínalos según las instrucciones del paquete, pero retíralos 1 minuto antes del tiempo indicado (al dente).",
+      "Reserva 1 taza del agua de cocción de la pasta antes de escurrir.",
+      "Añade los espaguetis escurridos directamente a la sartén con la panceta y su grasa, a fuego muy bajo.",
+      "Vierte la mezcla de huevo y queso sobre la pasta caliente, removiendo rápidamente. Si es necesario, añade un poco del agua de cocción reservada para crear una salsa cremosa.",
+      "Sirve inmediatamente con más queso parmesano y pimienta negra por encima."
+    ],
+    "prep_time_minutes": 10,
+    "cook_time_minutes": 15,
+    "servings": 4,
+    "cuisine": "italiana",
+    "meal_type": "cena",
+    "dietary_tags": [
+      "sin gluten (con pasta sin gluten)"
+    ]
+  },
+  {
+    "title": "Pechuga de Pato a la Naranja Glaseada con Puré de Boniato",
+    "ingredients": "Pechuga de pato magret,Naranja sanguina,Miel,Vino tinto,Boniato,Mantequilla,Nuez moscada",
+    "time_minutes": 70,
+    "difficulty": "Media",
+    "tags": "pato,caza,salsa reducida",
+    "image_url": "https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Marcar la piel del pato en sartén fría y cocinar a fuego bajo para renderizar la grasa. Hornear hasta punto medio. Reducir jugo de naranja, vino y miel para la salsa. Cocer boniato y hacer puré fino con mantequilla y nuez moscada. Glasar el pato con la salsa antes de servir.",
+    "nutrients": "calories 520,protein 32g,fat 28g,carbs 35g"
+  },
+  {
+    "title": "Ravioli de Queso de Cabra con Espuma de Remolacha",
+    "ingredients": "Harina 00,Huevos,Queso de cabra,Ricotta,Remolacha,Nata líquida,Gelatina,Limón,Cebollino",
+    "time_minutes": 120,
+    "difficulty": "Difícil",
+    "tags": "pasta casera,vegetariano,tecnica moderna",
+    "image_url": "https://images.unsplash.com/photo-1621996346565-e3dbc353d2c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Preparar masa fresca y estirar muy fina. Mezclar quesos, ralladura de limón y cebollino para el relleno. Formar raviolis. Para la espuma, licuar remolacha con caldo, colar, añadir gelatina y nata fría, cargar en sifón. Cocer raviolis 3 min y servir con la espuma y brotes.",
+    "nutrients": "calories 380,protein 18g,fat 22g,carbs 32g"
+  },
+  {
+    "title": "Salmón al horno con verduras",
+    "ingredients": "salmón,brócoli,zanahoria,calabacín,limón,aceite de oliva,ajo,romero",
+    "time_minutes": 35,
+    "difficulty": "Fácil",
+    "tags": "pescado,saludable,horno,rápido",
+    "image_url": "https://example.com/salmon_horno_verduras.jpg",
+    "description": "Salmón jugoso al horno acompañado de verduras asadas, una comida completa y saludable.",
+    "nutrients": "calories 420,protein 38.0g,carbs 15.0g,fat 24.0g",
+    "ingredients_detailed": [
+      {
+        "name": "salmón",
+        "quantity": 600,
+        "unit": "gramos",
+        "notes": "filetes con piel"
+      },
+      {
+        "name": "brócoli",
+        "quantity": 300,
+        "unit": "gramos",
+        "notes": "en ramilletes"
+      },
+      {
+        "name": "zanahoria",
+        "quantity": 2,
+        "unit": "unidades",
+        "notes": "cortada en rodajas"
+      },
+      {
+        "name": "calabacín",
+        "quantity": 2,
+        "unit": "unidades",
+        "notes": "cortado en rodajas"
+      },
+      {
+        "name": "limón",
+        "quantity": 1,
+        "unit": "unidades",
+        "notes": "en rodajas"
+      },
+      {
+        "name": "aceite de oliva",
+        "quantity": 4,
+        "unit": "cucharadas",
+        "notes": ""
+      },
+      {
+        "name": "ajo",
+        "quantity": 3,
+        "unit": "dientes",
+        "notes": "picado"
+      },
+      {
+        "name": "romero",
+        "quantity": 2,
+        "unit": "ramitas",
+        "notes": "fresco"
+      },
+      {
+        "name": "sal",
+        "quantity": 1,
+        "unit": "cucharadita",
+        "notes": ""
+      },
+      {
+        "name": "pimienta",
+        "quantity": 0.5,
+        "unit": "cucharadita",
+        "notes": ""
+      }
+    ],
+    "instructions": [
+      "Precalienta el horno a 200°C (400°F).",
+      "Prepara las verduras: corta el brócoli en ramilletes, las zanahorias en rodajas de 1 cm y el calabacín en rodajas.",
+      "Coloca las verduras en una bandeja de horno grande. Añade el ajo picado, 2 cucharadas de aceite de oliva, sal y pimienta. Mezcla bien.",
+      "Hornea las verduras durante 10 minutos.",
+      "Mientras tanto, prepara el salmón: coloca los filetes en un plato, añade sal, pimienta, el romero picado y el jugo de medio limón. Deja marinar 5 minutos.",
+      "Retira la bandeja del horno, mueve las verduras a los lados y coloca los filetes de salmón en el centro, con la piel hacia abajo.",
+      "Coloca las rodajas de limón sobre el salmón.",
+      "Rocía todo con el aceite de oliva restante.",
+      "Hornea durante 12-15 minutos, hasta que el salmón esté opaco y se desmenuce fácilmente con un tenedor.",
+      "Sirve caliente con las verduras y más limón si lo deseas."
+    ],
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 20,
+    "servings": 4,
+    "cuisine": "mediterránea",
+    "meal_type": "cena",
+    "dietary_tags": [
+      "alto en proteína",
+      "rico en omega-3",
+      "sin gluten",
+      "bajo en carbohidratos"
+    ]
+  },
+  {
+    "title": "Tataki de Atún con Sésamo y Cítricos",
+    "ingredients": "Lomo de atún rojo,Sésamo negro y blanco,Lima,Yuzu (o lima-limón),Jengibre fresco,Salsa de soja,Sirope de agave,Aguacate",
+    "time_minutes": 40,
+    "difficulty": "Fácil",
+    "tags": "atun,crudo,japones",
+    "image_url": "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Sellar el lomo de atún por todos lados en una sartén muy caliente, dejando el centro crudo. Enfriar y envolver en sésamo. Cortar en finas láminas. Mezclar zumos de cítricos, soja, agave y jengibre rallado para la salsa. Servir el atún sobre aguacate con la salsa al lado.",
+    "nutrients": "calories 290,protein 30g,fat 16g,carbs 8g"
+  },
+  {
+    "title": "Tortilla española clásica",
+    "ingredients": "huevo,patata,cebolla,aceite de oliva,sal",
+    "time_minutes": 45,
+    "difficulty": "Media",
+    "tags": "española,tradicional,huevo,clásico",
+    "image_url": "https://example.com/tortilla_espanola.jpg",
+    "description": "La tortilla española más auténtica, con patatas y cebolla, jugosa por dentro y dorada por fuera.",
+    "nutrients": "calories 380,protein 18.0g,carbs 35.0g,fat 20.0g",
+    "ingredients_detailed": [
+      {
+        "name": "huevo",
+        "quantity": 6,
+        "unit": "unidades",
+        "notes": "grandes"
+      },
+      {
+        "name": "patata",
+        "quantity": 600,
+        "unit": "gramos",
+        "notes": "peladas y cortadas en rodajas finas"
+      },
+      {
+        "name": "cebolla",
+        "quantity": 1,
+        "unit": "unidades",
+        "notes": "grande, cortada en juliana"
+      },
+      {
+        "name": "aceite de oliva",
+        "quantity": 200,
+        "unit": "ml",
+        "notes": "para freír"
+      },
+      {
+        "name": "sal",
+        "quantity": 1,
+        "unit": "cucharadita",
+        "notes": "o al gusto"
+      }
+    ],
+    "instructions": [
+      "Pela las patatas y córtalas en rodajas de aproximadamente 1 cm de grosor. Corta la cebolla en juliana fina.",
+      "Calienta el aceite de oliva en una sartén grande (preferiblemente antiadherente) a fuego medio.",
+      "Añade las patatas y la cebolla al aceite caliente. Fríe suavemente durante 20-25 minutos, removiendo ocasionalmente, hasta que las patatas estén tiernas pero no doradas.",
+      "Retira las patatas y cebolla del aceite con una espumadera y escúrrelas bien sobre papel de cocina. Reserva el aceite para otros usos.",
+      "En un bol grande, bate los huevos con sal. Añade las patatas y cebolla aún calientes y mezcla suavemente.",
+      "Calienta 2 cucharadas de aceite de oliva en una sartén antiadherente de 24-26 cm a fuego medio-alto.",
+      "Vierte la mezcla de huevo y patatas en la sartén caliente. Cocina durante 3-4 minutos hasta que los bordes estén dorados y el centro aún esté líquido.",
+      "Con cuidado, voltea la tortilla usando un plato: coloca un plato sobre la sartén, invierte rápidamente y desliza la tortilla de vuelta a la sartén para cocinar el otro lado durante 2-3 minutos más.",
+      "La tortilla debe quedar jugosa por dentro. Sirve caliente o a temperatura ambiente."
+    ],
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 30,
+    "servings": 4,
+    "cuisine": "española",
+    "meal_type": "comida",
+    "dietary_tags": [
+      "sin gluten",
+      "vegetariano"
+    ]
+  },
+  {
+    "title": "Trucha con Piel Crujiente y Verduras Primaverales",
+    "ingredients": "Filete de trucha,Espárragos,Guisantes,Habas,Cebolleta,Caldo de pescado,Espinacas,Perejil,Mantequilla,Aceite de oliva",
+    "time_minutes": 90,
+    "difficulty": "Media",
+    "tags": "pescado,primavera,caldo emulsionado",
+    "image_url": "https://images.unsplash.com/photo-1571757767119-68b8dbed8c97?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "description": "Sellar la trucha en una sartén muy caliente con la piel hacia abajo hasta que quede crujiente. Saltear las verduras por separado. Para el caldo verde, blanquear hierbas, triturar con caldo reducido y emulsificar con mantequilla fría. Servir el caldo en el plato, colocar las verduras y encima el pescado.",
+    "nutrients": "calories 420,protein 35g,fat 28g,carbs 12g"
+  },
+  {
+    "title": "Tostada de Aguacate y Huevo",
+    "ingredients": "pan integral,aguacate,huevo,limón",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "desayuno,rápido,saludable",
+    "image_url": "https://example.com/tostada.jpg",
+    "description": "Una opción clásica y equilibrada para empezar el día.",
+    "nutrients": "calories 280,protein 12g,carbs 24g,fat 16g",
+    "ingredients_detailed": [
+      { "name": "pan integral", "quantity": 1, "unit": "rebanadas", "notes": "tostado" },
+      { "name": "aguacate", "quantity": 0.5, "unit": "unidades", "notes": "maduro" },
+      { "name": "huevo", "quantity": 1, "unit": "unidades", "notes": "poché o frito" }
+    ],
+    "instructions": [
+      "Tuesta la rebanada de pan integral hasta que esté crujiente.",
+      "Extrae la pulpa del aguacate y machácala en un bol con un chorrito de limón y sal.",
+      "Cocina el huevo: puedes hacerlo poché en agua hirviendo con vinagre (3 min) o a la plancha.",
+      "Extiende el aguacate sobre el pan y coloca el huevo encima. Sazona con pimienta."
+    ]
+  },
+  {
+    "title": "Salteado Express de Pollo y Brócoli",
+    "ingredients": "pollo,brócoli,salsa de soja,ajo",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "cena,proteína,low-carb",
+    "image_url": "https://example.com/salteado_pollo.jpg",
+    "description": "Cena ligera cargada de proteínas y fibra.",
+    "nutrients": "calories 320,protein 35g,carbs 8g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "pollo", "quantity": 200, "unit": "gramos", "notes": "pechuga en dados" },
+      { "name": "brócoli", "quantity": 150, "unit": "gramos", "notes": "cortado pequeño" },
+      { "name": "salsa de soja", "quantity": 2, "unit": "cucharadas", "notes": "" }
+    ],
+    "instructions": [
+      "Calienta una sartén con una gota de aceite y añade el ajo picado.",
+      "Añade los dados de pollo y saltéalos a fuego alto hasta que doren.",
+      "Incorpora los ramilletes de brócoli con un par de cucharadas de agua y tapa la sartén 3 minutos para que se cocinen al vapor.",
+      "Quita la tapa, añade la salsa de soja y saltea 1 minuto más para integrar sabores."
+    ]
+  },
+  {
+    "title": "Quesadilla de Champiñones",
+    "ingredients": "tortilla de maíz,queso fresco,champiñones",
+    "time_minutes": 8,
+    "difficulty": "Fácil",
+    "tags": "mexicano,rápido,vegetariano",
+    "image_url": "https://example.com/quesadilla.jpg",
+    "description": "Queso fundido con el toque terroso de los champiñones.",
+    "nutrients": "calories 290,protein 14g,carbs 22g,fat 16g",
+    "ingredients_detailed": [
+      { "name": "tortilla de maíz", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "queso fresco", "quantity": 60, "unit": "gramos", "notes": "que funda bien" },
+      { "name": "champiñones", "quantity": 50, "unit": "gramos", "notes": "laminados" }
+    ],
+    "instructions": [
+      "Saltea los champiñones en una sartén con sal hasta que pierdan su agua.",
+      "Coloca una tortilla en la sartén limpia, añade el queso troceado y los champiñones encima.",
+      "Cubre con la otra tortilla y calienta 2 minutos por cada lado hasta que el queso esté derretido.",
+      "Corta en triángulos y sirve con salsa si lo deseas."
+    ]
+  },
+  {
+    "title": "Gnocchi con Mantequilla y Salvia",
+    "ingredients": "pasta,mantequilla,ajo",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "italiano,rápido",
+    "image_url": "https://example.com/gnocchi.jpg",
+    "description": "Elegancia minimalista en el plato.",
+    "nutrients": "calories 380,protein 6g,carbs 50g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "pasta", "quantity": 200, "unit": "gramos", "notes": "tipo gnocchi de patata" },
+      { "name": "mantequilla", "quantity": 20, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Cuece los gnocchi en agua hirviendo con sal; estarán listos en cuanto floten en la superficie.",
+      "Mientras tanto, derrite la mantequilla en una sartén hasta que empiece a dorarse ligeramente.",
+      "Escurre los gnocchi y añádelos a la sartén con la mantequilla.",
+      "Saltea un par de minutos para que se doren y sirve con pimienta negra."
+    ]
+  },
+  {
+    "title": "Hummus con Crudités de Zanahoria",
+    "ingredients": "hummus,zanahoria",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "snack,vegano,sin fuego",
+    "image_url": "https://example.com/hummus_snack.jpg",
+    "description": "El dip más saludable y rápido.",
+    "nutrients": "calories 180,protein 6g,carbs 15g,fat 11g",
+    "ingredients_detailed": [
+      { "name": "hummus", "quantity": 100, "unit": "gramos", "notes": "" },
+      { "name": "zanahoria", "quantity": 2, "unit": "unidades", "notes": "peladas" }
+    ],
+    "instructions": [
+      "Pela las zanahorias y córtalas en bastones o 'sticks' delgados.",
+      "Vierte el hummus en un cuenco pequeño.",
+      "Sirve la zanahoria al lado para mojar directamente en la crema de garbanzo."
+    ]
+  },
+  {
+    "title": "Ensalada de Atún y Garbanzos",
+    "ingredients": "garbanzos cocidos,atún,cebolla,pimiento",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "almuerzo,legumbres,rápido",
+    "image_url": "https://example.com/ensalada_legumbre.jpg",
+    "description": "Proteína vegetal y animal en un plato fresco.",
+    "nutrients": "calories 340,protein 28g,carbs 30g,fat 9g",
+    "ingredients_detailed": [
+      { "name": "garbanzos cocidos", "quantity": 150, "unit": "gramos", "notes": "enjuagados" },
+      { "name": "atún", "quantity": 1, "unit": "latas", "notes": "al natural" },
+      { "name": "cebolla", "quantity": 30, "unit": "gramos", "notes": "picada" }
+    ],
+    "instructions": [
+      "Enjuaga los garbanzos cocidos bajo el grifo y escúrrelos bien.",
+      "En un bol, mezcla los garbanzos con el atún (sin el líquido de la lata).",
+      "Añade la cebolla y el pimiento picados finamente.",
+      "Aliña con aceite de oliva, vinagre y una pizca de sal."
+    ]
+  },
+  {
+    "title": "Yogur con Arándanos y Nueces",
+    "ingredients": "yogur natural,arándanos,nueces,miel",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "merienda,desayuno",
+    "image_url": "https://example.com/yogur_bol.jpg",
+    "description": "Snack rápido y saciante.",
+    "nutrients": "calories 210,protein 12g,carbs 18g,fat 10g",
+    "ingredients_detailed": [
+      { "name": "yogur natural", "quantity": 125, "unit": "gramos", "notes": "" },
+      { "name": "arándanos", "quantity": 50, "unit": "gramos", "notes": "" },
+      { "name": "nueces", "quantity": 3, "unit": "unidades", "notes": "troceadas" }
+    ],
+    "instructions": [
+      "Vierte el yogur natural en un bol o vaso.",
+      "Lava los arándanos y colócalos sobre el yogur.",
+      "Trocea las nueces con las manos y añádelas para dar un toque crujiente.",
+      "Finaliza con un hilo de miel si deseas un toque dulce."
+    ]
+  },
+  {
+    "title": "Pescado al Vapor con Limón",
+    "ingredients": "salmón,limón,perejil",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "pescado,saludable,microondas",
+    "image_url": "https://example.com/pescado_vapor.jpg",
+    "description": "Cocción perfecta y jugosa en tiempo récord.",
+    "nutrients": "calories 290,protein 30g,carbs 2g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "salmón", "quantity": 150, "unit": "gramos", "notes": "lomo" },
+      { "name": "limón", "quantity": 0.5, "unit": "unidades", "notes": "en rodajas" }
+    ],
+    "instructions": [
+      "Coloca el filete de pescado en un estuche de vapor o en un plato hondo tapado con film apto.",
+      "Pon un par de rodajas de limón encima y espolvorea perejil fresco.",
+      "Cocina en el microondas a potencia media durante 4 o 5 minutos.",
+      "Deja reposar un minuto antes de destapar y servir."
+    ]
+  },
+  {
+    "title": "Smoothie de Plátano y Avena",
+    "ingredients": "plátano,avena,leche entera",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "bebida,fitness,desayuno",
+    "image_url": "https://example.com/smoothie.jpg",
+    "description": "Batido energético para antes o después de entrenar.",
+    "nutrients": "calories 320,protein 10g,carbs 55g,fat 6g",
+    "ingredients_detailed": [
+      { "name": "plátano", "quantity": 1, "unit": "unidades", "notes": "" },
+      { "name": "avena", "quantity": 30, "unit": "gramos", "notes": "" },
+      { "name": "leche entera", "quantity": 250, "unit": "mililitros", "notes": "" }
+    ],
+    "instructions": [
+      "Pela el plátano y trocéalo.",
+      "Introduce en la batidora el plátano, los copos de avena y la leche.",
+      "Tritura a máxima potencia hasta que la textura sea homogénea y sin grumos.",
+      "Sirve inmediatamente en un vaso grande."
+    ]
+  },
+  {
+    "title": "Tortilla de Champiñones",
+    "ingredients": "huevo,champiñones,ajo",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "cena,huevo,vegetariano",
+    "image_url": "https://example.com/tortilla_champ.jpg",
+    "description": "Una cena clásica, ligera y muy rápida.",
+    "nutrients": "calories 210,protein 14g,carbs 4g,fat 15g",
+    "ingredients_detailed": [
+      { "name": "huevo", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "champiñones", "quantity": 100, "unit": "gramos", "notes": "limpios" }
+    ],
+    "instructions": [
+      "Saltea los champiñones laminados con un poco de ajo hasta que pierdan su humedad.",
+      "Bate los dos huevos en un cuenco con una pizca de sal.",
+      "Vierte los huevos sobre los champiñones en la sartén.",
+      "Cocina a fuego medio, dobla la tortilla por la mitad y sirve cuando esté cuajada."
+    ]
+  },
+  {
+    "title": "Ensalada Caprese de un Minuto",
+    "ingredients": "tomate,queso fresco,aceite de oliva",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "ensalada,vegetariano,frío",
+    "image_url": "https://example.com/caprese.jpg",
+    "description": "Frescura italiana en segundos.",
+    "nutrients": "calories 240,protein 10g,carbs 6g,fat 20g",
+    "ingredients_detailed": [
+      { "name": "tomate", "quantity": 150, "unit": "gramos", "notes": "en rodajas" },
+      { "name": "queso fresco", "quantity": 100, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Corta el tomate en rodajas de un centímetro de grosor.",
+      "Corta el queso fresco en láminas similares.",
+      "Intercala una rodaja de tomate y una de queso en el plato.",
+      "Aliña generosamente con aceite de oliva y sal."
+    ]
+  },
+  {
+    "title": "Pechuga de Pollo a la Plancha",
+    "ingredients": "pollo,ajo,aceite de oliva",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "proteína,básico",
+    "image_url": "https://example.com/pollo_plancha.jpg",
+    "description": "El básico que nunca falla si se hace bien.",
+    "nutrients": "calories 220,protein 38g,carbs 0g,fat 6g",
+    "ingredients_detailed": [
+      { "name": "pollo", "quantity": 200, "unit": "gramos", "notes": "filete fino" }
+    ],
+    "instructions": [
+      "Calienta la plancha o sartén a fuego alto con muy poco aceite.",
+      "Coloca el filete de pollo y deja cocinar 3-4 minutos sin moverlo para que dore.",
+      "Dale la vuelta y cocina otros 3 minutos por el otro lado.",
+      "Sazona con sal y pimienta al final para que no suelte jugos."
+    ]
+  },
+  {
+    "title": "Tacos de Pavo y Queso",
+    "ingredients": "tortilla de maíz,pechuga de pavo,queso fresco",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "cena,rápido,niños",
+    "image_url": "https://example.com/tacos_pavo.jpg",
+    "description": "Tacos ligeros para una cena informal.",
+    "nutrients": "calories 310,protein 22g,carbs 28g,fat 10g",
+    "ingredients_detailed": [
+      { "name": "tortilla de maíz", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "pechuga de pavo", "quantity": 100, "unit": "gramos", "notes": "tiras" }
+    ],
+    "instructions": [
+      "Calienta las tortillas de maíz en una sartén seca durante 30 segundos por cada lado.",
+      "Saltea brevemente las tiras de pavo con un poco de sal.",
+      "Rellena las tortillas con el pavo y el queso fresco desmenuzado.",
+      "Dobla y sirve calientes."
+    ]
+  },
+  {
+    "title": "Pasta al Pesto con Tomatitos",
+    "ingredients": "pasta cocida,tomate,queso parmesano",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "pasta,vegetariano",
+    "image_url": "https://example.com/pasta_pesto.jpg",
+    "description": "Sabor mediterráneo en tiempo récord.",
+    "nutrients": "calories 450,protein 15g,carbs 55g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "pasta cocida", "quantity": 150, "unit": "gramos", "notes": "" },
+      { "name": "tomate", "quantity": 100, "unit": "gramos", "notes": "tipo cherry" }
+    ],
+    "instructions": [
+      "Saltea los tomates cherry partidos por la mitad en una sartén con aceite y ajo.",
+      "Cuando los tomates estén blandos, añade la pasta ya cocida.",
+      "Mezcla bien, retira del fuego y añade el queso parmesano rallado.",
+      "Añade un chorrito extra de aceite de oliva crudo antes de servir."
+    ]
+  },
+  {
+    "title": "Gambas al Ajillo Express",
+    "ingredients": "gambas,ajo,aceite de oliva",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "tapa,marisco",
+    "image_url": "https://example.com/gambas_ajillo.jpg",
+    "description": "Un clásico español muy veloz.",
+    "nutrients": "calories 210,protein 22g,carbs 2g,fat 14g",
+    "ingredients_detailed": [
+      { "name": "gambas", "quantity": 200, "unit": "gramos", "notes": "peladas" },
+      { "name": "ajo", "quantity": 3, "unit": "dientes", "notes": "laminados" }
+    ],
+    "instructions": [
+      "Corta los ajos en láminas finas.",
+      "En una sartén pequeña, calienta abundante aceite y dora los ajos.",
+      "Antes de que el ajo se queme, añade las gambas y cocina 2 minutos hasta que cambien de color.",
+      "Sirve inmediatamente con el aceite burbujeando."
+    ]
+  },
+  {
+    "title": "Espinacas Salteadas con Ajo",
+    "ingredients": "espinaca,ajo,aceite de oliva",
+    "time_minutes": 8,
+    "difficulty": "Fácil",
+    "tags": "guarnición,vegano,saludable",
+    "image_url": "https://example.com/espinacas.jpg",
+    "description": "La forma más rápida de comer verde.",
+    "nutrients": "calories 120,protein 4g,carbs 5g,fat 10g",
+    "ingredients_detailed": [
+      { "name": "espinaca", "quantity": 200, "unit": "gramos", "notes": "fresca" },
+      { "name": "ajo", "quantity": 2, "unit": "dientes", "notes": "" }
+    ],
+    "instructions": [
+      "Dora el ajo picado en una sartén grande con aceite.",
+      "Añade las espinacas frescas (aunque parezcan muchas, reducirán mucho).",
+      "Saltea durante 3-4 minutos moviendo constantemente hasta que estén tiernas.",
+      "Sazona con sal y sirve como guarnición."
+    ]
+  },
+  {
+    "title": "Bowl de Avena Nocturna",
+    "ingredients": "avena,leche de almendras,chía",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "desayuno,prep,frío",
+    "image_url": "https://example.com/overnight_oats.jpg",
+    "description": "Prepara la noche anterior y listo para llevar.",
+    "nutrients": "calories 280,protein 9g,carbs 42g,fat 8g",
+    "ingredients_detailed": [
+      { "name": "avena", "quantity": 40, "unit": "gramos", "notes": "" },
+      { "name": "leche de almendras", "quantity": 150, "unit": "mililitros", "notes": "" }
+    ],
+    "instructions": [
+      "En un bote de cristal, mezcla la avena con la leche de almendras y una cucharada de chía.",
+      "Remueve bien y cierra el bote.",
+      "Deja reposar en la nevera durante toda la noche.",
+      "Por la mañana, añade frutas o frutos secos por encima y consume frío."
+    ]
+  },
+  {
+    "title": "Ensalada de Pepino y Yogur",
+    "ingredients": "pepino,yogur natural,ajo",
+    "time_minutes": 7,
+    "difficulty": "Fácil",
+    "tags": "ensalada,griego,frío",
+    "image_url": "https://example.com/tzatziki.jpg",
+    "description": "Refrescante y cremosa.",
+    "nutrients": "calories 110,protein 6g,carbs 8g,fat 5g",
+    "ingredients_detailed": [
+      { "name": "pepino", "quantity": 200, "unit": "gramos", "notes": "picado" },
+      { "name": "yogur natural", "quantity": 125, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Ralla el pepino y apriétalo con las manos para eliminar el exceso de agua.",
+      "Mezcla el yogur con un diente de ajo muy picado y sal.",
+      "Incorpora el pepino a la mezcla de yogur.",
+      "Sirve frío como ensalada o acompañamiento de carnes."
+    ]
+  },
+  {
+    "title": "Pavo con Pimientos Salteados",
+    "ingredients": "pechuga de pavo,pimiento,cebolla",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "cena,saludable",
+    "image_url": "https://example.com/pavo_pimientos.jpg",
+    "description": "Plato colorido y lleno de vitaminas.",
+    "nutrients": "calories 260,protein 32g,carbs 10g,fat 8g",
+    "ingredients_detailed": [
+      { "name": "pechuga de pavo", "quantity": 200, "unit": "gramos", "notes": "tiras" },
+      { "name": "pimiento", "quantity": 100, "unit": "gramos", "notes": "en tiras" }
+    ],
+    "instructions": [
+      "Corta la cebolla y los pimientos en tiras finas.",
+      "Saltea las verduras en una sartén con aceite hasta que estén ligeramente tiernas.",
+      "Añade las tiras de pavo y cocina a fuego alto durante 5 minutos.",
+      "Sazona con sal y sirve caliente."
+    ]
+  },
+  {
+    "title": "Revuelto de Espárragos y Jamón",
+    "ingredients": "huevo,espárragos,jamón serrano",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "huevo,proteína",
+    "image_url": "https://example.com/revuelto.jpg",
+    "description": "Sabores intensos en un revuelto jugoso.",
+    "nutrients": "calories 290,protein 25g,carbs 3g,fat 19g",
+    "ingredients_detailed": [
+      { "name": "huevo", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "espárragos", "quantity": 100, "unit": "gramos", "notes": "" },
+      { "name": "jamón serrano", "quantity": 30, "unit": "gramos", "notes": "troceado" }
+    ],
+    "instructions": [
+      "Corta la parte dura de los espárragos y trocea el resto.",
+      "Saltea los espárragos en la sartén hasta que doren.",
+      "Añade el jamón unos segundos y luego vierte los huevos batidos.",
+      "Remueve suavemente a fuego bajo hasta que el huevo esté cuajado pero aún jugoso."
+    ]
+  },
+  {
+    "title": "Arroz con Atún y Maíz",
+    "ingredients": "arroz blanco cocido,atún,maíz dulce",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "rápido,estudiante",
+    "image_url": "https://example.com/arroz_atun.jpg",
+    "description": "El salvavidas de los días con prisa.",
+    "nutrients": "calories 390,protein 20g,carbs 60g,fat 7g",
+    "ingredients_detailed": [
+      { "name": "arroz blanco cocido", "quantity": 200, "unit": "gramos", "notes": "" },
+      { "name": "atún", "quantity": 1, "unit": "latas", "notes": "" }
+    ],
+    "instructions": [
+      "Calienta el arroz cocido en el microondas si estaba frío.",
+      "En un bol, mezcla el arroz con el atún escurrido y el maíz dulce.",
+      "Añade un chorrito de aceite de oliva o una cucharada de mayonesa si prefieres.",
+      "Mezcla bien y listo para comer."
+    ]
+  },
+  {
+    "title": "Canónigos con Nueces y Queso",
+    "ingredients": "canónigos,nueces,queso fresco",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "ensalada,gourmet",
+    "image_url": "https://example.com/ensalada_can.jpg",
+    "description": "Ensalada elegante en 5 minutos.",
+    "nutrients": "calories 250,protein 9g,carbs 12g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "canónigos", "quantity": 50, "unit": "gramos", "notes": "" },
+      { "name": "nueces", "quantity": 20, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Lava y seca los canónigos y colócalos en un plato.",
+      "Añade el queso fresco cortado en dados y las nueces troceadas.",
+      "Prepara una vinagreta con aceite y vinagre de manzana.",
+      "Aliña justo antes de servir para que el canónigo no pierda frescura."
+    ]
+  },
+  {
+    "title": "Tofu Salteado con Soja",
+    "ingredients": "tofu firme,salsa de soja,jengibre",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "vegano,oriental",
+    "image_url": "https://example.com/tofu_soja.jpg",
+    "description": "Tofu crujiente con sabor asiático.",
+    "nutrients": "calories 210,protein 18g,carbs 5g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "tofu firme", "quantity": 200, "unit": "gramos", "notes": "en dados" },
+      { "name": "salsa de soja", "quantity": 2, "unit": "cucharadas", "notes": "" }
+    ],
+    "instructions": [
+      "Seca muy bien el bloque de tofu con papel de cocina y córtalo en dados.",
+      "Dora el tofu en una sartén con aceite hasta que los bordes estén crujientes.",
+      "Añade jengibre rallado y la salsa de soja.",
+      "Cocina un minuto más para que el tofu absorba el líquido y sirva."
+    ]
+  },
+  {
+    "title": "Batata al Microondas",
+    "ingredients": "batata,aceite de oliva,sal",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "carbohidrato,rápido",
+    "image_url": "https://example.com/batata.jpg",
+    "description": "Textura asada en solo 10 minutos.",
+    "nutrients": "calories 180,protein 3g,carbs 40g,fat 1g",
+    "ingredients_detailed": [
+      { "name": "batata", "quantity": 1, "unit": "unidades", "notes": "mediana" }
+    ],
+    "instructions": [
+      "Lava bien la batata y pincha la piel varias veces con un tenedor.",
+      "Envuélvela en papel de cocina húmedo.",
+      "Cocina en el microondas a potencia máxima durante 8-10 minutos.",
+      "Corta por la mitad, añade sal y un hilo de aceite de oliva."
+    ]
+  },
+  {
+    "title": "Ceviche de Gambas Rápido",
+    "ingredients": "gambas,limón,cebolla,cilantro",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "marisco,fresco",
+    "image_url": "https://example.com/ceviche.jpg",
+    "description": "Un entrante cítrico y refrescante.",
+    "nutrients": "calories 150,protein 24g,carbs 6g,fat 2g",
+    "ingredients_detailed": [
+      { "name": "gambas", "quantity": 200, "unit": "gramos", "notes": "cocidas" },
+      { "name": "limón", "quantity": 2, "unit": "unidades", "notes": "zumo" }
+    ],
+    "instructions": [
+      "Pica la cebolla morada y el cilantro muy finamente.",
+      "En un bol, mezcla las gambas cocidas con el zumo de los limones.",
+      "Añade la cebolla y el cilantro y mezcla bien.",
+      "Deja reposar 5 minutos en la nevera para que los sabores se integren antes de servir."
+    ]
+  },
+  {
+    "title": "Tostada de Aguacate y Huevo",
+    "ingredients": "pan integral,aguacate,huevo,limón",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "desayuno,rápido,saludable",
+    "image_url": "https://example.com/tostada.jpg",
+    "description": "Una opción clásica y equilibrada para empezar el día.",
+    "nutrients": "calories 280,protein 12g,carbs 24g,fat 16g",
+    "ingredients_detailed": [
+      { "name": "pan integral", "quantity": 1, "unit": "rebanadas", "notes": "tostado" },
+      { "name": "aguacate", "quantity": 0.5, "unit": "unidades", "notes": "maduro" },
+      { "name": "huevo", "quantity": 1, "unit": "unidades", "notes": "poché o frito" }
+    ],
+    "instructions": [
+      "Tuesta la rebanada de pan integral hasta que esté crujiente.",
+      "Extrae la pulpa del aguacate y machácala en un bol con un chorrito de limón y sal.",
+      "Cocina el huevo: puedes hacerlo poché en agua hirviendo con vinagre (3 min) o a la plancha.",
+      "Extiende el aguacate sobre el pan y coloca el huevo encima. Sazona con pimienta."
+    ]
+  },
+  {
+    "title": "Salteado Express de Pollo y Brócoli",
+    "ingredients": "pollo,brócoli,salsa de soja,ajo",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "cena,proteína,low-carb",
+    "image_url": "https://example.com/salteado_pollo.jpg",
+    "description": "Cena ligera cargada de proteínas y fibra.",
+    "nutrients": "calories 320,protein 35g,carbs 8g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "pollo", "quantity": 200, "unit": "gramos", "notes": "pechuga en dados" },
+      { "name": "brócoli", "quantity": 150, "unit": "gramos", "notes": "cortado pequeño" },
+      { "name": "salsa de soja", "quantity": 2, "unit": "cucharadas", "notes": "" }
+    ],
+    "instructions": [
+      "Calienta una sartén con una gota de aceite y añade el ajo picado.",
+      "Añade los dados de pollo y saltéalos a fuego alto hasta que doren.",
+      "Incorpora los ramilletes de brócoli con un par de cucharadas de agua y tapa la sartén 3 minutos para que se cocinen al vapor.",
+      "Quita la tapa, añade la salsa de soja y saltea 1 minuto más para integrar sabores."
+    ]
+  },
+  {
+    "title": "Quesadilla de Champiñones",
+    "ingredients": "tortilla de maíz,queso fresco,champiñones",
+    "time_minutes": 8,
+    "difficulty": "Fácil",
+    "tags": "mexicano,rápido,vegetariano",
+    "image_url": "https://example.com/quesadilla.jpg",
+    "description": "Queso fundido con el toque terroso de los champiñones.",
+    "nutrients": "calories 290,protein 14g,carbs 22g,fat 16g",
+    "ingredients_detailed": [
+      { "name": "tortilla de maíz", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "queso fresco", "quantity": 60, "unit": "gramos", "notes": "que funda bien" },
+      { "name": "champiñones", "quantity": 50, "unit": "gramos", "notes": "laminados" }
+    ],
+    "instructions": [
+      "Saltea los champiñones en una sartén con sal hasta que pierdan su agua.",
+      "Coloca una tortilla en la sartén limpia, añade el queso troceado y los champiñones encima.",
+      "Cubre con la otra tortilla y calienta 2 minutos por cada lado hasta que el queso esté derretido.",
+      "Corta en triángulos y sirve con salsa si lo deseas."
+    ]
+  },
+  {
+    "title": "Gnocchi con Mantequilla y Salvia",
+    "ingredients": "pasta,mantequilla,ajo",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "italiano,rápido",
+    "image_url": "https://example.com/gnocchi.jpg",
+    "description": "Elegancia minimalista en el plato.",
+    "nutrients": "calories 380,protein 6g,carbs 50g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "pasta", "quantity": 200, "unit": "gramos", "notes": "tipo gnocchi de patata" },
+      { "name": "mantequilla", "quantity": 20, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Cuece los gnocchi en agua hirviendo con sal; estarán listos en cuanto floten en la superficie.",
+      "Mientras tanto, derrite la mantequilla en una sartén hasta que empiece a dorarse ligeramente.",
+      "Escurre los gnocchi y añádelos a la sartén con la mantequilla.",
+      "Saltea un par de minutos para que se doren y sirve con pimienta negra."
+    ]
+  },
+  {
+    "title": "Hummus con Crudités de Zanahoria",
+    "ingredients": "hummus,zanahoria",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "snack,vegano,sin fuego",
+    "image_url": "https://example.com/hummus_snack.jpg",
+    "description": "El dip más saludable y rápido.",
+    "nutrients": "calories 180,protein 6g,carbs 15g,fat 11g",
+    "ingredients_detailed": [
+      { "name": "hummus", "quantity": 100, "unit": "gramos", "notes": "" },
+      { "name": "zanahoria", "quantity": 2, "unit": "unidades", "notes": "peladas" }
+    ],
+    "instructions": [
+      "Pela las zanahorias y córtalas en bastones o 'sticks' delgados.",
+      "Vierte el hummus en un cuenco pequeño.",
+      "Sirve la zanahoria al lado para mojar directamente en la crema de garbanzo."
+    ]
+  },
+  {
+    "title": "Ensalada de Atún y Garbanzos",
+    "ingredients": "garbanzos cocidos,atún,cebolla,pimiento",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "almuerzo,legumbres,rápido",
+    "image_url": "https://example.com/ensalada_legumbre.jpg",
+    "description": "Proteína vegetal y animal en un plato fresco.",
+    "nutrients": "calories 340,protein 28g,carbs 30g,fat 9g",
+    "ingredients_detailed": [
+      { "name": "garbanzos cocidos", "quantity": 150, "unit": "gramos", "notes": "enjuagados" },
+      { "name": "atún", "quantity": 1, "unit": "latas", "notes": "al natural" },
+      { "name": "cebolla", "quantity": 30, "unit": "gramos", "notes": "picada" }
+    ],
+    "instructions": [
+      "Enjuaga los garbanzos cocidos bajo el grifo y escúrrelos bien.",
+      "En un bol, mezcla los garbanzos con el atún (sin el líquido de la lata).",
+      "Añade la cebolla y el pimiento picados finamente.",
+      "Aliña con aceite de oliva, vinagre y una pizca de sal."
+    ]
+  },
+  {
+    "title": "Yogur con Arándanos y Nueces",
+    "ingredients": "yogur natural,arándanos,nueces,miel",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "merienda,desayuno",
+    "image_url": "https://example.com/yogur_bol.jpg",
+    "description": "Snack rápido y saciante.",
+    "nutrients": "calories 210,protein 12g,carbs 18g,fat 10g",
+    "ingredients_detailed": [
+      { "name": "yogur natural", "quantity": 125, "unit": "gramos", "notes": "" },
+      { "name": "arándanos", "quantity": 50, "unit": "gramos", "notes": "" },
+      { "name": "nueces", "quantity": 3, "unit": "unidades", "notes": "troceadas" }
+    ],
+    "instructions": [
+      "Vierte el yogur natural en un bol o vaso.",
+      "Lava los arándanos y colócalos sobre el yogur.",
+      "Trocea las nueces con las manos y añádelas para dar un toque crujiente.",
+      "Finaliza con un hilo de miel si deseas un toque dulce."
+    ]
+  },
+  {
+    "title": "Pescado al Vapor con Limón",
+    "ingredients": "salmón,limón,perejil",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "pescado,saludable,microondas",
+    "image_url": "https://example.com/pescado_vapor.jpg",
+    "description": "Cocción perfecta y jugosa en tiempo récord.",
+    "nutrients": "calories 290,protein 30g,carbs 2g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "salmón", "quantity": 150, "unit": "gramos", "notes": "lomo" },
+      { "name": "limón", "quantity": 0.5, "unit": "unidades", "notes": "en rodajas" }
+    ],
+    "instructions": [
+      "Coloca el filete de pescado en un estuche de vapor o en un plato hondo tapado con film apto.",
+      "Pon un par de rodajas de limón encima y espolvorea perejil fresco.",
+      "Cocina en el microondas a potencia media durante 4 o 5 minutos.",
+      "Deja reposar un minuto antes de destapar y servir."
+    ]
+  },
+  {
+    "title": "Smoothie de Plátano y Avena",
+    "ingredients": "plátano,avena,leche entera",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "bebida,fitness,desayuno",
+    "image_url": "https://example.com/smoothie.jpg",
+    "description": "Batido energético para antes o después de entrenar.",
+    "nutrients": "calories 320,protein 10g,carbs 55g,fat 6g",
+    "ingredients_detailed": [
+      { "name": "plátano", "quantity": 1, "unit": "unidades", "notes": "" },
+      { "name": "avena", "quantity": 30, "unit": "gramos", "notes": "" },
+      { "name": "leche entera", "quantity": 250, "unit": "mililitros", "notes": "" }
+    ],
+    "instructions": [
+      "Pela el plátano y trocéalo.",
+      "Introduce en la batidora el plátano, los copos de avena y la leche.",
+      "Tritura a máxima potencia hasta que la textura sea homogénea y sin grumos.",
+      "Sirve inmediatamente en un vaso grande."
+    ]
+  },
+  {
+    "title": "Tortilla de Champiñones",
+    "ingredients": "huevo,champiñones,ajo",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "cena,huevo,vegetariano",
+    "image_url": "https://example.com/tortilla_champ.jpg",
+    "description": "Una cena clásica, ligera y muy rápida.",
+    "nutrients": "calories 210,protein 14g,carbs 4g,fat 15g",
+    "ingredients_detailed": [
+      { "name": "huevo", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "champiñones", "quantity": 100, "unit": "gramos", "notes": "limpios" }
+    ],
+    "instructions": [
+      "Saltea los champiñones laminados con un poco de ajo hasta que pierdan su humedad.",
+      "Bate los dos huevos en un cuenco con una pizca de sal.",
+      "Vierte los huevos sobre los champiñones en la sartén.",
+      "Cocina a fuego medio, dobla la tortilla por la mitad y sirve cuando esté cuajada."
+    ]
+  },
+  {
+    "title": "Ensalada Caprese de un Minuto",
+    "ingredients": "tomate,queso fresco,aceite de oliva",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "ensalada,vegetariano,frío",
+    "image_url": "https://example.com/caprese.jpg",
+    "description": "Frescura italiana en segundos.",
+    "nutrients": "calories 240,protein 10g,carbs 6g,fat 20g",
+    "ingredients_detailed": [
+      { "name": "tomate", "quantity": 150, "unit": "gramos", "notes": "en rodajas" },
+      { "name": "queso fresco", "quantity": 100, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Corta el tomate en rodajas de un centímetro de grosor.",
+      "Corta el queso fresco en láminas similares.",
+      "Intercala una rodaja de tomate y una de queso en el plato.",
+      "Aliña generosamente con aceite de oliva y sal."
+    ]
+  },
+  {
+    "title": "Pechuga de Pollo a la Plancha",
+    "ingredients": "pollo,ajo,aceite de oliva",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "proteína,básico",
+    "image_url": "https://example.com/pollo_plancha.jpg",
+    "description": "El básico que nunca falla si se hace bien.",
+    "nutrients": "calories 220,protein 38g,carbs 0g,fat 6g",
+    "ingredients_detailed": [
+      { "name": "pollo", "quantity": 200, "unit": "gramos", "notes": "filete fino" }
+    ],
+    "instructions": [
+      "Calienta la plancha o sartén a fuego alto con muy poco aceite.",
+      "Coloca el filete de pollo y deja cocinar 3-4 minutos sin moverlo para que dore.",
+      "Dale la vuelta y cocina otros 3 minutos por el otro lado.",
+      "Sazona con sal y pimienta al final para que no suelte jugos."
+    ]
+  },
+  {
+    "title": "Tacos de Pavo y Queso",
+    "ingredients": "tortilla de maíz,pechuga de pavo,queso fresco",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "cena,rápido,niños",
+    "image_url": "https://example.com/tacos_pavo.jpg",
+    "description": "Tacos ligeros para una cena informal.",
+    "nutrients": "calories 310,protein 22g,carbs 28g,fat 10g",
+    "ingredients_detailed": [
+      { "name": "tortilla de maíz", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "pechuga de pavo", "quantity": 100, "unit": "gramos", "notes": "tiras" }
+    ],
+    "instructions": [
+      "Calienta las tortillas de maíz en una sartén seca durante 30 segundos por cada lado.",
+      "Saltea brevemente las tiras de pavo con un poco de sal.",
+      "Rellena las tortillas con el pavo y el queso fresco desmenuzado.",
+      "Dobla y sirve calientes."
+    ]
+  },
+  {
+    "title": "Pasta al Pesto con Tomatitos",
+    "ingredients": "pasta cocida,tomate,queso parmesano",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "pasta,vegetariano",
+    "image_url": "https://example.com/pasta_pesto.jpg",
+    "description": "Sabor mediterráneo en tiempo récord.",
+    "nutrients": "calories 450,protein 15g,carbs 55g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "pasta cocida", "quantity": 150, "unit": "gramos", "notes": "" },
+      { "name": "tomate", "quantity": 100, "unit": "gramos", "notes": "tipo cherry" }
+    ],
+    "instructions": [
+      "Saltea los tomates cherry partidos por la mitad en una sartén con aceite y ajo.",
+      "Cuando los tomates estén blandos, añade la pasta ya cocida.",
+      "Mezcla bien, retira del fuego y añade el queso parmesano rallado.",
+      "Añade un chorrito extra de aceite de oliva crudo antes de servir."
+    ]
+  },
+  {
+    "title": "Gambas al Ajillo Express",
+    "ingredients": "gambas,ajo,aceite de oliva",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "tapa,marisco",
+    "image_url": "https://example.com/gambas_ajillo.jpg",
+    "description": "Un clásico español muy veloz.",
+    "nutrients": "calories 210,protein 22g,carbs 2g,fat 14g",
+    "ingredients_detailed": [
+      { "name": "gambas", "quantity": 200, "unit": "gramos", "notes": "peladas" },
+      { "name": "ajo", "quantity": 3, "unit": "dientes", "notes": "laminados" }
+    ],
+    "instructions": [
+      "Corta los ajos en láminas finas.",
+      "En una sartén pequeña, calienta abundante aceite y dora los ajos.",
+      "Antes de que el ajo se queme, añade las gambas y cocina 2 minutos hasta que cambien de color.",
+      "Sirve inmediatamente con el aceite burbujeando."
+    ]
+  },
+  {
+    "title": "Espinacas Salteadas con Ajo",
+    "ingredients": "espinaca,ajo,aceite de oliva",
+    "time_minutes": 8,
+    "difficulty": "Fácil",
+    "tags": "guarnición,vegano,saludable",
+    "image_url": "https://example.com/espinacas.jpg",
+    "description": "La forma más rápida de comer verde.",
+    "nutrients": "calories 120,protein 4g,carbs 5g,fat 10g",
+    "ingredients_detailed": [
+      { "name": "espinaca", "quantity": 200, "unit": "gramos", "notes": "fresca" },
+      { "name": "ajo", "quantity": 2, "unit": "dientes", "notes": "" }
+    ],
+    "instructions": [
+      "Dora el ajo picado en una sartén grande con aceite.",
+      "Añade las espinacas frescas (aunque parezcan muchas, reducirán mucho).",
+      "Saltea durante 3-4 minutos moviendo constantemente hasta que estén tiernas.",
+      "Sazona con sal y sirve como guarnición."
+    ]
+  },
+  {
+    "title": "Bowl de Avena Nocturna",
+    "ingredients": "avena,leche de almendras,chía",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "desayuno,prep,frío",
+    "image_url": "https://example.com/overnight_oats.jpg",
+    "description": "Prepara la noche anterior y listo para llevar.",
+    "nutrients": "calories 280,protein 9g,carbs 42g,fat 8g",
+    "ingredients_detailed": [
+      { "name": "avena", "quantity": 40, "unit": "gramos", "notes": "" },
+      { "name": "leche de almendras", "quantity": 150, "unit": "mililitros", "notes": "" }
+    ],
+    "instructions": [
+      "En un bote de cristal, mezcla la avena con la leche de almendras y una cucharada de chía.",
+      "Remueve bien y cierra el bote.",
+      "Deja reposar en la nevera durante toda la noche.",
+      "Por la mañana, añade frutas o frutos secos por encima y consume frío."
+    ]
+  },
+  {
+    "title": "Ensalada de Pepino y Yogur",
+    "ingredients": "pepino,yogur natural,ajo",
+    "time_minutes": 7,
+    "difficulty": "Fácil",
+    "tags": "ensalada,griego,frío",
+    "image_url": "https://example.com/tzatziki.jpg",
+    "description": "Refrescante y cremosa.",
+    "nutrients": "calories 110,protein 6g,carbs 8g,fat 5g",
+    "ingredients_detailed": [
+      { "name": "pepino", "quantity": 200, "unit": "gramos", "notes": "picado" },
+      { "name": "yogur natural", "quantity": 125, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Ralla el pepino y apriétalo con las manos para eliminar el exceso de agua.",
+      "Mezcla el yogur con un diente de ajo muy picado y sal.",
+      "Incorpora el pepino a la mezcla de yogur.",
+      "Sirve frío como ensalada o acompañamiento de carnes."
+    ]
+  },
+  {
+    "title": "Pavo con Pimientos Salteados",
+    "ingredients": "pechuga de pavo,pimiento,cebolla",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "cena,saludable",
+    "image_url": "https://example.com/pavo_pimientos.jpg",
+    "description": "Plato colorido y lleno de vitaminas.",
+    "nutrients": "calories 260,protein 32g,carbs 10g,fat 8g",
+    "ingredients_detailed": [
+      { "name": "pechuga de pavo", "quantity": 200, "unit": "gramos", "notes": "tiras" },
+      { "name": "pimiento", "quantity": 100, "unit": "gramos", "notes": "en tiras" }
+    ],
+    "instructions": [
+      "Corta la cebolla y los pimientos en tiras finas.",
+      "Saltea las verduras en una sartén con aceite hasta que estén ligeramente tiernas.",
+      "Añade las tiras de pavo y cocina a fuego alto durante 5 minutos.",
+      "Sazona con sal y sirve caliente."
+    ]
+  },
+  {
+    "title": "Revuelto de Espárragos y Jamón",
+    "ingredients": "huevo,espárragos,jamón serrano",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "huevo,proteína",
+    "image_url": "https://example.com/revuelto.jpg",
+    "description": "Sabores intensos en un revuelto jugoso.",
+    "nutrients": "calories 290,protein 25g,carbs 3g,fat 19g",
+    "ingredients_detailed": [
+      { "name": "huevo", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "espárragos", "quantity": 100, "unit": "gramos", "notes": "" },
+      { "name": "jamón serrano", "quantity": 30, "unit": "gramos", "notes": "troceado" }
+    ],
+    "instructions": [
+      "Corta la parte dura de los espárragos y trocea el resto.",
+      "Saltea los espárragos en la sartén hasta que doren.",
+      "Añade el jamón unos segundos y luego vierte los huevos batidos.",
+      "Remueve suavemente a fuego bajo hasta que el huevo esté cuajado pero aún jugoso."
+    ]
+  },
+  {
+    "title": "Arroz con Atún y Maíz",
+    "ingredients": "arroz blanco cocido,atún,maíz dulce",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "rápido,estudiante",
+    "image_url": "https://example.com/arroz_atun.jpg",
+    "description": "El salvavidas de los días con prisa.",
+    "nutrients": "calories 390,protein 20g,carbs 60g,fat 7g",
+    "ingredients_detailed": [
+      { "name": "arroz blanco cocido", "quantity": 200, "unit": "gramos", "notes": "" },
+      { "name": "atún", "quantity": 1, "unit": "latas", "notes": "" }
+    ],
+    "instructions": [
+      "Calienta el arroz cocido en el microondas si estaba frío.",
+      "En un bol, mezcla el arroz con el atún escurrido y el maíz dulce.",
+      "Añade un chorrito de aceite de oliva o una cucharada de mayonesa si prefieres.",
+      "Mezcla bien y listo para comer."
+    ]
+  },
+  {
+    "title": "Canónigos con Nueces y Queso",
+    "ingredients": "canónigos,nueces,queso fresco",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "ensalada,gourmet",
+    "image_url": "https://example.com/ensalada_can.jpg",
+    "description": "Ensalada elegante en 5 minutos.",
+    "nutrients": "calories 250,protein 9g,carbs 12g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "canónigos", "quantity": 50, "unit": "gramos", "notes": "" },
+      { "name": "nueces", "quantity": 20, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Lava y seca los canónigos y colócalos en un plato.",
+      "Añade el queso fresco cortado en dados y las nueces troceadas.",
+      "Prepara una vinagreta con aceite y vinagre de manzana.",
+      "Aliña justo antes de servir para que el canónigo no pierda frescura."
+    ]
+  },
+  {
+    "title": "Tofu Salteado con Soja",
+    "ingredients": "tofu firme,salsa de soja,jengibre",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "vegano,oriental",
+    "image_url": "https://example.com/tofu_soja.jpg",
+    "description": "Tofu crujiente con sabor asiático.",
+    "nutrients": "calories 210,protein 18g,carbs 5g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "tofu firme", "quantity": 200, "unit": "gramos", "notes": "en dados" },
+      { "name": "salsa de soja", "quantity": 2, "unit": "cucharadas", "notes": "" }
+    ],
+    "instructions": [
+      "Seca muy bien el bloque de tofu con papel de cocina y córtalo en dados.",
+      "Dora el tofu en una sartén con aceite hasta que los bordes estén crujientes.",
+      "Añade jengibre rallado y la salsa de soja.",
+      "Cocina un minuto más para que el tofu absorba el líquido y sirva."
+    ]
+  },
+  {
+    "title": "Batata al Microondas",
+    "ingredients": "batata,aceite de oliva,sal",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "carbohidrato,rápido",
+    "image_url": "https://example.com/batata.jpg",
+    "description": "Textura asada en solo 10 minutos.",
+    "nutrients": "calories 180,protein 3g,carbs 40g,fat 1g",
+    "ingredients_detailed": [
+      { "name": "batata", "quantity": 1, "unit": "unidades", "notes": "mediana" }
+    ],
+    "instructions": [
+      "Lava bien la batata y pincha la piel varias veces con un tenedor.",
+      "Envuélvela en papel de cocina húmedo.",
+      "Cocina en el microondas a potencia máxima durante 8-10 minutos.",
+      "Corta por la mitad, añade sal y un hilo de aceite de oliva."
+    ]
+  },
+  {
+    "title": "Ceviche de Gambas Rápido",
+    "ingredients": "gambas,limón,cebolla,cilantro",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "marisco,fresco",
+    "image_url": "https://example.com/ceviche.jpg",
+    "description": "Un entrante cítrico y refrescante.",
+    "nutrients": "calories 150,protein 24g,carbs 6g,fat 2g",
+    "ingredients_detailed": [
+      { "name": "gambas", "quantity": 200, "unit": "gramos", "notes": "cocidas" },
+      { "name": "limón", "quantity": 2, "unit": "unidades", "notes": "zumo" }
+    ],
+    "instructions": [
+      "Pica la cebolla morada y el cilantro muy finamente.",
+      "En un bol, mezcla las gambas cocidas con el zumo de los limones.",
+      "Añade la cebolla y el cilantro y mezcla bien.",
+      "Deja reposar 5 minutos en la nevera para que los sabores se integren antes de servir."
+    ]
+  },
+  {
+    "title": "Bowl de arroz integral con pollo",
+    "ingredients": "arroz integral cocido,pollo,brócoli,ajo,aceite de oliva",
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "tags": "rápido,bowl,proteína",
+    "image_url": "https://example.com/bowl_arroz_pollo.jpg",
+    "description": "Bowl equilibrado y rápido con arroz integral y pollo.",
+    "nutrients": "calories 480,protein 35g,carbs 45g,fat 14g",
+    "instructions": [
+      "Cortar el pollo en cubos pequeños.",
+      "Calentar el aceite de oliva en una sartén.",
+      "Sofreír el ajo durante 30 segundos.",
+      "Añadir el pollo y cocinar hasta dorar.",
+      "Agregar el brócoli y cocinar 5 minutos.",
+      "Servir sobre el arroz integral caliente."
+    ]
+  },
+  {
+    "title": "Tostadas integrales con aguacate y huevo",
+    "ingredients": "pan integral,aguacate,huevo,aceite de oliva,sal",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "desayuno,rápido",
+    "image_url": "https://example.com/tostadas_aguacate.jpg",
+    "description": "Tostadas crujientes con aguacate y huevo.",
+    "nutrients": "calories 320,protein 14g,carbs 30g,fat 18g",
+    "instructions": [
+      "Tostar el pan integral.",
+      "Machacar el aguacate con sal.",
+      "Cocinar el huevo a la plancha.",
+      "Untar el aguacate sobre el pan.",
+      "Colocar el huevo encima y añadir aceite."
+    ]
+  },
+  {
+    "title": "Pasta rápida con atún",
+    "ingredients": "pasta cocida,atún,tomate,ajo,aceite de oliva",
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "tags": "pasta,rápido",
+    "image_url": "https://example.com/pasta_atun.jpg",
+    "description": "Pasta sencilla y rápida con atún.",
+    "nutrients": "calories 450,protein 28g,carbs 55g,fat 12g",
+    "instructions": [
+      "Calentar la pasta cocida.",
+      "Sofreír el ajo en aceite.",
+      "Añadir el tomate picado y cocinar 5 minutos.",
+      "Incorporar el atún escurrido.",
+      "Mezclar con la pasta y servir."
+    ]
+  },
+  {
+    "title": "Salteado de tofu con verduras",
+    "ingredients": "tofu,zanahoria,brócoli,pimiento,aceite de oliva",
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "tags": "vegano,rápido",
+    "image_url": "https://example.com/tofu_verduras.jpg",
+    "description": "Tofu dorado con verduras salteadas.",
+    "nutrients": "calories 360,protein 22g,carbs 18g,fat 18g",
+    "instructions": [
+      "Cortar el tofu en cubos.",
+      "Dorar el tofu en aceite.",
+      "Añadir las verduras cortadas.",
+      "Saltear 10 minutos removiendo.",
+      "Servir caliente."
+    ]
+  },
+  {
+    "title": "Wrap de pan pita con pavo",
+    "ingredients": "pan pita,pechuga de pavo,lechuga,tomate,mayonesa",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "wrap,rápido",
+    "image_url": "https://example.com/wrap_pavo.jpg",
+    "description": "Wrap ligero y rápido de pavo.",
+    "nutrients": "calories 390,protein 28g,carbs 32g,fat 14g",
+    "instructions": [
+      "Calentar el pan pita.",
+      "Colocar el pavo en el centro.",
+      "Añadir lechuga y tomate.",
+      "Agregar mayonesa.",
+      "Enrollar y servir."
+    ]
+  },
+
+  {
+    "title": "Avena caliente con plátano",
+    "ingredients": "avena,leche entera,plátano,miel",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "desayuno,rápido",
+    "image_url": "https://example.com/avena_platano.jpg",
+    "description": "Desayuno energético y rápido.",
+    "nutrients": "calories 410,protein 14g,carbs 65g,fat 10g",
+    "instructions": [
+      "Calentar la leche en una olla.",
+      "Añadir la avena y cocinar 5 minutos.",
+      "Cortar el plátano en rodajas.",
+      "Servir la avena con plátano y miel."
+    ]
+  },
+  {
+    "title": "Huevos revueltos con champiñones",
+    "ingredients": "huevo,champiñones,aceite de oliva,sal",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "desayuno,rápido",
+    "image_url": "https://example.com/huevos_champinones.jpg",
+    "description": "Huevos suaves con champiñones.",
+    "nutrients": "calories 260,protein 18g,carbs 5g,fat 18g",
+    "instructions": [
+      "Cortar los champiñones.",
+      "Saltear los champiñones en aceite.",
+      "Batir los huevos con sal.",
+      "Añadir los huevos y revolver hasta cuajar."
+    ]
+  },
+  {
+    "title": "Quinoa rápida con verduras",
+    "ingredients": "quinoa cocida,calabacín,zanahoria,aceite de oliva",
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "tags": "vegano,rápido",
+    "image_url": "https://example.com/quinoa_verduras.jpg",
+    "description": "Quinoa ligera con verduras.",
+    "nutrients": "calories 340,protein 12g,carbs 45g,fat 10g",
+    "instructions": [
+      "Cortar las verduras en cubos.",
+      "Saltearlas en aceite 8 minutos.",
+      "Añadir la quinoa cocida.",
+      "Mezclar y servir caliente."
+    ]
+  },
+  {
+    "title": "Camarones salteados al ajo",
+    "ingredients": "camarones,ajo,aceite de oliva,limón",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "marisco,rápido",
+    "image_url": "https://example.com/camarones_ajo.jpg",
+    "description": "Camarones rápidos al ajo.",
+    "nutrients": "calories 260,protein 32g,carbs 3g,fat 10g",
+    "instructions": [
+      "Limpiar los camarones.",
+      "Sofreír el ajo en aceite.",
+      "Añadir los camarones y cocinar 3 minutos por lado.",
+      "Agregar limón y servir."
+    ]
+  },
+  {
+    "title": "Ensalada rápida de lentejas",
+    "ingredients": "lentejas cocidas,tomate,cebolla,aceite de oliva,vinagre",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "vegano,rápido",
+    "image_url": "https://example.com/ensalada_lentejas.jpg",
+    "description": "Ensalada fresca y saciante.",
+    "nutrients": "calories 300,protein 16g,carbs 40g,fat 6g",
+    "instructions": [
+      "Escurrir las lentejas.",
+      "Cortar tomate y cebolla.",
+      "Mezclar todos los ingredientes.",
+      "Aliñar con aceite y vinagre."
+    ]
+  },
+
+  {
+    "title": "Sandwich mixto caliente",
+    "ingredients": "pan blanco,jamón cocido,queso fresco,mantequilla",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "sandwich,rápido",
+    "image_url": "https://example.com/sandwich_mixto.jpg",
+    "description": "Clásico sandwich caliente.",
+    "nutrients": "calories 420,protein 22g,carbs 38g,fat 20g",
+    "instructions": [
+      "Untar mantequilla en el pan.",
+      "Colocar jamón y queso.",
+      "Dorar en sartén por ambos lados."
+    ]
+  },
+  {
+    "title": "Maíz salteado con mantequilla",
+    "ingredients": "maíz cocido,mantequilla",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "rápido",
+    "image_url": "https://example.com/maiz_mantequilla.jpg",
+    "description": "Acompañamiento rápido.",
+    "nutrients": "calories 260,protein 6g,carbs 32g,fat 12g",
+    "instructions": [
+      "Derretir la mantequilla.",
+      "Añadir el maíz.",
+      "Saltear 5 minutos y servir."
+    ]
+  },
+  {
+    "title": "Yogur con manzana y miel",
+    "ingredients": "yogur natural,manzana,miel",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "desayuno,rápido",
+    "image_url": "https://example.com/yogur_manzana.jpg",
+    "description": "Postre ligero y rápido.",
+    "nutrients": "calories 210,protein 9g,carbs 35g,fat 2g",
+    "instructions": [
+      "Cortar la manzana en cubos.",
+      "Servir el yogur en un bol.",
+      "Añadir manzana y miel."
+    ]
+  },
+  {
+    "title": "Frijoles negros con arroz blanco",
+    "ingredients": "frijoles negros cocidos,arroz blanco cocido,aceite de oliva",
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "tags": "vegano",
+    "image_url": "https://example.com/frijoles_arroz.jpg",
+    "description": "Plato sencillo y completo.",
+    "nutrients": "calories 420,protein 16g,carbs 62g,fat 10g",
+    "instructions": [
+      "Calentar los frijoles.",
+      "Calentar el arroz.",
+      "Servir juntos con aceite de oliva."
+    ]
+  },
+
+  {
+    "title": "Pan integral con crema de cacahuate",
+    "ingredients": "pan integral,crema de cacahuate",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "snack,rápido",
+    "image_url": "https://example.com/pan_cacahuate.jpg",
+    "description": "Snack energético.",
+    "nutrients": "calories 310,protein 10g,carbs 28g,fat 18g",
+    "instructions": [
+      "Tostar el pan.",
+      "Untar la crema de cacahuate.",
+      "Servir."
+    ]
+  },
+  {
+    "title": "Ensalada de tomate y queso fresco",
+    "ingredients": "tomate,queso fresco,aceite de oliva",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "rápido",
+    "image_url": "https://example.com/ensalada_tomate_queso.jpg",
+    "description": "Ensalada fresca.",
+    "nutrients": "calories 220,protein 12g,carbs 10g,fat 14g",
+    "instructions": [
+      "Cortar el tomate.",
+      "Cortar el queso.",
+      "Aliñar con aceite y servir."
+    ]
+  },
+  {
+    "title": "Salmón al Horno con Costra de Hierbas y Limón",
+    "ingredients": "salmón,pan rallado integral,perejil,ajo,limón,aceite de oliva",
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "tags": "pescado,horno,saludable,omega3",
+    "image_url": "https://example.com/salmon_costra.jpg",
+    "description": "Un lomo de salmón jugoso con un toque crujiente profesional.",
+    "nutrients": "calories 350,protein 28g,carbs 10g,fat 22g",
+    "ingredients_detailed": [
+      { "name": "salmón", "quantity": 150, "unit": "gramos", "notes": "lomo sin espinas" },
+      { "name": "pan rallado integral", "quantity": 2, "unit": "cucharadas", "notes": "" },
+      { "name": "perejil", "quantity": 1, "unit": "ramillete", "notes": "fresco picado" }
+    ],
+    "instructions": [
+      "Precalienta el horno a 200°C.",
+      "En un cuenco, mezcla el pan rallado, el perejil picado, un diente de ajo rallado y una cucharada de aceite hasta formar una pasta arenosa.",
+      "Coloca el salmón en una bandeja, salpimiéntalo y extiende la mezcla de hierbas sobre la parte superior presionando ligeramente.",
+      "Hornea durante 10-12 minutos (según grosor). El interior debe quedar rosado y la costra dorada. Sirve con rodajas de limón."
+    ]
+  },
+  {
+    "title": "Shakshuka Express de Espinacas y Queso",
+    "ingredients": "huevo,espinaca,tomate triturado,cebolla,queso fresco",
+    "time_minutes": 15,
+    "difficulty": "Media",
+    "tags": "huevo,vegetariano,oriental,sartén",
+    "image_url": "https://example.com/shakshuka_verde.jpg",
+    "description": "Versión saludable del clásico de oriente medio con base de espinacas.",
+    "nutrients": "calories 290,protein 18g,carbs 12g,fat 14g",
+    "ingredients_detailed": [
+      { "name": "huevo", "quantity": 2, "unit": "unidades", "notes": "" },
+      { "name": "espinaca", "quantity": 150, "unit": "gramos", "notes": "fresca" },
+      { "name": "tomate triturado", "quantity": 100, "unit": "gramos", "notes": "natural" }
+    ],
+    "instructions": [
+      "Sofríe la cebolla picada en una sartén pequeña hasta que esté transparente.",
+      "Añade el tomate y las espinacas; cocina hasta que el tomate reduzca y las espinacas pierdan volumen.",
+      "Haz dos huecos en la mezcla con una cuchara y casca los huevos dentro.",
+      "Tapa la sartén y cocina a fuego bajo 3-4 minutos hasta que la clara esté blanca y la yema líquida. Decora con queso fresco."
+    ]
+  },
+  {
+    "title": "Solomillo de Cerdo con Manzana y Mostaza",
+    "ingredients": "solomillo de cerdo,manzana,mostaza,cebolla,caldo de pollo",
+    "time_minutes": 25,
+    "difficulty": "Media",
+    "tags": "carne,cena elegante,bajo en grasa",
+    "image_url": "https://example.com/solomillo_manzana.jpg",
+    "description": "Una combinación clásica de la cocina francesa adaptada para el día a día.",
+    "nutrients": "calories 310,protein 32g,carbs 15g,fat 9g",
+    "ingredients_detailed": [
+      { "name": "solomillo de cerdo", "quantity": 180, "unit": "gramos", "notes": "en medallones" },
+      { "name": "manzana", "quantity": 1, "unit": "unidades", "notes": "tipo golden" },
+      { "name": "mostaza", "quantity": 1, "unit": "cucharada", "notes": "dijon" }
+    ],
+    "instructions": [
+      "Dora los medallones de solomillo salpimentados en una sartén con aceite. Retira y reserva.",
+      "En la misma sartén, saltea la manzana en gajos y la cebolla picada hasta que caramelicen.",
+      "Añade la mostaza y un chorrito de caldo de pollo para desglasar el fondo de la sartén.",
+      "Devuelve la carne a la sartén y cocina 2 minutos más para que se impregne de la salsa cremosa."
+    ]
+  },
+  {
+    "title": "Wok de Pavo con Anacardos y Jengibre",
+    "ingredients": "pechuga de pavo,anacardos,pimiento,salsa de soja,jengibre",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "pavo,asiático,frutos secos,salteado",
+    "image_url": "https://example.com/wok_pavo.jpg",
+    "description": "Salteado rápido con técnica de fuego alto para conservar nutrientes.",
+    "nutrients": "calories 340,protein 35g,carbs 12g,fat 16g",
+    "ingredients_detailed": [
+      { "name": "pechuga de pavo", "quantity": 200, "unit": "gramos", "notes": "tiras finas" },
+      { "name": "anacardos", "quantity": 20, "unit": "gramos", "notes": "tostados sin sal" },
+      { "name": "jengibre", "quantity": 1, "unit": "trozo", "notes": "rallado" }
+    ],
+    "instructions": [
+      "Calienta un wok o sartén amplia al máximo con una gota de aceite.",
+      "Añade el pavo y el jengibre; saltea 2 minutos sin parar de mover hasta que el pavo cambie de color.",
+      "Incorpora el pimiento en tiras y los anacardos. Sigue salteando 3 minutos más.",
+      "Vierte la salsa de soja al final para que caramelice ligeramente y sirve enseguida."
+    ]
+  },
+  {
+    "title": "Crema de Calabaza Rostizada con Semillas",
+    "ingredients": "calabaza,cebolla,ajo,caldo de verduras,semillas de chía",
+    "time_minutes": 25,
+    "difficulty": "Fácil",
+    "tags": "vegetariano,crema,otoño,confort",
+    "image_url": "https://example.com/crema_calabaza.jpg",
+    "description": "El secreto profesional es asar la verdura antes de triturarla para potenciar el dulzor.",
+    "nutrients": "calories 180,protein 4g,carbs 22g,fat 7g",
+    "ingredients_detailed": [
+      { "name": "calabaza", "quantity": 400, "unit": "gramos", "notes": "en cubos" },
+      { "name": "cebolla", "quantity": 0.5, "unit": "unidades", "notes": "" },
+      { "name": "semillas de chía", "quantity": 1, "unit": "cucharadita", "notes": "para decorar" }
+    ],
+    "instructions": [
+      "Pon la calabaza y la cebolla en una bandeja de horno con aceite y sal. Asa a 220°C por 15 min.",
+      "Pasa la verdura asada a una olla y cubre con el caldo de verduras caliente.",
+      "Cocina 5 minutos y tritura con una batidora de mano hasta obtener una textura sedosa.",
+      "Sirve con un chorrito de aceite de oliva virgen y las semillas por encima."
+    ]
+  },
+  {
+    "title": "Bacalao al Papillote con Verduras",
+    "ingredients": "bacalao,calabacín,zanahoria,pimiento,limón",
+    "time_minutes": 20,
+    "difficulty": "Fácil",
+    "tags": "pescado,papillote,ligero,vapor",
+    "image_url": "https://example.com/bacalao_papillote.jpg",
+    "description": "Técnica de cocción en su propio jugo, ideal para dietas.",
+    "nutrients": "calories 210,protein 26g,carbs 8g,fat 6g",
+    "ingredients_detailed": [
+      { "name": "bacalao", "quantity": 150, "unit": "gramos", "notes": "lomo fresco" },
+      { "name": "calabacín", "quantity": 50, "unit": "gramos", "notes": "en bastones" },
+      { "name": "zanahoria", "quantity": 50, "unit": "gramos", "notes": "en bastones" }
+    ],
+    "instructions": [
+      "Corta un cuadrado grande de papel de horno o aluminio.",
+      "Coloca una cama de verduras en el centro, pon el bacalao encima y añade rodajas de limón y sal.",
+      "Cierra el paquete herméticamente para que no escape el vapor.",
+      "Hornea a 200°C durante 12-15 minutos. Abre el paquete con cuidado de no quemarte con el vapor."
+    ]
+  },
+  {
+    "title": "Garbanzos Salteados con Kale y Pimentón",
+    "ingredients": "garbanzos cocidos,kale,ajo,pimentón dulce,aceite de oliva",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "vegano,legumbres,hierro,rápido",
+    "image_url": "https://example.com/garbanzos_kale.jpg",
+    "description": "Un plato de legumbres moderno, seco y lleno de textura.",
+    "nutrients": "calories 280,protein 12g,carbs 35g,fat 9g",
+    "ingredients_detailed": [
+      { "name": "garbanzos cocidos", "quantity": 200, "unit": "gramos", "notes": "bien secos" },
+      { "name": "kale", "quantity": 50, "unit": "gramos", "notes": "sin el tallo duro" },
+      { "name": "pimentón dulce", "quantity": 1, "unit": "cucharadita", "notes": "de la Vera" }
+    ],
+    "instructions": [
+      "Dora el ajo laminado en una sartén con aceite.",
+      "Añade los garbanzos y saltéalos a fuego medio hasta que la piel esté ligeramente crujiente.",
+      "Incorpora el kale troceado y el pimentón. Cocina 2 minutos más hasta que el kale esté tierno pero crujiente.",
+      "Aparta del fuego para que el pimentón no amargue y sirve."
+    ]
+  },
+  {
+    "title": "Ternera Stroganoff Saludable",
+    "ingredients": "ternera,champiñones,yogur griego 0%,cebolla,mostaza",
+    "time_minutes": 20,
+    "difficulty": "Media",
+    "tags": "ternera,clásico,proteína,salsa",
+    "image_url": "https://example.com/stroganoff_fit.jpg",
+    "description": "Versión ligera del clásico ruso usando yogur en lugar de nata.",
+    "nutrients": "calories 340,protein 38g,carbs 7g,fat 14g",
+    "ingredients_detailed": [
+      { "name": "ternera", "quantity": 180, "unit": "gramos", "notes": "tiras de solomillo o contra" },
+      { "name": "champiñones", "quantity": 100, "unit": "gramos", "notes": "laminados" },
+      { "name": "yogur griego 0%", "quantity": 60, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Dora la ternera a fuego muy alto para sellar jugos. Retira de la sartén.",
+      "En la misma sartén, cocina la cebolla y los champiñones hasta que doren.",
+      "Baja el fuego, añade la mostaza y el yogur griego removiendo rápido para que no se corte.",
+      "Devuelve la carne, mezcla con la salsa 30 segundos y sirve caliente."
+    ]
+  },
+  {
+    "title": "Bowl de Edamame, Quinoa y Atún",
+    "ingredients": "quinoa cocida,edamame cocido,atún,pepino,sésamo",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "bowl,frío,proteína,fibra",
+    "image_url": "https://example.com/quinoa_edamame.jpg",
+    "description": "Bowl estilo 'poke' equilibrado con ingredientes de alta densidad nutricional.",
+    "nutrients": "calories 410,protein 30g,carbs 45g,fat 11g",
+    "ingredients_detailed": [
+      { "name": "quinoa cocida", "quantity": 150, "unit": "gramos", "notes": "" },
+      { "name": "edamame cocido", "quantity": 50, "unit": "gramos", "notes": "sin vaina" },
+      { "name": "atún", "quantity": 1, "unit": "lata", "notes": "al natural" }
+    ],
+    "instructions": [
+      "Coloca la quinoa en la base de un bol ancho.",
+      "Dispón el edamame, el pepino en rodajas y el atún escurrido por secciones.",
+      "Aliña con una mezcla de limón y un poco de aceite.",
+      "Termina con semillas de sésamo para un toque crujiente."
+    ]
+  },
+  {
+    "title": "Tortilla de Claras con Pavo y Espinacas",
+    "ingredients": "claras de huevo,pechuga de pavo,espinaca,queso cottage",
+    "time_minutes": 8,
+    "difficulty": "Fácil",
+    "tags": "desayuno,proteína pura,fitness",
+    "image_url": "https://example.com/tortilla_claras.jpg",
+    "description": "Máxima proteína con el mínimo de grasas, ideal para deportistas.",
+    "nutrients": "calories 190,protein 35g,carbs 4g,fat 3g",
+    "ingredients_detailed": [
+      { "name": "claras de huevo", "quantity": 4, "unit": "unidades", "notes": "" },
+      { "name": "pechuga de pavo", "quantity": 40, "unit": "gramos", "notes": "picada" },
+      { "name": "espinaca", "quantity": 30, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Bate las claras con un poco de sal hasta que espumen un poco.",
+      "Calienta una sartén antiadherente y vierte las claras.",
+      "Cuando empiecen a cuajar, añade el pavo, las espinacas y el queso cottage en el centro.",
+      "Dobla a la mitad, cocina 1 minuto más y sirve."
+    ]
+  },
+  {
+    "title": "Lubina a la Espalda con Ajos",
+    "ingredients": "lubina,ajo,guindilla,vinagre de sidra,aceite de oliva",
+    "time_minutes": 15,
+    "difficulty": "Media",
+    "tags": "pescado,española,tradicional",
+    "image_url": "https://example.com/lubina_espalda.jpg",
+    "description": "Pescado blanco con el refrito clásico de las sidrerías vascas.",
+    "nutrients": "calories 250,protein 28g,carbs 1g,fat 14g",
+    "ingredients_detailed": [
+      { "name": "lubina", "quantity": 1, "unit": "unidad", "notes": "abierta en libro" },
+      { "name": "ajo", "quantity": 3, "unit": "dientes", "notes": "laminados" },
+      { "name": "guindilla", "quantity": 1, "unit": "aro", "notes": "opcional" }
+    ],
+    "instructions": [
+      "Haz la lubina a la plancha con la piel hacia abajo 4 min y 2 min por el otro lado.",
+      "En otra sartén pequeña, dora los ajos con la guindilla en abundante aceite.",
+      "Cuando los ajos estén dorados, retira del fuego y añade un chorrito de vinagre (cuidado con las salpicaduras).",
+      "Vierte el refrito caliente sobre el pescado justo antes de comer."
+    ]
+  },
+  {
+    "title": "Pasta Integral con Salsa de Nueces",
+    "ingredients": "pasta integral,nueces,leche de almendras,ajo,queso parmesano",
+    "time_minutes": 12,
+    "difficulty": "Fácil",
+    "tags": "pasta,vegetariano,cerebro,omega3",
+    "image_url": "https://example.com/pasta_nueces.jpg",
+    "description": "Salsa cremosa vegetal sin usar cremas de leche.",
+    "nutrients": "calories 420,protein 14g,carbs 50g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "pasta integral", "quantity": 80, "unit": "gramos", "notes": "" },
+      { "name": "nueces", "quantity": 30, "unit": "gramos", "notes": "peladas" },
+      { "name": "leche de almendras", "quantity": 50, "unit": "mililitros", "notes": "sin azúcar" }
+    ],
+    "instructions": [
+      "Cuece la pasta en agua con sal.",
+      "Mientras, tritura las nueces con la leche de almendras, el ajo y el parmesano hasta crear una crema.",
+      "Escurre la pasta reservando un poco de agua de cocción.",
+      "Mezcla la pasta con la crema de nueces en la sartén caliente, añadiendo el agua reservada para dar cremosidad."
+    ]
+  },
+  {
+    "title": "Pechuga de Pollo con Salsa de Frambuesas",
+    "ingredients": "pollo,frambuesas,vinagre balsámico,cebolla morada",
+    "time_minutes": 15,
+    "difficulty": "Media",
+    "tags": "pollo,fruta,agridulce,original",
+    "image_url": "https://example.com/pollo_frambuesa.jpg",
+    "description": "Una salsa frutal que rompe la monotonía del pollo a la plancha.",
+    "nutrients": "calories 280,protein 35g,carbs 12g,fat 8g",
+    "ingredients_detailed": [
+      { "name": "pollo", "quantity": 200, "unit": "gramos", "notes": "pechuga entera" },
+      { "name": "frambuesas", "quantity": 50, "unit": "gramos", "notes": "frescas" },
+      { "name": "vinagre balsámico", "quantity": 1, "unit": "cucharada", "notes": "" }
+    ],
+    "instructions": [
+      "Cocina la pechuga de pollo a la plancha hasta que esté bien hecha. Reserva.",
+      "En la misma sartén, saltea la cebolla morada picada y las frambuesas.",
+      "Aplasta las frambuesas con un tenedor y añade el vinagre balsámico y una gota de agua.",
+      "Deja reducir 2 minutos y vierte sobre el pollo."
+    ]
+  },
+  {
+    "title": "Ensalada Templada de Lentejas y Feta",
+    "ingredients": "lentejas cocidas,queso feta,tomate,pepino,menta",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "ensalada,legumbres,mediterráneo,hierro",
+    "image_url": "https://example.com/ensalada_lentejas.jpg",
+    "description": "Plato saciante y fresco inspirado en la cocina griega.",
+    "nutrients": "calories 310,protein 18g,carbs 30g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "lentejas cocidas", "quantity": 200, "unit": "gramos", "notes": "de bote lavadas" },
+      { "name": "queso feta", "quantity": 30, "unit": "gramos", "notes": "" },
+      { "name": "menta", "quantity": 4, "unit": "hojas", "notes": "frescas" }
+    ],
+    "instructions": [
+      "Calienta ligeramente las lentejas en una sartén con una gota de aceite (opcional, se puede comer frío).",
+      "Corta el tomate y el pepino en dados pequeños.",
+      "Mezcla las lentejas con las verduras y desmenuza el queso feta por encima.",
+      "Aliña con limón y menta picada fina."
+    ]
+  },
+  {
+    "title": "Mejillones al Vapor con Curry y Coco",
+    "ingredients": "mejillones,leche de coco,curry,limón,ajo",
+    "time_minutes": 15,
+    "difficulty": "Media",
+    "tags": "marisco,thai,exótico",
+    "image_url": "https://example.com/mejillones_curry.jpg",
+    "description": "Una forma diferente de comer moluscos con técnica tailandesa.",
+    "nutrients": "calories 260,protein 22g,carbs 10g,fat 14g",
+    "ingredients_detailed": [
+      { "name": "mejillones", "quantity": 500, "unit": "gramos", "notes": "limpios" },
+      { "name": "leche de coco", "quantity": 100, "unit": "mililitros", "notes": "ligera" },
+      { "name": "curry", "quantity": 1, "unit": "cucharadita", "notes": "en polvo" }
+    ],
+    "instructions": [
+      "Sofríe ajo picado en una olla grande.",
+      "Añade la leche de coco y el curry; deja que hierva suavemente.",
+      "Echa los mejillones, tapa la olla y cocina 3-5 minutos hasta que se abran.",
+      "Sirve los mejillones con abundante salsa y un chorrito de limón."
+    ]
+  },
+  {
+    "title": "Brochetas de Tofu y Piña",
+    "ingredients": "tofu firme,piña,pimiento,mostaza,soja",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "vegano,plancha,agridulce,bajo en calorías",
+    "image_url": "https://example.com/brochetas_tofu.jpg",
+    "description": "Contraste de sabores y texturas muy divertido.",
+    "nutrients": "calories 220,protein 15g,carbs 18g,fat 9g",
+    "ingredients_detailed": [
+      { "name": "tofu firme", "quantity": 150, "unit": "gramos", "notes": "cubos" },
+      { "name": "piña", "quantity": 100, "unit": "gramos", "notes": "natural en cubos" }
+    ],
+    "instructions": [
+      "Marina los cubos de tofu en una mezcla de soja y mostaza durante 5 min.",
+      "Ensarta en palillos de brocheta alternando tofu, piña y pimiento.",
+      "Cocina a la plancha a fuego medio-alto 2 minutos por cada lado.",
+      "Pincela con el resto de la marinada mientras se cocinan."
+    ]
+  },
+  {
+    "title": "Espárragos Trigueros con Huevo Mollet",
+    "ingredients": "espárragos,huevo,jamón serrano,aceite de oliva",
+    "time_minutes": 10,
+    "difficulty": "Media",
+    "tags": "verdura,huevo,cena ligera",
+    "image_url": "https://example.com/esparragos_huevo.jpg",
+    "description": "Cena minimalista donde la técnica del huevo es la protagonista.",
+    "nutrients": "calories 210,protein 16g,carbs 4g,fat 14g",
+    "ingredients_detailed": [
+      { "name": "espárragos", "quantity": 1, "unit": "manojo", "notes": "" },
+      { "name": "huevo", "quantity": 1, "unit": "unidades", "notes": "" },
+      { "name": "jamón serrano", "quantity": 20, "unit": "gramos", "notes": "virutas" }
+    ],
+    "instructions": [
+      "Hierve agua y cocina el huevo exactamente 6 minutos. Pásalo a agua con hielo para cortar cocción.",
+      "Mientras, cocina los espárragos a la plancha con sal hasta que estén dorados.",
+      "Pela el huevo con cuidado (la yema debe estar líquida).",
+      "Sirve el huevo sobre los espárragos y rompe la yema justo al comer. Decora con el jamón."
+    ]
+  },
+  {
+    "title": "Berenjenas Rellenas de Atún",
+    "ingredients": "berenjena,atún,cebolla,queso fresco,tomate triturado",
+    "time_minutes": 25,
+    "difficulty": "Media",
+    "tags": "verdura,horno,proteína",
+    "image_url": "https://example.com/berenjena_rellena.jpg",
+    "description": "Una forma clásica de comer verdura con relleno saciante.",
+    "nutrients": "calories 270,protein 22g,carbs 15g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "berenjena", "quantity": 1, "unit": "unidad", "notes": "" },
+      { "name": "atún", "quantity": 1, "unit": "lata", "notes": "al natural" }
+    ],
+    "instructions": [
+      "Corta la berenjena por la mitad, haz cortes en la pulpa y cocina al microondas 8 min.",
+      "Vacía la pulpa con una cuchara y mézclala en una sartén con cebolla, tomate y atún.",
+      "Rellena las pieles de las berenjenas con esta mezcla.",
+      "Pon un poco de queso fresco por encima y gratina 3 minutos en el horno."
+    ]
+  },
+  {
+    "title": "Gambas Salteadas con Lima y Chile",
+    "ingredients": "gambas,lima,ajo,perejil",
+    "time_minutes": 8,
+    "difficulty": "Fácil",
+    "tags": "marisco,picante,rápido",
+    "image_url": "https://example.com/gambas_lima.jpg",
+    "description": "Sabor vibrante y fresco en menos de 10 minutos.",
+    "nutrients": "calories 160,protein 24g,carbs 3g,fat 6g",
+    "ingredients_detailed": [
+      { "name": "gambas", "quantity": 200, "unit": "gramos", "notes": "peladas" },
+      { "name": "lima", "quantity": 1, "unit": "unidades", "notes": "zumo y ralladura" }
+    ],
+    "instructions": [
+      "Calienta aceite con ajo picado y un poco de chile o guindilla.",
+      "Añade las gambas a fuego fuerte hasta que cambien de color (2-3 min).",
+      "Apaga el fuego e incorpora el zumo de lima y la ralladura.",
+      "Remueve y sirve inmediatamente con perejil fresco."
+    ]
+  },
+  {
+    "title": "Aguacate Relleno de Salpicón de Pavo",
+    "ingredients": "aguacate,pechuga de pavo,pimiento,cebolla,limón",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "frío,sin fuego,grasas saludables",
+    "image_url": "https://example.com/aguacate_relleno.jpg",
+    "description": "Entrante o cena ligera muy nutritiva y sin usar cocina.",
+    "nutrients": "calories 320,protein 18g,carbs 12g,fat 24g",
+    "ingredients_detailed": [
+      { "name": "aguacate", "quantity": 1, "unit": "unidades", "notes": "maduro" },
+      { "name": "pechuga de pavo", "quantity": 80, "unit": "gramos", "notes": "cocido en dados" }
+    ],
+    "instructions": [
+      "Corta el aguacate por la mitad y retira el hueso.",
+      "Mezcla en un bol el pavo picado, pimiento y cebolla con zumo de limón y una pizca de sal.",
+      "Rellena el hueco del aguacate con la mezcla.",
+      "Come directamente con una cuchara."
+    ]
+  },
+  {
+    "title": "Cuscús Integral con Verduras y Pistachos",
+    "ingredients": "cuscús integral,pistachos,pimiento,cebolla,calabacín",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "vegano,rápido,fibra",
+    "image_url": "https://example.com/cuscus_pistacho.jpg",
+    "description": "El cereal más rápido de cocinar con un toque árabe.",
+    "nutrients": "calories 360,protein 10g,carbs 55g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "cuscús integral", "quantity": 60, "unit": "gramos", "notes": "" },
+      { "name": "pistachos", "quantity": 15, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Vierte la misma cantidad de agua hirviendo que de cuscús en un bol, tapa y espera 5 min.",
+      "Mientras, saltea verduritas picadas muy finas en una sartén.",
+      "Separa los granos del cuscús con un tenedor y añade las verduras y los pistachos.",
+      "Mezcla todo con un poco de aceite de oliva."
+    ]
+  },
+  {
+    "title": "Mero con Puré de Guisantes",
+    "ingredients": "mero,guisantes,menta,limón,aceite de oliva",
+    "time_minutes": 20,
+    "difficulty": "Media",
+    "tags": "pescado,texturas,gourmet",
+    "image_url": "https://example.com/mero_guisantes.jpg",
+    "description": "Pescado blanco sobre una base vibrante de puré de legumbre.",
+    "nutrients": "calories 310,protein 32g,carbs 18g,fat 12g",
+    "ingredients_detailed": [
+      { "name": "mero", "quantity": 150, "unit": "gramos", "notes": "filete" },
+      { "name": "guisantes", "quantity": 150, "unit": "gramos", "notes": "cocidos" }
+    ],
+    "instructions": [
+      "Tritura los guisantes cocidos con unas hojas de menta y un chorrito de aceite hasta que esté fino.",
+      "Cocina el mero a la plancha, 3 min por cada lado.",
+      "Pon una base de puré de guisantes en el plato y el pescado encima.",
+      "Decora con ralladura de limón."
+    ]
+  },
+  {
+    "title": "Pollo Satay Saludable",
+    "ingredients": "pollo,mantequilla de cacahuete,salsa de soja,curry",
+    "time_minutes": 15,
+    "difficulty": "Fácil",
+    "tags": "asiático,pollo,cremoso",
+    "image_url": "https://example.com/pollo_satay.jpg",
+    "description": "Sabor intenso a cacahuete sin aditivos industriales.",
+    "nutrients": "calories 350,protein 38g,carbs 6g,fat 18g",
+    "ingredients_detailed": [
+      { "name": "pollo", "quantity": 200, "unit": "gramos", "notes": "en dados" },
+      { "name": "mantequilla de cacahuete", "quantity": 1, "unit": "cucharada", "notes": "natural" }
+    ],
+    "instructions": [
+      "Dora el pollo en la sartén hasta que esté cocinado.",
+      "En un vaso, mezcla la mantequilla de cacahuete, un poco de agua caliente y soja.",
+      "Vierte la salsa sobre el pollo en la sartén y remueve a fuego bajo 1 minuto.",
+      "Sirve con un poco de cilantro fresco."
+    ]
+  },
+  {
+    "title": "Hummus de Remolacha",
+    "ingredients": "garbanzos cocidos,remolacha cocida,tahini,limón",
+    "time_minutes": 10,
+    "difficulty": "Fácil",
+    "tags": "vegano,dip,colores,antioxidante",
+    "image_url": "https://example.com/hummus_remolacha.jpg",
+    "description": "Variante del hummus tradicional con un color espectacular.",
+    "nutrients": "calories 240,protein 10g,carbs 28g,fat 11g",
+    "ingredients_detailed": [
+      { "name": "garbanzos cocidos", "quantity": 200, "unit": "gramos", "notes": "" },
+      { "name": "remolacha cocida", "quantity": 100, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Pon todos los ingredientes en el vaso de la batidora.",
+      "Añade un chorrito de agua fría y tritura hasta que esté muy cremoso.",
+      "Sirve en un bol con un poco de aceite por encima.",
+      "Acompaña con pan integral o verduras crudas."
+    ]
+  },
+  {
+    "title": "Mug Cake de Avena y Frambuesa",
+    "ingredients": "avena,huevo,leche de almendras,frambuesas",
+    "time_minutes": 5,
+    "difficulty": "Fácil",
+    "tags": "desayuno,postre saludable,microondas",
+    "image_url": "https://example.com/mugcake.jpg",
+    "description": "Bizcocho individual al microondas, listo en 3 minutos.",
+    "nutrients": "calories 250,protein 12g,carbs 30g,fat 8g",
+    "ingredients_detailed": [
+      { "name": "avena", "quantity": 30, "unit": "gramos", "notes": "en harina o copos" },
+      { "name": "frambuesas", "quantity": 20, "unit": "gramos", "notes": "" }
+    ],
+    "instructions": [
+      "Mezcla la avena, el huevo y la leche en una taza con un tenedor.",
+      "Introduce las frambuesas en la masa.",
+      "Cocina en el microondas 2 minutos a potencia media-alta.",
+      "Deja enfriar un poco y disfruta directamente de la taza."
+    ]
+  }
+]
