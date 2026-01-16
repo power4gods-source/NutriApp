@@ -18,6 +18,15 @@
           "fat": 3.0
         },
         "meals_count": 1
+      },
+      "2026-01-12": {
+        "consumed_calories": 462.5,
+        "nutrition": {
+          "protein": 57.2,
+          "carbohydrates": 20.0,
+          "fat": 17.0
+        },
+        "meals_count": 2
       }
     },
     "weekly_stats": {
@@ -41,54 +50,75 @@
           "sodium": 29.6
         },
         "days": 7
+      },
+      "2026-W03": {
+        "total_calories": 462.5,
+        "avg_daily_calories": 66.1,
+        "total_nutrition": {
+          "protein": 57.2,
+          "carbohydrates": 20.0,
+          "fat": 17.0,
+          "fiber": 3.7,
+          "sugar": 12.1,
+          "sodium": 452.0
+        },
+        "avg_daily_nutrition": {
+          "protein": 8.2,
+          "carbohydrates": 2.9,
+          "fat": 2.4,
+          "fiber": 0.5,
+          "sugar": 1.7,
+          "sodium": 64.6
+        },
+        "days": 7
       }
     },
     "monthly_stats": {
       "2026-01": {
-        "total_calories": 1886.5,
-        "avg_daily_calories": 60.9,
+        "total_calories": 2349.0,
+        "avg_daily_calories": 75.8,
         "total_nutrition": {
-          "protein": 93.7,
-          "carbohydrates": 317.5,
-          "fat": 19.9,
-          "fiber": 6.2,
-          "sugar": 1.9,
-          "sodium": 207.5
+          "protein": 150.9,
+          "carbohydrates": 337.5,
+          "fat": 36.9,
+          "fiber": 9.9,
+          "sugar": 14.0,
+          "sodium": 659.5
         },
         "avg_daily_nutrition": {
-          "protein": 3.0,
-          "carbohydrates": 10.2,
-          "fat": 0.6,
-          "fiber": 0.2,
-          "sugar": 0.1,
-          "sodium": 6.7
+          "protein": 4.9,
+          "carbohydrates": 10.9,
+          "fat": 1.2,
+          "fiber": 0.3,
+          "sugar": 0.5,
+          "sodium": 21.3
         },
         "days": 31
       }
     },
     "yearly_stats": {
       "2026": {
-        "total_calories": 1886.5,
-        "avg_daily_calories": 5.2,
+        "total_calories": 2349.0,
+        "avg_daily_calories": 6.4,
         "total_nutrition": {
-          "protein": 93.7,
-          "carbohydrates": 317.5,
-          "fat": 19.9,
-          "fiber": 6.2,
-          "sugar": 1.9,
-          "sodium": 207.5
+          "protein": 150.9,
+          "carbohydrates": 337.5,
+          "fat": 36.9,
+          "fiber": 9.9,
+          "sugar": 14.0,
+          "sodium": 659.5
         },
         "avg_daily_nutrition": {
-          "protein": 0.3,
+          "protein": 0.4,
           "carbohydrates": 0.9,
           "fat": 0.1,
           "fiber": 0.0,
           "sugar": 0.0,
-          "sodium": 0.6
+          "sodium": 1.8
         },
         "days": 365
       }
     },
-    "last_updated": "2026-01-11T18:23:20.796025"
+    "last_updated": "2026-01-12T20:30:33.402191"
   }
 }

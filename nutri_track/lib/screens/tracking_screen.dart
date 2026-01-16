@@ -548,6 +548,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     final avg = consumed; // For daily view, average is the same as consumed
     final maxY = (goal * 1.2).clamp(consumed * 1.1, goal * 1.5);
     final barHeight = 250.0;
+    final goalBarWidth = 60.0; // Tamaño fijo para barras de meta/media
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -645,7 +646,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                             BarChartRodData(
                               toY: consumed,
                               color: consumed > goal ? Colors.orange : const Color(0xFF4CAF50),
-                              width: 60,
+                              width: goalBarWidth, // Mismo tamaño que barras de meta/media
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(4),
                               ),
@@ -660,7 +661,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
               const SizedBox(width: 16),
               // Barra gris con objetivo y media (más oscura) - mismo tamaño que las barras de consumo
               SizedBox(
-                width: 60,
+                width: goalBarWidth,
                 height: barHeight,
                 child: Stack(
                   children: [
@@ -668,7 +669,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: 60,
+                        width: goalBarWidth,
                         height: (goal / maxY) * barHeight,
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
@@ -682,7 +683,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: 60,
+                        width: goalBarWidth,
                         height: (avg / maxY) * barHeight,
                         decoration: BoxDecoration(
                           color: Colors.grey[600],
@@ -746,6 +747,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
     final maxCalories = _weeklyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a > b ? a : b);
     final maxY = ((maxCalories * 1.2).clamp(goal * 1.1, goal * 1.5)).toDouble();
     final avgCalories = _weeklyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a + b) / _weeklyDailyData.length;
+    final barHeight = 250.0;
+    final goalBarWidth = 35.0; // Tamaño fijo para barras de meta/media
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -778,7 +781,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
               Expanded(
                 flex: 3,
                 child: SizedBox(
-                  height: 250,
+                  height: barHeight,
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
@@ -870,7 +873,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                             BarChartRodData(
                               toY: calories,
                               color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
-                              width: 35,
+                              width: goalBarWidth, // Mismo tamaño que barras de meta/media
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(4),
                               ),
@@ -885,16 +888,16 @@ class _TrackingScreenState extends State<TrackingScreen> {
               const SizedBox(width: 16),
               // Barra gris con objetivo y media (más oscura) - mismo tamaño que las barras de consumo
               SizedBox(
-                width: 35,
-                height: 250,
+                width: goalBarWidth,
+                height: barHeight,
                 child: Stack(
                   children: [
                     // Barra gris completa (objetivo)
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: 35,
-                        height: (goal / maxY) * 250,
+                        width: goalBarWidth,
+                        height: (goal / maxY) * barHeight,
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
                           borderRadius: const BorderRadius.vertical(
@@ -907,8 +910,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: 35,
-                        height: (avgCalories / maxY) * 250,
+                        width: goalBarWidth,
+                        height: (avgCalories / maxY) * barHeight,
                         decoration: BoxDecoration(
                           color: Colors.grey[600],
                           borderRadius: const BorderRadius.vertical(
@@ -971,6 +974,17 @@ class _TrackingScreenState extends State<TrackingScreen> {
     final maxCalories = _monthlyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a > b ? a : b);
     final maxY = ((maxCalories * 1.2).clamp(goal * 1.1, goal * 1.5)).toDouble();
     final avgCalories = _monthlyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a + b) / _monthlyDailyData.length;
+    final barHeight = 250.0;
+    final goalBarWidth = 12.0; // Tamaño fijo para barras de meta/media
+    
+    // Calcular ancho de barras diarias basado en espacio disponible
+    // Mantener tamaño fijo de barras de meta/media, ajustar barras diarias al espacio restante
+    final availableWidth = MediaQuery.of(context).size.width - 80; // Ancho disponible menos márgenes
+    final goalBarSpace = goalBarWidth + 16; // Ancho de barra de meta + espacio
+    final dailyBarsSpace = availableWidth - goalBarSpace;
+    final dailyBarWidth = (_monthlyDailyData.length > 0) 
+        ? (dailyBarsSpace / _monthlyDailyData.length).clamp(8.0, 20.0) 
+        : 12.0; // Ancho dinámico pero con límites
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -1050,7 +1064,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
               Expanded(
                 flex: 3,
                 child: SizedBox(
-                  height: 250,
+                  height: barHeight,
                   child: BarChart(
                     BarChartData(
                       alignment: BarChartAlignment.spaceAround,
@@ -1154,7 +1168,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                             BarChartRodData(
                               toY: calories,
                               color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
-                              width: 12,
+                              width: dailyBarWidth, // Ancho dinámico ajustado al espacio disponible
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(2),
                               ),
@@ -1167,18 +1181,18 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Barra gris con objetivo y media (más oscura) - mismo tamaño que las barras de consumo
+              // Barra gris con objetivo y media (más oscura) - tamaño fijo
               SizedBox(
-                width: 12,
-                height: 250,
+                width: goalBarWidth,
+                height: barHeight,
                 child: Stack(
                   children: [
                     // Barra gris completa (objetivo)
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: 12,
-                        height: (goal / maxY) * 250,
+                        width: goalBarWidth,
+                        height: (goal / maxY) * barHeight,
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
                           borderRadius: const BorderRadius.vertical(
@@ -1191,8 +1205,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: 12,
-                        height: (avgCalories / maxY) * 250,
+                        width: goalBarWidth,
+                        height: (avgCalories / maxY) * barHeight,
                         decoration: BoxDecoration(
                           color: Colors.grey[600],
                           borderRadius: const BorderRadius.vertical(

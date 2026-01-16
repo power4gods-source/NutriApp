@@ -32,39 +32,64 @@ class _FriendsScreenState extends State<FriendsScreen> {
       final headers = await _authService.getAuthHeaders();
       
       try {
+        print('🔍 Cargando perfiles desde: $url/profiles/all');
         final response = await http.get(
           Uri.parse('$url/profiles/all'),
           headers: headers,
-        ).timeout(const Duration(seconds: 5));
+        ).timeout(const Duration(seconds: 10));
+        
+        print('📥 Respuesta del backend: ${response.statusCode}');
         
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
+          print('📊 Datos recibidos: ${data.runtimeType}');
+          
+          List<Map<String, dynamic>> profilesList = [];
+          
           if (data is List) {
-            setState(() {
-              _profiles = List<Map<String, dynamic>>.from(data);
-              _isLoading = false;
-            });
-            return;
-          } else if (data is Map && data['profiles'] != null) {
-            setState(() {
-              _profiles = List<Map<String, dynamic>>.from(data['profiles']);
-              _isLoading = false;
-            });
-            return;
+            profilesList = List<Map<String, dynamic>>.from(data);
+            print('✅ Perfiles cargados (List): ${profilesList.length}');
+          } else if (data is Map) {
+            if (data['profiles'] != null && data['profiles'] is List) {
+              profilesList = List<Map<String, dynamic>>.from(data['profiles']);
+              print('✅ Perfiles cargados (Map.profiles): ${profilesList.length}');
+            } else {
+              // Si es un Map pero no tiene 'profiles', intentar convertir el Map completo
+              print('⚠️ Formato inesperado, intentando convertir...');
+            }
           }
+          
+          // Filtrar para excluir el usuario actual
+          final currentUserId = _authService.userId;
+          if (currentUserId != null) {
+            profilesList = profilesList.where((profile) {
+              final profileUserId = profile['user_id']?.toString();
+              return profileUserId != currentUserId.toString();
+            }).toList();
+          }
+          
+          setState(() {
+            _profiles = profilesList;
+            _isLoading = false;
+          });
+          
+          print('✅ Total perfiles mostrados: ${_profiles.length}');
+          return;
+        } else {
+          print('❌ Error del backend: ${response.statusCode} - ${response.body}');
         }
-      } catch (e) {
-        print('Error cargando perfiles desde backend: $e');
+      } catch (e, stackTrace) {
+        print('❌ Error cargando perfiles desde backend: $e');
+        print('Stack trace: $stackTrace');
       }
       
-      // Fallback: cargar desde profiles.json local si está disponible
-      // En producción, esto se haría desde Firebase
+      // Fallback: mostrar mensaje si no hay perfiles
       setState(() {
         _profiles = [];
         _isLoading = false;
       });
     } catch (e) {
-      print('Error cargando perfiles: $e');
+      print('❌ Error general cargando perfiles: $e');
       setState(() {
         _isLoading = false;
       });

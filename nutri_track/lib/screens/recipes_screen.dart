@@ -379,16 +379,43 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
     // Intentar publicar usando el backend primero, si está disponible
     bool success = false;
+    String? finalUserId; // Declarar fuera del try para que esté disponible en todo el método
     
     try {
       // Buscar la receta en el backend por título y user_id para obtener el índice correcto
       final recipeTitle = recipe['title'] as String;
       final authService = AuthService();
-      final userId = authService.userId;
+      
+      // Asegurar que los datos de autenticación estén cargados
+      await authService.reloadAuthData();
+      var userId = authService.userId;
       
       print('🔍 Buscando receta en backend: título="$recipeTitle", userId="$userId"');
       
-      if (userId != null) {
+      // Si userId es null, intentar obtenerlo desde SharedPreferences
+      if (userId == null) {
+        print('❌ Error: userId es null. Verificando autenticación...');
+        // Intentar recargar desde SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        final savedUserId = prefs.getString('user_id');
+        print('📋 userId desde SharedPreferences: $savedUserId');
+        if (savedUserId == null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Error: No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          return;
+        }
+        userId = savedUserId;
+      }
+      
+      finalUserId = userId; // Asignar valor
+      
+      if (finalUserId != null) {
         // Obtener todas las recetas privadas del backend para encontrar el índice correcto
         final allPrivateRecipes = await _recipeService.getAllPrivateRecipesFromBackend();
         int? recipeIndex;
@@ -400,7 +427,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           final rTitle = r['title'] as String? ?? '';
           final rUserId = r['user_id'] as String? ?? '';
           print('📋 Receta $i: título="$rTitle", userId="$rUserId"');
-          if (rTitle == recipeTitle && rUserId == userId) {
+          if (rTitle == recipeTitle && rUserId == finalUserId) {
             recipeIndex = i;
             print('✅ Receta encontrada en backend con índice: $recipeIndex');
             break;
@@ -415,13 +442,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
           // Si se publicó desde el backend, también sincronizar con Firebase
           // para mantener la receta en privadas y públicas
           if (success) {
-            final authService = AuthService();
-            final userId = authService.userId;
-            if (userId != null) {
+            if (finalUserId != null) {
               // Sincronizar con Firebase manteniendo en privadas y agregando a públicas
               try {
                 final firebaseRecipeService = FirebaseRecipeService();
-                await firebaseRecipeService.publishPrivateRecipe(recipe, userId);
+                await firebaseRecipeService.publishPrivateRecipe(recipe, finalUserId);
                 print('✅ Receta sincronizada con Firebase después de publicar desde backend');
               } catch (e) {
                 print('⚠️ Error sincronizando con Firebase después de publicar: $e');
@@ -438,12 +463,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
     
     // Si el backend no está disponible, usar Firebase directamente
     if (!success) {
-      final authService = AuthService();
-      final userId = authService.userId;
-      if (userId != null) {
+      // Usar finalUserId que ya fue obtenido anteriormente
+      if (finalUserId != null) {
         // Usar FirebaseRecipeService directamente
         final firebaseRecipeService = FirebaseRecipeService();
-        success = await firebaseRecipeService.publishPrivateRecipe(recipe, userId);
+        success = await firebaseRecipeService.publishPrivateRecipe(recipe, finalUserId);
       }
     }
     

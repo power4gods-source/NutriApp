@@ -395,7 +395,7 @@ def register(user_data: UserRegister):
     user_id = user_data.email.lower().replace("@", "_at_").replace(".", "_")
     hashed_password = get_password_hash(user_data.password)
     
-    # Asignar rol: admin para power4gods@gmail.com, user para el resto
+    # Asignar rol: admin SOLO para power4gods@gmail.com, user para el resto (por defecto)
     role = "admin" if user_data.email.lower() == "power4gods@gmail.com" else "user"
     
     users[user_id] = {
@@ -532,9 +532,12 @@ def get_profile(current_user: dict = Depends(get_current_user)):
 def get_all_profiles(current_user: dict = Depends(get_current_user)):
     """Get all user profiles (for friends screen)"""
     profiles = load_profiles()
+    users = load_users()
     
     # Return all profiles as a list
     all_profiles = []
+    
+    # First, add all existing profiles
     for user_id, profile_data in profiles.items():
         profile = profile_data.copy()
         
@@ -548,6 +551,38 @@ def get_all_profiles(current_user: dict = Depends(get_current_user)):
         profile["public_recipes_count"] = len(user_public)
         
         all_profiles.append(profile)
+    
+    # Then, add users that don't have a profile yet
+    for user_id, user_data in users.items():
+        if user_id not in profiles:
+            # Create a basic profile from user data
+            profile = {
+                "user_id": user_id,
+                "email": user_data.get("email", ""),
+                "username": user_data.get("username") or user_data.get("email", "").split("@")[0],
+                "display_name": user_data.get("username") or user_data.get("email", "").split("@")[0],
+                "bio": None,
+                "avatar_url": None,
+                "dietary_preferences": [],
+                "favorite_cuisines": [],
+                "ingredients": [],
+                "favorite_recipes": [],
+                "recipes_count": 0,
+                "public_recipes_count": 0,
+                "created_at": user_data.get("created_at", datetime.now().isoformat()),
+                "updated_at": datetime.now().isoformat(),
+            }
+            
+            # Count user's recipes
+            private_recipes = load_recipes_private()
+            public_recipes = load_recipes_public()
+            user_private = [r for r in private_recipes if r.get("user_id") == user_id]
+            user_public = [r for r in public_recipes if r.get("user_id") == user_id]
+            
+            profile["recipes_count"] = len(user_private) + len(user_public)
+            profile["public_recipes_count"] = len(user_public)
+            
+            all_profiles.append(profile)
     
     return {"profiles": all_profiles}
 
