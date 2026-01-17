@@ -1,18 +1,15 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'firebase_sync_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'supabase_sync_service.dart';
 
-/// Servicio para gestionar usuarios y sus datos en Firebase
-/// Almacena usuarios en Firestore y datos del usuario en Firebase Storage
-class FirebaseUserService {
-  final FirebaseSyncService _firebaseService = FirebaseSyncService();
+/// Servicio para gestionar usuarios y sus datos en Supabase
+/// Reemplaza a FirebaseUserService
+class SupabaseUserService {
+  final SupabaseSyncService _supabaseService = SupabaseSyncService();
+  final SupabaseClient _supabase = Supabase.instance.client;
   
-  FirebaseFirestore get firestore => _firebaseService.firestore;
-  FirebaseStorage get storage => _firebaseService.storage;
-  
-  /// Registra un nuevo usuario en Firebase
+  /// Registra un nuevo usuario en Supabase
+  /// Usa Supabase Auth para el registro y Storage para los datos del usuario
   Future<bool> registerUser({
     required String userId,
     required String email,
@@ -20,9 +17,13 @@ class FirebaseUserService {
     String? username,
   }) async {
     try {
-      print('📝 Iniciando registro de usuario en Firebase: $email');
+      print('📝 Iniciando registro de usuario en Supabase: $email');
       
-      // Usar solo Storage en lugar de Firestore para evitar problemas de permisos
+      // Intentar registro con Supabase Auth (opcional - usamos Storage principalmente)
+      // Nota: Supabase Auth requiere la contraseña real, no el hash
+      // Por ahora, solo guardamos en Storage para mantener compatibilidad
+      // Si quieres usar Supabase Auth, necesitarías pasar la contraseña real aquí
+      
       // Crear estructura inicial de datos del usuario en Storage
       final userData = {
         'user_id': userId,
@@ -38,42 +39,41 @@ class FirebaseUserService {
         'updated_at': DateTime.now().toIso8601String(),
       };
       
-      print('📤 Subiendo datos del usuario a Firebase Storage...');
+      print('📤 Subiendo datos del usuario a Supabase Storage...');
       
-      // Guardar en Storage (más permisivo que Firestore)
-      final uploadSuccess = await _firebaseService.uploadJsonFile(
+      // Guardar en Storage
+      final uploadSuccess = await _supabaseService.uploadJsonFile(
         'users/$userId.json',
         userData,
       );
       
       if (uploadSuccess) {
-        print('✅ Usuario registrado en Firebase Storage: $email');
+        print('✅ Usuario registrado en Supabase Storage: $email');
         return true;
       } else {
-        print('⚠️ Fallo al subir a Storage, intentando guardar localmente...');
-        // Si falla Storage, al menos guardar localmente
-        return false; // Se manejará en auth_service con fallback local
+        print('⚠️ Fallo al subir a Storage');
+        return false;
       }
     } catch (e, stackTrace) {
-      print('❌ Error registrando usuario en Firebase: $e');
+      print('❌ Error registrando usuario en Supabase: $e');
       print('Stack trace: $stackTrace');
       return false;
     }
   }
   
-  /// Obtiene un usuario desde Firebase Storage
+  /// Obtiene un usuario desde Supabase Storage
   Future<Map<String, dynamic>?> getUser(String userId) async {
     try {
-      // Obtener desde Storage en lugar de Firestore
       final userData = await getUserData(userId);
       return userData;
     } catch (e) {
-      print('Error obteniendo usuario desde Firebase: $e');
+      print('Error obteniendo usuario desde Supabase: $e');
       return null;
     }
   }
   
-  /// Verifica credenciales de usuario en Firebase Storage
+  /// Verifica credenciales de usuario desde Storage
+  /// Compara el hash de la contraseña almacenado
   Future<bool> verifyUser(String email, String passwordHash) async {
     try {
       final normalizedEmail = email.toLowerCase().trim();
@@ -82,9 +82,11 @@ class FirebaseUserService {
       
       if (userData == null) return false;
       
-      return userData['password_hash'] == passwordHash;
+      // Comparar hash de contraseña
+      final storedHash = userData['password_hash'] as String?;
+      return storedHash != null && storedHash == passwordHash;
     } catch (e) {
-      print('Error verificando usuario en Firebase: $e');
+      print('Error verificando usuario en Supabase: $e');
       return false;
     }
   }
@@ -112,19 +114,19 @@ class FirebaseUserService {
     return email.replaceAll('@', '_at_').replaceAll('.', '_');
   }
   
-  /// Guarda datos del usuario en Firebase Storage
+  /// Guarda datos del usuario en Supabase Storage
   Future<bool> saveUserData(String userId, Map<String, dynamic> userData) async {
     try {
       userData['updated_at'] = DateTime.now().toIso8601String();
-      print('💾 Guardando datos del usuario $userId en Firebase Storage...');
-      final success = await _firebaseService.uploadJsonFile(
+      print('💾 Guardando datos del usuario $userId en Supabase Storage...');
+      final success = await _supabaseService.uploadJsonFile(
         'users/$userId.json',
         userData,
       );
       if (success) {
-        print('✅ Datos del usuario $userId guardados correctamente en Firebase');
+        print('✅ Datos del usuario $userId guardados correctamente en Supabase');
       } else {
-        print('❌ Error al guardar datos del usuario $userId en Firebase');
+        print('❌ Error al guardar datos del usuario $userId en Supabase');
       }
       return success;
     } catch (e) {
@@ -133,10 +135,10 @@ class FirebaseUserService {
     }
   }
   
-  /// Obtiene datos del usuario desde Firebase Storage
+  /// Obtiene datos del usuario desde Supabase Storage
   Future<Map<String, dynamic>?> getUserData(String userId) async {
     try {
-      final data = await _firebaseService.downloadJsonFile('users/$userId.json');
+      final data = await _supabaseService.downloadJsonFile('users/$userId.json');
       if (data != null && data is Map) {
         return Map<String, dynamic>.from(data);
       }
@@ -227,9 +229,8 @@ class FirebaseUserService {
     }
   }
   
-  /// Carga todos los datos del usuario desde Firebase
+  /// Carga todos los datos del usuario desde Supabase
   Future<Map<String, dynamic>?> loadUserData(String userId) async {
     return await getUserData(userId);
   }
 }
-

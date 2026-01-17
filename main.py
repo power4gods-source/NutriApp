@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import secrets
+from supabase_storage import load_json_with_fallback, save_json_with_sync, load_json_from_supabase, save_json_to_supabase
 
 app = FastAPI()
 
@@ -105,34 +106,28 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def load_users():
-    """Load users from JSON file"""
-    try:
-        with open(USERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
+    """Load users from Supabase Storage with fallback to local file"""
+    # Para users.json, cargar desde Supabase Storage
+    data = load_json_with_fallback(USERS_FILE, USERS_FILE)
+    # Asegurar que es un dict
+    if not isinstance(data, dict):
         return {}
-    except json.JSONDecodeError:
-        return {}
+    return data
 
 def save_users(users: dict):
-    """Save users to JSON file"""
-    with open(USERS_FILE, "w", encoding="utf-8") as f:
-        json.dump(users, f, ensure_ascii=False, indent=2)
+    """Save users to Supabase Storage and local file"""
+    save_json_with_sync(USERS_FILE, users, USERS_FILE)
 
 def load_profiles():
-    """Load user profiles from JSON file"""
-    try:
-        with open(PROFILES_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
+    """Load user profiles from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(PROFILES_FILE, PROFILES_FILE)
+    if not isinstance(data, dict):
         return {}
-    except json.JSONDecodeError:
-        return {}
+    return data
 
 def save_profiles(profiles: dict):
-    """Save user profiles to JSON file"""
-    with open(PROFILES_FILE, "w", encoding="utf-8") as f:
-        json.dump(profiles, f, ensure_ascii=False, indent=2)
+    """Save user profiles to Supabase Storage and local file"""
+    save_json_with_sync(PROFILES_FILE, profiles, PROFILES_FILE)
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     """Get current authenticated user from JWT token"""
@@ -171,145 +166,128 @@ def is_admin(current_user: dict = Depends(get_current_user)) -> bool:
     return current_user.get("role") == "admin"
 
 def load_recipes_general():
-    """Load precompiled recipes from JSON file"""
-    try:
-        with open(RECIPES_GENERAL_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-    except json.JSONDecodeError:
-        return []
+    """Load precompiled recipes from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(RECIPES_GENERAL_FILE, RECIPES_GENERAL_FILE)
+    # Si es un dict con clave 'recipes', extraer la lista
+    if isinstance(data, dict) and 'recipes' in data:
+        return data['recipes']
+    # Si es una lista, retornarla directamente
+    if isinstance(data, list):
+        return data
+    return []
 
 def save_recipes_general(recipes_list):
-    """Save general recipes to JSON file"""
-    with open(RECIPES_GENERAL_FILE, "w", encoding="utf-8") as f:
-        json.dump(recipes_list, f, ensure_ascii=False, indent=2)
+    """Save general recipes to Supabase Storage and local file"""
+    # Guardar como dict con clave 'recipes' para consistencia
+    data = {'recipes': recipes_list} if isinstance(recipes_list, list) else recipes_list
+    save_json_with_sync(RECIPES_GENERAL_FILE, data, RECIPES_GENERAL_FILE)
 
 def load_recipes_private():
-    """Load private user recipes from JSON file"""
-    try:
-        with open(RECIPES_PRIVATE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-    except json.JSONDecodeError:
-        return []
+    """Load private user recipes from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(RECIPES_PRIVATE_FILE, RECIPES_PRIVATE_FILE)
+    # Si es un dict con clave 'recipes', extraer la lista
+    if isinstance(data, dict) and 'recipes' in data:
+        return data['recipes']
+    # Si es una lista, retornarla directamente
+    if isinstance(data, list):
+        return data
+    return []
 
 def load_recipes_public():
-    """Load public user recipes from JSON file"""
-    try:
-        with open(RECIPES_PUBLIC_FILE, "r", encoding="utf-8") as f:
-            recipes = json.load(f)
-            print(f"📖 Loaded {len(recipes)} public recipes from {RECIPES_PUBLIC_FILE}")
-            return recipes
-    except FileNotFoundError:
-        print(f"⚠️ File {RECIPES_PUBLIC_FILE} not found, returning empty list")
-        return []
-    except json.JSONDecodeError as e:
-        print(f"❌ JSON decode error in {RECIPES_PUBLIC_FILE}: {e}")
-        return []
+    """Load public user recipes from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(RECIPES_PUBLIC_FILE, RECIPES_PUBLIC_FILE)
+    # Si es un dict con clave 'recipes', extraer la lista
+    if isinstance(data, dict) and 'recipes' in data:
+        recipes = data['recipes']
+        print(f"📖 Loaded {len(recipes)} public recipes from Supabase/local")
+        return recipes
+    # Si es una lista, retornarla directamente
+    if isinstance(data, list):
+        print(f"📖 Loaded {len(data)} public recipes from Supabase/local")
+        return data
+    print(f"⚠️ No public recipes found, returning empty list")
+    return []
 
 def save_recipes_private(recipes_list):
-    """Save private recipes to JSON file"""
-    with open(RECIPES_PRIVATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(recipes_list, f, ensure_ascii=False, indent=2)
+    """Save private recipes to Supabase Storage and local file"""
+    # Guardar como dict con clave 'recipes' para consistencia
+    data = {'recipes': recipes_list} if isinstance(recipes_list, list) else recipes_list
+    save_json_with_sync(RECIPES_PRIVATE_FILE, data, RECIPES_PRIVATE_FILE)
 
 def save_recipes_public(recipes_list):
-    """Save public recipes to JSON file"""
-    try:
-        with open(RECIPES_PUBLIC_FILE, "w", encoding="utf-8") as f:
-            json.dump(recipes_list, f, ensure_ascii=False, indent=2)
-        print(f"💾 Saved {len(recipes_list)} public recipes to {RECIPES_PUBLIC_FILE}")
-    except Exception as e:
-        print(f"❌ Error saving public recipes: {e}")
-        raise
+    """Save public recipes to Supabase Storage and local file"""
+    # Guardar como dict con clave 'recipes' para consistencia
+    data = {'recipes': recipes_list} if isinstance(recipes_list, list) else recipes_list
+    save_json_with_sync(RECIPES_PUBLIC_FILE, data, RECIPES_PUBLIC_FILE)
+    print(f"💾 Saved {len(recipes_list)} public recipes to Supabase and local file")
 
 # Food database functions
 def load_foods():
-    """Load foods database from JSON file"""
-    try:
-        with open(FOODS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return []
-    except json.JSONDecodeError:
-        return []
+    """Load foods database from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(FOODS_FILE, FOODS_FILE)
+    if isinstance(data, list):
+        return data
+    if isinstance(data, dict) and 'foods' in data:
+        return data['foods']
+    return []
 
 def load_ingredient_mapping():
-    """Load ingredient to food mapping from JSON file"""
-    try:
-        with open(INGREDIENT_MAPPING_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data.get("mappings", [])
-    except FileNotFoundError:
-        return []
-    except json.JSONDecodeError:
-        return []
+    """Load ingredient to food mapping from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(INGREDIENT_MAPPING_FILE, INGREDIENT_MAPPING_FILE)
+    if isinstance(data, dict):
+        return data.get("mappings", [])
+    if isinstance(data, list):
+        return data
+    return []
 
 def save_ingredient_mapping(mappings):
-    """Save ingredient to food mapping to JSON file"""
-    with open(INGREDIENT_MAPPING_FILE, "w", encoding="utf-8") as f:
-        json.dump({"mappings": mappings}, f, ensure_ascii=False, indent=2)
+    """Save ingredient to food mapping to Supabase Storage and local file"""
+    data = {"mappings": mappings} if isinstance(mappings, list) else mappings
+    save_json_with_sync(INGREDIENT_MAPPING_FILE, data, INGREDIENT_MAPPING_FILE)
 
 def load_consumption_history():
-    """Load consumption history from JSON file"""
-    try:
-        with open(CONSUMPTION_HISTORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
+    """Load consumption history from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(CONSUMPTION_HISTORY_FILE, CONSUMPTION_HISTORY_FILE)
+    if not isinstance(data, dict):
         return {}
-    except json.JSONDecodeError:
-        return {}
+    return data
 
 def save_consumption_history(history):
-    """Save consumption history to JSON file"""
-    with open(CONSUMPTION_HISTORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
+    """Save consumption history to Supabase Storage and local file"""
+    save_json_with_sync(CONSUMPTION_HISTORY_FILE, history, CONSUMPTION_HISTORY_FILE)
 
 def load_meal_plans():
-    """Load meal plans from JSON file"""
-    try:
-        with open(MEAL_PLANS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
+    """Load meal plans from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(MEAL_PLANS_FILE, MEAL_PLANS_FILE)
+    if not isinstance(data, dict):
         return {}
-    except json.JSONDecodeError:
-        return {}
+    return data
 
 def save_meal_plans(plans):
-    """Save meal plans to JSON file"""
-    with open(MEAL_PLANS_FILE, "w", encoding="utf-8") as f:
-        json.dump(plans, f, ensure_ascii=False, indent=2)
+    """Save meal plans to Supabase Storage and local file"""
+    save_json_with_sync(MEAL_PLANS_FILE, plans, MEAL_PLANS_FILE)
 
 def load_nutrition_stats():
-    """Load nutrition statistics from JSON file"""
-    try:
-        with open(NUTRITION_STATS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
+    """Load nutrition statistics from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(NUTRITION_STATS_FILE, NUTRITION_STATS_FILE)
+    if not isinstance(data, dict):
         return {}
-    except json.JSONDecodeError:
-        return {}
+    return data
 
 def save_nutrition_stats(stats):
-    """Save nutrition statistics to JSON file"""
-    with open(NUTRITION_STATS_FILE, "w", encoding="utf-8") as f:
-        json.dump(stats, f, ensure_ascii=False, indent=2)
+    """Save nutrition statistics to Supabase Storage and local file"""
+    save_json_with_sync(NUTRITION_STATS_FILE, stats, NUTRITION_STATS_FILE)
 
 def load_user_goals():
-    """Load user goals from JSON file"""
-    try:
-        with open(USER_GOALS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
+    """Load user goals from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(USER_GOALS_FILE, USER_GOALS_FILE)
+    if not isinstance(data, dict):
         return {}
-    except json.JSONDecodeError:
-        return {}
+    return data
 
 def save_user_goals(goals):
-    """Save user goals to JSON file"""
-    with open(USER_GOALS_FILE, "w", encoding="utf-8") as f:
-        json.dump(goals, f, ensure_ascii=False, indent=2)
+    """Save user goals to Supabase Storage and local file"""
+    save_json_with_sync(USER_GOALS_FILE, goals, USER_GOALS_FILE)
 
 @app.get("/")
 def read_root():

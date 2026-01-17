@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
-import '../services/firebase_user_service.dart';
+import '../services/supabase_user_service.dart';
 import '../config/app_config.dart';
 
 class ShoppingListScreen extends StatefulWidget {
@@ -15,7 +15,7 @@ class ShoppingListScreen extends StatefulWidget {
 
 class _ShoppingListScreenState extends State<ShoppingListScreen> {
   final AuthService _authService = AuthService();
-  final FirebaseUserService _firebaseUserService = FirebaseUserService();
+  final SupabaseUserService _supabaseUserService = SupabaseUserService();
   final TextEditingController _itemController = TextEditingController();
   List<ShoppingItem> _items = [];
   bool _isLoading = true;
@@ -40,7 +40,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       // 1. Intentar cargar desde Firebase primero
       if (userId != null) {
         try {
-          final userData = await _firebaseUserService.getUserData(userId);
+          final userData = await _supabaseUserService.getUserData(userId);
           if (userData != null && userData['shopping_list'] != null) {
             final itemsList = userData['shopping_list'] as List;
             setState(() {
@@ -89,7 +89,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           
           // Sincronizar con Firebase
           if (userId != null) {
-            await _firebaseUserService.syncUserShoppingList(userId, itemsList);
+            await _supabaseUserService.syncUserShoppingList(userId, itemsList);
           }
           return;
         }
@@ -133,7 +133,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       
       // Sincronizar con Firebase
       if (userId != null) {
-        await _firebaseUserService.syncUserShoppingList(userId, itemsJson);
+        await _supabaseUserService.syncUserShoppingList(userId, itemsJson);
       }
       
       // Intentar guardar en el backend también

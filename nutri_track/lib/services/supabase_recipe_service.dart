@@ -1,17 +1,12 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'firebase_sync_service.dart';
-import 'firebase_user_service.dart';
+import 'supabase_sync_service.dart';
 
-/// Servicio para gestionar recetas directamente en Firebase
-/// Permite guardar, actualizar y obtener recetas sin necesidad del backend local
-class FirebaseRecipeService {
-  final FirebaseSyncService _firebaseService = FirebaseSyncService();
-  final FirebaseUserService _firebaseUserService = FirebaseUserService();
+/// Servicio para gestionar recetas directamente en Supabase
+/// Reemplaza a FirebaseRecipeService
+class SupabaseRecipeService {
+  final SupabaseSyncService _supabaseService = SupabaseSyncService();
   
-  /// Guarda una receta privada directamente en Firebase
+  /// Guarda una receta privada directamente en Supabase Storage
   Future<bool> savePrivateRecipe(Map<String, dynamic> recipe, String userId) async {
     try {
       // Obtener TODAS las recetas privadas (no solo del usuario)
@@ -25,20 +20,20 @@ class FirebaseRecipeService {
       // Agregar a la lista
       allPrivateRecipes.add(recipe);
       
-      // Guardar en Firebase Storage
-      final success = await _firebaseService.uploadJsonFile(
+      // Guardar en Supabase Storage
+      final success = await _supabaseService.uploadJsonFile(
         'recipes_private.json',
         {'recipes': allPrivateRecipes},
       );
       
       return success;
     } catch (e) {
-      print('Error saving private recipe to Firebase: $e');
+      print('Error saving private recipe to Supabase: $e');
       return false;
     }
   }
   
-  /// Guarda una receta pública directamente en Firebase
+  /// Guarda una receta pública directamente en Supabase Storage
   Future<bool> savePublicRecipe(Map<String, dynamic> recipe, String userId) async {
     try {
       // Obtener recetas públicas actuales
@@ -52,28 +47,28 @@ class FirebaseRecipeService {
       // Agregar a la lista
       publicRecipes.add(recipe);
       
-      // Guardar en Firebase Storage
-      final success = await _firebaseService.uploadJsonFile(
+      // Guardar en Supabase Storage
+      final success = await _supabaseService.uploadJsonFile(
         'recipes_public.json',
         {'recipes': publicRecipes},
       );
       
       return success;
     } catch (e) {
-      print('Error saving public recipe to Firebase: $e');
+      print('Error saving public recipe to Supabase: $e');
       return false;
     }
   }
   
-  /// Obtiene todas las recetas públicas desde Firebase (para luego filtrar)
+  /// Obtiene todas las recetas públicas desde Supabase (para luego filtrar)
   Future<List<dynamic>> getAllPublicRecipes() async {
     return await getPublicRecipes();
   }
   
-  /// Obtiene todas las recetas privadas desde Firebase (para luego filtrar)
+  /// Obtiene todas las recetas privadas desde Supabase (para luego filtrar)
   Future<List<dynamic>> getAllPrivateRecipes() async {
     try {
-      final data = await _firebaseService.downloadJsonFile('recipes_private.json');
+      final data = await _supabaseService.downloadJsonFile('recipes_private.json');
       if (data != null) {
         if (data is Map && data['recipes'] != null) {
           return (data['recipes'] as List).cast<dynamic>();
@@ -83,21 +78,21 @@ class FirebaseRecipeService {
       }
       return [];
     } catch (e) {
-      print('Error getting private recipes from Firebase: $e');
+      print('Error getting private recipes from Supabase: $e');
       return [];
     }
   }
   
-  /// Obtiene recetas privadas de un usuario desde Firebase
+  /// Obtiene recetas privadas de un usuario desde Supabase
   Future<List<dynamic>> getPrivateRecipes(String userId) async {
     final allRecipes = await getAllPrivateRecipes();
     return allRecipes.where((r) => r['user_id'] == userId).toList();
   }
   
-  /// Obtiene todas las recetas públicas desde Firebase
+  /// Obtiene todas las recetas públicas desde Supabase
   Future<List<dynamic>> getPublicRecipes() async {
     try {
-      final data = await _firebaseService.downloadJsonFile('recipes_public.json');
+      final data = await _supabaseService.downloadJsonFile('recipes_public.json');
       if (data != null) {
         if (data is Map && data['recipes'] != null) {
           return (data['recipes'] as List).cast<dynamic>();
@@ -107,7 +102,7 @@ class FirebaseRecipeService {
       }
       return [];
     } catch (e) {
-      print('Error getting public recipes from Firebase: $e');
+      print('Error getting public recipes from Supabase: $e');
       return [];
     }
   }
@@ -130,7 +125,7 @@ class FirebaseRecipeService {
       }
       
       // Guardar privadas actualizadas
-      await _firebaseService.uploadJsonFile(
+      await _supabaseService.uploadJsonFile(
         'recipes_private.json',
         {'recipes': allPrivateRecipes},
       );
@@ -148,4 +143,3 @@ class FirebaseRecipeService {
     }
   }
 }
-

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'firebase_options.dart';
+import 'config/supabase_config.dart';
 import 'services/auth_service.dart';
-import 'services/firebase_sync_service.dart';
-import 'services/firebase_user_service.dart';
+import 'services/supabase_sync_service.dart';
+import 'services/supabase_user_service.dart';
 import 'config/app_config.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
@@ -28,14 +28,20 @@ void main() async {
     print('⚠️ Error al inicializar locale data: $e');
   }
   
-  // Inicializar Firebase
+  // Inicializar Supabase
   try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-    print('✅ Firebase inicializado correctamente');
+    if (SupabaseConfig.isConfigured) {
+      await Supabase.initialize(
+        url: SupabaseConfig.supabaseUrl,
+        anonKey: SupabaseConfig.supabaseAnonKey,
+      );
+      print('✅ Supabase inicializado correctamente');
+    } else {
+      print('⚠️ Supabase no está configurado. Edita lib/config/supabase_config.dart con tus credenciales.');
+      print('ℹ️ La aplicación continuará usando el backend local');
+    }
   } catch (e) {
-    print('⚠️ Error al inicializar Firebase: $e');
+    print('⚠️ Error al inicializar Supabase: $e');
     print('ℹ️ La aplicación continuará usando el backend local');
   }
   
@@ -136,45 +142,43 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
     }
     
-    // 4. Sincronizar datos desde Firebase (si está disponible)
+    // 4. Sincronizar datos desde Supabase (si está disponible)
     try {
-      final firebaseService = FirebaseSyncService();
-      print('☁️ Intentando sincronizar con Firebase...');
-      
-      try {
-        final hasUpdates = await firebaseService.hasUpdatesAvailable();
-        if (hasUpdates) {
-          print('📥 Hay actualizaciones disponibles en Firebase');
+      if (SupabaseConfig.isConfigured) {
+        final supabaseService = SupabaseSyncService();
+        print('☁️ Intentando sincronizar con Supabase...');
+        
+        try {
           // Sincronizar en segundo plano sin bloquear la UI
-          firebaseService.downloadAllJsonFiles().then((data) {
+          supabaseService.downloadAllJsonFiles().then((data) {
             if (data.isNotEmpty) {
-              print('✅ Datos sincronizados desde Firebase: ${data.length} archivos');
+              print('✅ Datos sincronizados desde Supabase: ${data.length} archivos');
             }
           }).catchError((e) {
-            print('⚠️ Error sincronizando desde Firebase: $e');
+            print('⚠️ Error sincronizando desde Supabase: $e');
           });
-        } else {
-          print('ℹ️ No hay actualizaciones en Firebase');
+        } catch (e) {
+          print('⚠️ Supabase no disponible: $e');
         }
-      } catch (e) {
-        print('⚠️ Firebase no disponible: $e');
+      } else {
+        print('ℹ️ Supabase no configurado - usando solo backend local');
       }
     } catch (e) {
-      print('⚠️ Error al inicializar FirebaseSyncService: $e');
+      print('⚠️ Error al inicializar SupabaseSyncService: $e');
     }
     
-    // 5. Si hay usuario autenticado, cargar sus datos desde Firebase
-    if (_isAuthenticated && userId != null) {
+    // 5. Si hay usuario autenticado, cargar sus datos desde Supabase
+    if (_isAuthenticated && userId != null && SupabaseConfig.isConfigured) {
       try {
-        print('👤 Cargando datos del usuario desde Firebase...');
-        final firebaseUserService = FirebaseUserService();
+        print('👤 Cargando datos del usuario desde Supabase...');
+        final supabaseUserService = SupabaseUserService();
         // Cargar datos en segundo plano
-        firebaseUserService.getUser(userId).then((userData) {
+        supabaseUserService.getUser(userId).then((userData) {
           if (userData != null) {
-            print('✅ Datos del usuario cargados desde Firebase');
+            print('✅ Datos del usuario cargados desde Supabase');
             // Los datos se usarán automáticamente cuando se necesiten
           } else {
-            print('⚠️ No se encontraron datos del usuario en Firebase');
+            print('⚠️ No se encontraron datos del usuario en Supabase');
           }
         }).catchError((e) {
           print('⚠️ Error cargando datos del usuario: $e');

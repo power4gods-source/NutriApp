@@ -4,13 +4,13 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
 import '../config/app_config.dart';
-import 'firebase_sync_service.dart';
-import 'firebase_user_service.dart';
+import 'supabase_sync_service.dart';
+import 'supabase_user_service.dart';
 
 class TrackingService {
   final AuthService _authService = AuthService();
-  final FirebaseSyncService _firebaseService = FirebaseSyncService();
-  final FirebaseUserService _firebaseUserService = FirebaseUserService();
+  final SupabaseSyncService _supabaseService = SupabaseSyncService();
+  final SupabaseUserService _supabaseUserService = SupabaseUserService();
   
   Future<String> get baseUrl async {
     final config = await AppConfig.getBackendUrl();
@@ -57,9 +57,9 @@ class TrackingService {
       }
     }
     
-    // 2. Intentar desde Firebase
+    // 2. Intentar desde Supabase
     try {
-      final data = await _firebaseService.downloadJsonFile('foods.json');
+      final data = await _supabaseService.downloadJsonFile('foods.json');
       if (data != null) {
         List<dynamic> allFoods = [];
         if (data is List) {
@@ -544,7 +544,7 @@ class TrackingService {
       if (success) {
         final userId = _authService.userId;
         if (userId != null) {
-          await _firebaseUserService.syncUserGoals(userId, dailyGoals);
+          await _supabaseUserService.syncUserGoals(userId, dailyGoals);
         }
       }
       
@@ -552,11 +552,11 @@ class TrackingService {
     } catch (e) {
       print('Error updating goals: $e');
       
-      // Intentar guardar solo en Firebase si el backend falla
+      // Intentar guardar solo en Supabase si el backend falla
       try {
         final userId = _authService.userId;
         if (userId != null) {
-          final success = await _firebaseUserService.syncUserGoals(userId, dailyGoals);
+          final success = await _supabaseUserService.syncUserGoals(userId, dailyGoals);
           if (success) {
             // Guardar también localmente
             final prefs = await SharedPreferences.getInstance();

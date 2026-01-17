@@ -521,6 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitle: '',
               color: Colors.blue,
               onTap: _navigateToShoppingList,
+              isSmall: true, // Indicar que es más pequeño
             ),
           ),
         ],
@@ -534,11 +535,13 @@ class _HomeScreenState extends State<HomeScreen> {
     required String subtitle,
     required Color color,
     required VoidCallback onTap,
+    bool isSmall = false,
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
+        constraints: const BoxConstraints(minHeight: 100), // Altura mínima igual para todos
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -552,6 +555,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(8),
@@ -559,13 +563,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: color, size: 20),
+              child: Icon(icon, color: color, size: isSmall ? 18 : 20),
             ),
             const SizedBox(height: 8),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 20,
+              style: TextStyle(
+                fontSize: isSmall ? 12 : 20, // Texto más pequeño para Lista Compra
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
@@ -603,14 +607,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       children: [
         SizedBox(
-          width: 80,
-          height: 80,
+          width: 120, // Aumentado de 80 a 120
+          height: 120, // Aumentado de 80 a 120
           child: Stack(
             alignment: Alignment.center,
             children: [
               CircularProgressIndicator(
                 value: progress,
-                strokeWidth: 8,
+                strokeWidth: 12, // Aumentado de 8 a 12
                 backgroundColor: Colors.grey[200],
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
@@ -620,7 +624,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     value.toInt().toString(),
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 24, // Aumentado de 18 a 24
                       fontWeight: FontWeight.bold,
                       color: color,
                     ),
@@ -628,7 +632,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     '/ ${goal.toInt()}',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12, // Aumentado de 10 a 12
                       color: Colors.grey[600],
                     ),
                   ),
@@ -641,7 +645,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 11,
+            fontSize: 12, // Aumentado de 11 a 12
             fontWeight: FontWeight.w600,
             color: Colors.grey[700],
           ),

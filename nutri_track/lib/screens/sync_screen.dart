@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import '../services/firebase_sync_service.dart';
+import '../services/supabase_sync_service.dart';
 import 'dart:convert';
 
-/// Pantalla para gestionar la sincronización con Firebase
+/// Pantalla para gestionar la sincronización con Supabase
 class SyncScreen extends StatefulWidget {
   const SyncScreen({super.key});
 
@@ -12,7 +12,7 @@ class SyncScreen extends StatefulWidget {
 }
 
 class _SyncScreenState extends State<SyncScreen> {
-  final FirebaseSyncService _syncService = FirebaseSyncService();
+  final SupabaseSyncService _syncService = SupabaseSyncService();
   bool _isSyncing = false;
   String _statusMessage = '';
   Map<String, bool> _uploadResults = {};
@@ -31,86 +31,94 @@ class _SyncScreenState extends State<SyncScreen> {
     });
   }
 
-  Future<void> _uploadToFirebase() async {
+  Future<void> _uploadToSupabase() async {
     setState(() {
       _isSyncing = true;
       _statusMessage = 'Preparando subida...';
       _uploadResults = {};
     });
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('💡 Para subir archivos JSON, usa Firebase Console manualmente o el script Python'),
-          backgroundColor: Colors.blue,
-          duration: Duration(seconds: 5),
-        ),
-      );
-    }
-    
-    setState(() {
-      _isSyncing = false;
-      _statusMessage = 'Usa el método manual desde Firebase Console';
-    });
-    
-    // Mostrar instrucciones
-    if (mounted) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('📤 Subir Archivos a Firebase'),
-          content: const SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Para subir los archivos JSON:'),
-                SizedBox(height: 12),
-                Text('1. Ve a Firebase Console > Storage > Archivos'),
-                Text('2. Entra a la carpeta data/'),
-                Text('3. Haz clic en "Subir archivo"'),
-                Text('4. Selecciona los JSON desde:'),
-                Text('   C:\\Users\\mball\\Downloads\\NutriApp\\'),
-                SizedBox(height: 12),
-                Text('Archivos a subir:'),
-                Text('• recipes.json'),
-                Text('• foods.json'),
-                Text('• users.json'),
-                Text('• profiles.json'),
-                Text('• Y los demás JSON...'),
-              ],
-            ),
+    try {
+      // Leer archivos JSON locales y subirlos a Supabase
+      // Por ahora, mostrar instrucciones para subida manual
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('💡 Para subir archivos JSON, usa Supabase Dashboard manualmente'),
+            backgroundColor: Colors.blue,
+            duration: Duration(seconds: 5),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Entendido'),
+        );
+      }
+      
+      setState(() {
+        _isSyncing = false;
+        _statusMessage = 'Usa el método manual desde Supabase Dashboard';
+      });
+      
+      // Mostrar instrucciones
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('📤 Subir Archivos a Supabase'),
+            content: const SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Para subir los archivos JSON:'),
+                  SizedBox(height: 12),
+                  Text('1. Ve a Supabase Dashboard > Storage > data bucket'),
+                  Text('2. Haz clic en "Upload file"'),
+                  Text('3. Selecciona los JSON desde:'),
+                  Text('   C:\\Users\\mball\\Downloads\\NutriApp\\'),
+                  SizedBox(height: 12),
+                  Text('Archivos a subir:'),
+                  Text('• recipes.json'),
+                  Text('• foods.json'),
+                  Text('• users.json'),
+                  Text('• profiles.json'),
+                  Text('• Y los demás JSON...'),
+                ],
+              ),
             ),
-          ],
-        ),
-      );
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Entendido'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isSyncing = false;
+        _statusMessage = 'Error: $e';
+      });
     }
   }
 
-  Future<void> _downloadFromFirebase() async {
+  Future<void> _downloadFromSupabase() async {
     setState(() {
       _isSyncing = true;
-      _statusMessage = 'Descargando datos desde Firebase...';
+      _statusMessage = 'Descargando datos desde Supabase...';
     });
 
     try {
-      // Paso 1: Descargar desde Firebase
+      // Paso 1: Descargar desde Supabase
       final cloudData = await _syncService.downloadAllJsonFiles();
       
       if (cloudData.isEmpty) {
         setState(() {
-          _statusMessage = 'No se encontraron archivos en Firebase';
+          _statusMessage = 'No se encontraron archivos en Supabase';
         });
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('No hay archivos disponibles en Firebase'),
+              content: Text('No hay archivos disponibles en Supabase'),
               backgroundColor: Colors.orange,
             ),
           );
@@ -192,7 +200,7 @@ class _SyncScreenState extends State<SyncScreen> {
             title: const Text('Actualizaciones Disponibles'),
             content: Text(
               hasUpdates
-                  ? 'Hay actualizaciones disponibles en Firebase. ¿Deseas descargarlas?'
+                  ? 'Hay actualizaciones disponibles en Supabase. ¿Deseas descargarlas?'
                   : 'Tu app está actualizada. No hay nuevas actualizaciones.',
             ),
             actions: [
@@ -204,7 +212,7 @@ class _SyncScreenState extends State<SyncScreen> {
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context);
-                    _downloadFromFirebase();
+                    _downloadFromSupabase();
                   },
                   child: const Text('Descargar'),
                 ),
@@ -233,7 +241,7 @@ class _SyncScreenState extends State<SyncScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sincronización Firebase'),
+        title: const Text('Sincronización Supabase'),
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -285,9 +293,9 @@ class _SyncScreenState extends State<SyncScreen> {
             
             // Upload button
             ElevatedButton.icon(
-              onPressed: _isSyncing ? null : _uploadToFirebase,
+              onPressed: _isSyncing ? null : _uploadToSupabase,
               icon: const Icon(Icons.cloud_upload),
-              label: const Text('Subir a Firebase'),
+              label: const Text('Subir a Supabase'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4CAF50),
                 foregroundColor: Colors.white,
@@ -301,9 +309,9 @@ class _SyncScreenState extends State<SyncScreen> {
             
             // Download button
             ElevatedButton.icon(
-              onPressed: _isSyncing ? null : _downloadFromFirebase,
+              onPressed: _isSyncing ? null : _downloadFromSupabase,
               icon: const Icon(Icons.cloud_download),
-              label: const Text('Descargar desde Firebase'),
+              label: const Text('Descargar desde Supabase'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,

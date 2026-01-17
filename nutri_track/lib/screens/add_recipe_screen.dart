@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import '../services/recipe_service.dart';
-import '../services/firebase_recipe_service.dart';
-import '../services/firebase_user_service.dart';
+import '../services/supabase_recipe_service.dart';
+import '../services/supabase_user_service.dart';
 import '../services/tracking_service.dart';
 import '../config/app_config.dart';
 import '../utils/plural_helper.dart';
@@ -30,7 +30,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   final _formKey = GlobalKey<FormState>();
   final AuthService _authService = AuthService();
   final RecipeService _recipeService = RecipeService();
-  final FirebaseRecipeService _firebaseRecipeService = FirebaseRecipeService();
+  final SupabaseRecipeService _supabaseRecipeService = SupabaseRecipeService();
   final TrackingService _trackingService = TrackingService();
   
   final TextEditingController _titleController = TextEditingController();
@@ -450,15 +450,15 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         final userId = _authService.userId;
         if (userId != null) {
           // Guardar en recipes_private.json primero (más rápido)
-          saved = await _firebaseRecipeService.savePrivateRecipe(recipe, userId);
+          saved = await _supabaseRecipeService.savePrivateRecipe(recipe, userId);
           
           // Sincronizar también en los datos del usuario (en segundo plano, sin bloquear)
           if (saved) {
             // No esperar a que se sincronice en users/{userId}.json - hacerlo en segundo plano
             Future.microtask(() async {
               try {
-                final firebaseUserService = FirebaseUserService();
-                final userData = await firebaseUserService.getUserData(userId) ?? {
+                final supabaseUserService = SupabaseUserService();
+                final userData = await supabaseUserService.getUserData(userId) ?? {
                   'user_id': userId,
                   'private_recipes': [],
                 };
@@ -473,7 +473,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 recipe['created_at'] = DateTime.now().toIso8601String();
                 privateRecipes.add(recipe);
                 
-                await firebaseUserService.syncUserPrivateRecipes(userId, privateRecipes);
+                await supabaseUserService.syncUserPrivateRecipes(userId, privateRecipes);
                 print('✅ Receta privada sincronizada en datos del usuario (background)');
               } catch (e) {
                 print('⚠️ Error sincronizando receta en datos del usuario (background): $e');
@@ -490,8 +490,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           if (userId != null) {
             // Sincronizar inmediatamente (no en segundo plano) para que esté disponible al recargar
             try {
-              final firebaseUserService = FirebaseUserService();
-              final userData = await firebaseUserService.getUserData(userId) ?? {
+              final supabaseUserService = SupabaseUserService();
+              final userData = await supabaseUserService.getUserData(userId) ?? {
                 'user_id': userId,
                 'private_recipes': [],
               };
@@ -517,7 +517,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               }
               privateRecipes.add(recipeWithMetadata);
               
-              await firebaseUserService.syncUserPrivateRecipes(userId, privateRecipes);
+              await supabaseUserService.syncUserPrivateRecipes(userId, privateRecipes);
               print('✅ Receta privada sincronizada en datos del usuario (users/$userId.json)');
             } catch (e) {
               print('⚠️ Error sincronizando receta en datos del usuario: $e');

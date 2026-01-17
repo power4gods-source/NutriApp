@@ -127,7 +127,7 @@ class AppDrawer extends StatelessWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.cloud_sync,
-                  title: 'Sincronizar con Firebase',
+                  title: 'Sincronizar con Supabase',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(

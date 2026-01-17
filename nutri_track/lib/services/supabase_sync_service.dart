@@ -1,43 +1,16 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
+import '../config/supabase_config.dart';
 import 'auth_service.dart';
 
-/// Servicio para sincronizar datos JSON con Firebase
-/// Permite subir y descargar archivos JSON desde Firebase Storage
-class FirebaseSyncService {
-  FirebaseStorage? _storage;
-  FirebaseFirestore? _firestore;
-  
-  // Verificar si Firebase está disponible
-  bool get _isFirebaseAvailable {
-    try {
-      _storage ??= FirebaseStorage.instance;
-      _firestore ??= FirebaseFirestore.instance;
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-  
-  FirebaseStorage get storage {
-    if (!_isFirebaseAvailable) {
-      throw Exception('Firebase no está configurado');
-    }
-    return _storage!;
-  }
-  
-  FirebaseFirestore get firestore {
-    if (!_isFirebaseAvailable) {
-      throw Exception('Firebase no está configurado');
-    }
-    return _firestore!;
-  }
+/// Servicio para sincronizar datos JSON con Supabase Storage
+/// Reemplaza a FirebaseSyncService
+class SupabaseSyncService {
+  final SupabaseClient _supabase = Supabase.instance.client;
   
   // Lista de archivos JSON que se sincronizarán
   static const List<String> jsonFiles = [
@@ -54,121 +27,74 @@ class FirebaseSyncService {
     'recipes_private.json',
   ];
 
-  /// Sube un archivo JSON a Firebase Storage
+  /// Sube un archivo JSON a Supabase Storage
   Future<bool> uploadJsonFile(String fileName, Map<String, dynamic> data) async {
-    if (!_isFirebaseAvailable) {
-      print('⚠️ Firebase no disponible, no se puede subir $fileName');
-      return false;
-    }
     try {
       final jsonString = jsonEncode(data);
-      final ref = storage.ref().child('data/$fileName');
+      final bytes = Uint8List.fromList(utf8.encode(jsonString));
       
-      // Configurar timeout más largo y retry para operaciones críticas
-      final uploadTask = ref.putString(
-        jsonString,
-        metadata: SettableMetadata(contentType: 'application/json'),
-      );
+      // Subir al bucket 'data' en Supabase Storage
+      final path = fileName.startsWith('users/') ? fileName : 'data/$fileName';
       
-      // Esperar con timeout extendido (60 segundos para operaciones críticas)
-      await uploadTask.timeout(
-        const Duration(seconds: 60),
-        onTimeout: () {
-          print('❌ Timeout al subir $fileName (60s)');
-          throw TimeoutException('Timeout al subir $fileName');
-        },
-      );
+      print('📤 Subiendo $path a Supabase Storage...');
       
-      // Verificar que la subida se completó correctamente
-      await uploadTask;
+      await _supabase.storage
+          .from(SupabaseConfig.storageBucket)
+          .uploadBinary(
+            path,
+            bytes,
+            fileOptions: const FileOptions(
+              contentType: 'application/json',
+              upsert: true, // Sobrescribir si existe
+            ),
+          );
       
-      // Guardar metadata en Firestore con timeout
-      await firestore.collection('sync_metadata').doc(fileName).set({
-        'fileName': fileName,
-        'lastUpdated': FieldValue.serverTimestamp(),
-        'size': jsonString.length,
-      }).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          print('⚠️ Timeout al guardar metadata de $fileName, pero el archivo se subió');
-          // No lanzar error, el archivo ya se subió
-        },
-      );
-      
-      print('✅ Archivo $fileName subido correctamente (${jsonString.length} bytes)');
+      print('✅ Archivo $fileName subido correctamente (${bytes.length} bytes)');
       return true;
     } catch (e) {
-      final errorStr = e.toString();
-      if (errorStr.contains('retry-limit-exceeded')) {
-        print('❌ Error: Firebase Storage alcanzó el límite de reintentos para $fileName');
-        print('   Esto puede deberse a problemas de conexión. Intenta nuevamente más tarde.');
-      } else if (errorStr.contains('TimeoutException')) {
-        print('❌ Timeout al subir $fileName');
-      } else {
-        print('❌ Error uploading $fileName: $e');
-      }
+      print('❌ Error uploading $fileName: $e');
       return false;
     }
   }
 
-  /// Descarga un archivo JSON desde Firebase Storage
+  /// Descarga un archivo JSON desde Supabase Storage
   /// Puede devolver Map o List dependiendo del contenido del archivo
   Future<dynamic> downloadJsonFile(String fileName) async {
-    if (!_isFirebaseAvailable) {
-      print('⚠️ Firebase no disponible, no se puede descargar $fileName');
-      return null;
-    }
     try {
-      final ref = storage.ref().child('data/$fileName');
+      final path = fileName.startsWith('users/') ? fileName : 'data/$fileName';
       
-      // Intentar descargar con getData
-      // Nota: getData() puede fallar si hay problemas de permisos o conexión
-      try {
-        final bytes = await ref.getData().timeout(
-          const Duration(seconds: 10),
-          onTimeout: () {
-            // Timeout silencioso - no imprimir para evitar spam
-            return null;
-          },
-        );
-        
-        if (bytes != null && bytes.isNotEmpty) {
-          try {
-            final jsonString = utf8.decode(bytes);
-            final data = jsonDecode(jsonString);
-            print('✅ Descargado $fileName desde Firebase (${bytes.length} bytes)');
-            return data;
-          } catch (e) {
-            print('❌ Error parseando JSON de $fileName: $e');
-            return null;
-          }
-        } else {
-          // Archivo vacío o no encontrado - no imprimir (es normal para algunos archivos)
+      print('📥 Descargando $path desde Supabase Storage...');
+      
+      final bytes = await _supabase.storage
+          .from(SupabaseConfig.storageBucket)
+          .download(path);
+      
+      if (bytes != null && bytes.isNotEmpty) {
+        try {
+          final jsonString = utf8.decode(bytes);
+          final data = jsonDecode(jsonString);
+          print('✅ Descargado $fileName desde Supabase (${bytes.length} bytes)');
+          return data;
+        } catch (e) {
+          print('❌ Error parseando JSON de $fileName: $e');
           return null;
         }
-      } catch (e) {
-        // Manejar errores específicos de Firebase Storage
-        final errorStr = e.toString();
-        if (errorStr.contains('permission-denied') || errorStr.contains('unauthorized')) {
-          print('❌ Error de permisos al descargar $fileName');
-          print('   Ve a Firebase Console > Storage > Reglas y permite lectura');
-        } else if (errorStr.contains('object-not-found')) {
-          // Archivo no encontrado - no imprimir (es normal si no está subido)
-          return null;
-        } else if (!errorStr.contains('TimeoutException') && !errorStr.contains('retry-limit-exceeded')) {
-          // Solo imprimir errores inesperados
-          print('⚠️ Error descargando $fileName: $e');
-        }
+      } else {
+        print('⚠️ Archivo $fileName vacío o no encontrado');
         return null;
       }
     } catch (e) {
-      // Error general
-      print('❌ Error general descargando $fileName: $e');
+      final errorStr = e.toString();
+      if (errorStr.contains('not found') || errorStr.contains('404')) {
+        // Archivo no encontrado - es normal si no está subido
+        return null;
+      }
+      print('⚠️ Error descargando $fileName: $e');
       return null;
     }
   }
 
-  /// Sube todos los archivos JSON locales a Firebase
+  /// Sube todos los archivos JSON locales a Supabase
   Future<Map<String, bool>> uploadAllJsonFiles(
     Map<String, Map<String, dynamic>> localData,
   ) async {
@@ -184,7 +110,7 @@ class FirebaseSyncService {
     return results;
   }
 
-  /// Descarga todos los archivos JSON desde Firebase
+  /// Descarga todos los archivos JSON desde Supabase
   /// Convierte Lists a Maps cuando sea necesario para mantener consistencia
   Future<Map<String, Map<String, dynamic>>> downloadAllJsonFiles() async {
     final results = <String, Map<String, dynamic>>{};
@@ -219,28 +145,6 @@ class FirebaseSyncService {
     return results;
   }
 
-  /// Obtiene la fecha de última actualización de un archivo
-  Future<DateTime?> getLastUpdated(String fileName) async {
-    if (!_isFirebaseAvailable) {
-      return null;
-    }
-    try {
-      final doc = await firestore
-          .collection('sync_metadata')
-          .doc(fileName)
-          .get();
-      
-      if (doc.exists) {
-        final timestamp = doc.data()?['lastUpdated'] as Timestamp?;
-        return timestamp?.toDate();
-      }
-      return null;
-    } catch (e) {
-      print('Error getting last updated for $fileName: $e');
-      return null;
-    }
-  }
-
   /// Guarda la última fecha de sincronización localmente
   Future<void> saveLastSyncTime() async {
     final prefs = await SharedPreferences.getInstance();
@@ -257,18 +161,22 @@ class FirebaseSyncService {
     return null;
   }
 
-  /// Verifica si hay actualizaciones disponibles en Firebase
+  /// Verifica si hay actualizaciones disponibles en Supabase
+  /// Compara la última sincronización local con los archivos en Supabase
   Future<bool> hasUpdatesAvailable() async {
     try {
       final lastSync = await getLastSyncTime();
-      if (lastSync == null) return true;
+      if (lastSync == null) return true; // Si nunca se sincronizó, hay actualizaciones
 
-      for (final fileName in jsonFiles) {
-        final lastUpdated = await getLastUpdated(fileName);
-        if (lastUpdated != null && lastUpdated.isAfter(lastSync)) {
-          return true;
-        }
+      // Por ahora, siempre retornamos true si hay archivos en Supabase
+      // En el futuro se puede implementar comparación de timestamps
+      // Para Supabase Storage, no hay metadata fácil de timestamps sin consultar cada archivo
+      // Por simplicidad, retornamos true si nunca se sincronizó o si pasó mucho tiempo
+      final timeSinceLastSync = DateTime.now().difference(lastSync);
+      if (timeSinceLastSync.inHours > 1) {
+        return true; // Si pasó más de 1 hora, asumimos que puede haber actualizaciones
       }
+      
       return false;
     } catch (e) {
       print('Error checking for updates: $e');
@@ -317,11 +225,11 @@ class FirebaseSyncService {
         
         if (healthCheck.statusCode != 200) {
           print('⚠️ Backend no disponible, solo guardando localmente');
-          return localSuccess; // Devolver éxito si se guardó localmente
+          return localSuccess;
         }
       } catch (e) {
         print('⚠️ Backend no disponible, solo guardando localmente');
-        return localSuccess; // Devolver éxito si se guardó localmente
+        return localSuccess;
       }
       
       // Si el backend está disponible, intentar enviar los datos
@@ -342,12 +250,11 @@ class FirebaseSyncService {
         return true;
       } else {
         print('⚠️ Error al sincronizar con backend (${response.statusCode}), pero guardado localmente');
-        return localSuccess; // Devolver éxito si se guardó localmente
+        return localSuccess;
       }
     } catch (e) {
       print('⚠️ Error al enviar datos al backend: $e. Datos guardados localmente.');
-      return localSuccess; // Devolver éxito si se guardó localmente
+      return localSuccess;
     }
   }
 }
-
