@@ -45,6 +45,7 @@ class AuthService extends ChangeNotifier {
       _role = 'admin';
       await prefs.setString('user_role', 'admin');
     }
+    print('🔄 Datos de autenticación recargados: userId=$_userId, email=$_email, token=${_token != null ? "${_token!.substring(0, _token!.length > 20 ? 20 : _token!.length)}..." : "null"}');
     notifyListeners();
   }
   
@@ -55,6 +56,7 @@ class AuthService extends ChangeNotifier {
 
   Future<void> _saveAuthData(String token, String userId, String email, String? username, {String? role}) async {
     final prefs = await SharedPreferences.getInstance();
+    print('💾 Guardando datos de autenticación: userId=$userId, email=$email');
     await prefs.setString('auth_token', token);
     await prefs.setString('user_id', userId);
     await prefs.setString('user_email', email);
@@ -69,6 +71,7 @@ class AuthService extends ChangeNotifier {
     _email = email;
     _username = username;
     _role = userRole;
+    print('✅ Datos de autenticación guardados: token=${token.substring(0, token.length > 20 ? 20 : token.length)}..., role=$userRole');
     notifyListeners();
   }
 
@@ -319,26 +322,46 @@ class AuthService extends ChangeNotifier {
         if (response.statusCode == 200 || response.statusCode == 201) {
           final data = jsonDecode(response.body);
           final userId = data['user_id'];
-          final passwordHash = _hashPassword(password);
+          final accessToken = data['access_token'];
+          final userEmail = data['email'] ?? email;
+          final userName = data['username'] ?? username ?? email.split('@')[0];
+          final userRole = data['role'] ?? (data['email'] == 'power4gods@gmail.com' ? 'admin' : 'user');
+          
+          print('✅ Registro exitoso en backend:');
+          print('   - userId: $userId');
+          print('   - email: $userEmail');
+          print('   - username: $userName');
+          print('   - role: $userRole');
+          print('   - token (primeros 30 chars): ${accessToken.substring(0, accessToken.length > 30 ? 30 : accessToken.length)}...');
           
           // Guardar datos de autenticación PRIMERO
           await _saveAuthData(
-            data['access_token'],
+            accessToken,
             userId,
-            data['email'],
-            data['username'],
-            role: data['role'] ?? (data['email'] == 'power4gods@gmail.com' ? 'admin' : 'user'),
+            userEmail,
+            userName,
+            role: userRole,
           );
           
           // CRÍTICO: Recargar el token inmediatamente para que esté disponible
           await _loadAuthData();
           
+          // Verificar que el token se guardó correctamente
+          final prefs = await SharedPreferences.getInstance();
+          final savedToken = prefs.getString('auth_token');
+          if (savedToken == accessToken) {
+            print('✅ Token guardado y verificado correctamente');
+          } else {
+            print('⚠️ ADVERTENCIA: Token guardado no coincide con el recibido');
+          }
+          
           // Registrar también en Supabase (en segundo plano, no bloquea)
+          final passwordHash = _hashPassword(password);
           _supabaseUserService.registerUser(
             userId: userId,
             email: email,
             passwordHash: passwordHash,
-            username: username ?? data['username'],
+            username: username ?? userName,
           ).then((success) {
             if (success) {
               print('✅ Usuario también registrado en Supabase Storage');
@@ -549,9 +572,20 @@ class AuthService extends ChangeNotifier {
   Future<Map<String, String>> getAuthHeaders() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
+    final userId = prefs.getString('user_id');
+    
+    if (token == null) {
+      print('⚠️ No hay token disponible en getAuthHeaders');
+      return {
+        'Content-Type': 'application/json',
+      };
+    }
+    
+    print('🔑 Token disponible para usuario: $userId (primeros 20 chars: ${token.substring(0, token.length > 20 ? 20 : token.length)}...)');
+    
     return {
       'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
+      'Authorization': 'Bearer $token',
     };
   }
 

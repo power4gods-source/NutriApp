@@ -149,7 +149,9 @@ def load_users():
     data = load_json_with_fallback(USERS_FILE, USERS_FILE)
     # Asegurar que es un dict
     if not isinstance(data, dict):
+        print(f"⚠️ users.json no es un dict, retornando dict vacío")
         return {}
+    print(f"📋 Cargados {len(data)} usuarios desde base de datos")
     return data
 
 def save_users(users: dict):
@@ -176,16 +178,24 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     )
     try:
         token = credentials.credentials
+        print(f"🔍 Validando token JWT (primeros 20 chars): {token[:20] if len(token) > 20 else token}...")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
         if user_id is None:
+            print(f"❌ Token no contiene 'sub' (user_id)")
             raise credentials_exception
-    except JWTError:
+        print(f"✅ Token válido para usuario: {user_id}")
+    except JWTError as e:
+        print(f"❌ Error decodificando token JWT: {e}")
         raise credentials_exception
     
     users = load_users()
+    print(f"📋 Verificando usuario en base de datos: {user_id}")
     if user_id not in users:
+        print(f"❌ Usuario no encontrado en base de datos: {user_id}")
+        print(f"📋 Usuarios disponibles: {list(users.keys())[:5]}...")
         raise credentials_exception
+    print(f"✅ Usuario encontrado: {user_id}")
     
     user_info = users[user_id]
     email = user_info.get("email", "")
@@ -408,11 +418,14 @@ class ProfileResponse(BaseModel):
 @app.post("/auth/register", response_model=Token)
 def register(user_data: UserRegister):
     """Register a new user"""
+    print(f"📝 Registrando nuevo usuario: {user_data.email}")
     users = load_users()
+    print(f"📋 Usuarios existentes: {len(users)}")
     
     # Check if email already exists
     for user_id, user_info in users.items():
         if user_info.get("email") == user_data.email.lower():
+            print(f"⚠️ Email ya registrado: {user_data.email}")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered"
@@ -424,6 +437,7 @@ def register(user_data: UserRegister):
     
     # Asignar rol: admin SOLO para power4gods@gmail.com, user para el resto (por defecto)
     role = "admin" if user_data.email.lower() == "power4gods@gmail.com" else "user"
+    print(f"👤 Creando usuario con rol: {role}")
     
     users[user_id] = {
         "email": user_data.email.lower(),
@@ -432,10 +446,13 @@ def register(user_data: UserRegister):
         "role": role,
         "created_at": datetime.now().isoformat()
     }
+    print(f"💾 Guardando usuario en base de datos...")
     save_users(users)
+    print(f"✅ Usuario guardado: {user_id} ({user_data.email})")
     
     # Create profile
     profiles = load_profiles()
+    print(f"📝 Creando perfil para usuario: {user_id}")
     profiles[user_id] = {
         "user_id": user_id,
         "email": user_data.email.lower(),
@@ -471,10 +488,14 @@ def register(user_data: UserRegister):
             "connections": []  # Mutual follows (bidirectional)
         }
         save_followers(followers_data)
+    print(f"💾 Guardando perfil en base de datos...")
     save_profiles(profiles)
+    print(f"✅ Perfil guardado para: {user_id}")
     
     # Create access token
+    print(f"🔑 Generando token JWT para: {user_id}")
     access_token = create_access_token(data={"sub": user_id})
+    print(f"✅ Token generado (primeros 20 chars): {access_token[:20]}...")
     
     # Obtener el rol del usuario
     role = users[user_id].get("role", "user")
@@ -483,13 +504,17 @@ def register(user_data: UserRegister):
         users[user_id]["role"] = "admin"
         save_users(users)
     
-    return {
+    result = {
         "access_token": access_token,
         "token_type": "bearer",
         "user_id": user_id,
         "email": user_data.email.lower(),
+        "username": user_data.username or user_data.email.split("@")[0],
         "role": role
     }
+    print(f"✅ Registro completado para: {user_data.email} (rol: {role})")
+    print(f"📤 Retornando token JWT al cliente")
+    return result
 
 @app.post("/auth/login", response_model=Token)
 def login(user_data: UserLogin):
