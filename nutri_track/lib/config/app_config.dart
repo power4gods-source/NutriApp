@@ -10,18 +10,20 @@ class AppConfig {
   
   // URLs por defecto según la plataforma
   static String get defaultBackendUrl {
+    // Usar Render como backend principal (siempre disponible)
+    const String renderUrl = 'https://nutriapp-470k.onrender.com';
+    
     if (kIsWeb) {
-      // En web, usar localhost
-      return 'http://localhost:8000';
+      // En web, usar Render directamente
+      return renderUrl;
     } else {
-      // En móvil, intentar detectar si es emulador o dispositivo físico
-      // Para Android Emulator: 10.0.2.2 apunta al localhost del PC
-      // Para dispositivo físico: usar IP del PC (debe estar en la misma red)
-      // Por defecto, intentar con 10.0.2.2 (emulador)
-      // Si no funciona, el usuario puede configurar la IP manualmente
-      return 'http://10.0.2.2:8000'; // Android Emulator por defecto
-      // Para dispositivo físico, el usuario debe configurar la IP del PC manualmente
-      // o usar Firebase como fuente principal de datos
+      // En móvil, usar Render directamente
+      // La app intentará Render primero, luego fallback a local si es necesario
+      return renderUrl;
+      
+      // Nota: Si quieres usar backend local para desarrollo, puedes cambiar esto a:
+      // return 'http://10.0.2.2:8000'; // Android Emulator
+      // return 'http://192.168.1.134:8000'; // IP local del PC
     }
   }
   
@@ -44,6 +46,7 @@ class AppConfig {
     
     // 2. URLs comunes para diferentes entornos
     urlsToTry.addAll([
+      'https://nutriapp-470k.onrender.com', // Render (producción)
       'http://10.0.2.2:8000', // Android Emulator
       'http://localhost:8000', // Web / Local
       'http://127.0.0.1:8000', // Localhost alternativo
