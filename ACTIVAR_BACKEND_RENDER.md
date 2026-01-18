@@ -39,7 +39,14 @@ Render está usando el commit antiguo (`6808692`) que tiene dependencias incompa
 ```
 SUPABASE_URL=https://gxdzybyszpebhlspwiyz.supabase.co
 SUPABASE_ANON_KEY=sb_publishable_JIAsHqR-ryvBtin_n6EpoA__VkJbZ5T
+JWT_SECRET_KEY=<genera-una-clave-secreta-aleatoria-aqui>
 ```
+
+**⚠️ IMPORTANTE: Para JWT_SECRET_KEY:**
+- Genera una clave aleatoria segura (puedes usar: `python -c "import secrets; print(secrets.token_urlsafe(32))"`)
+- O usa cualquier string aleatorio largo (mínimo 32 caracteres)
+- Esta clave debe ser la MISMA siempre para que los tokens JWT sigan siendo válidos después de reinicios
+- Ejemplo: `JWT_SECRET_KEY=tu-clave-super-secreta-de-al-menos-32-caracteres-aqui`
 
 3. **Haz clic en "Save Changes"**
 
