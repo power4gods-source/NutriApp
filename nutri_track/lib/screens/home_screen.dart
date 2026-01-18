@@ -337,11 +337,11 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             color: Color(0xFF4CAF50),
             fontWeight: FontWeight.bold,
-            fontSize: 20,
-            letterSpacing: 1.2,
+            fontSize: 24,
+            letterSpacing: 1.5,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -352,13 +352,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     // Sección de Alimentación, Registrar Comida y Lista Compra
                     _buildTopActionsSection(),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     // Tu progreso
                     _buildProgressCard(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     // Tendencias
                     _buildTrendingSection(),
                     const SizedBox(height: 16),
@@ -389,7 +389,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: _navigateToTracking,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16), // Reducido de 20 a 16
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -412,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.black87,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
             // Tres círculos: Diaria (grande), Media Semanal y Mensual (pequeños)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -433,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.blue,
                       isLarge: false,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
                     _buildProgressCircle(
                       label: 'Media Mensual',
                       value: (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
@@ -445,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 8), // Reducido de 12 a 8
             // Macronutrientes
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -561,8 +561,8 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
-        constraints: BoxConstraints(
-          minHeight: horizontalLayout ? 70 : (isSmall ? 70 : 100), // Reducir altura si es horizontal o pequeño
+        constraints: const BoxConstraints(
+          minHeight: 80, // Misma altura para todas las cajas
         ),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -670,10 +670,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
     
-    final size = isLarge ? 140.0 : 90.0;
-    final strokeWidth = isLarge ? 14.0 : 10.0;
-    final valueFontSize = isLarge ? 28.0 : 20.0;
-    final goalFontSize = isLarge ? 14.0 : 11.0;
+    final size = isLarge ? 160.0 : 90.0; // Aumentado de 140 a 160 para el círculo diaria
+    final strokeWidth = isLarge ? 16.0 : 10.0; // Aumentado de 14 a 16
+    final valueFontSize = isLarge ? 32.0 : 20.0; // Aumentado de 28 a 32
+    final goalFontSize = isLarge ? 16.0 : 11.0; // Aumentado de 14 a 16
     final labelFontSize = isLarge ? 14.0 : 11.0;
     
     return Column(
@@ -713,7 +713,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6), // Reducido de 8 a 6
         Text(
           label,
           style: TextStyle(
