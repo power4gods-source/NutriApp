@@ -67,7 +67,44 @@ USER_GOALS_FILE = "user_goals.json"  # User goals
 FOLLOWERS_FILE = "followers.json"  # User following/followers relationships
 
 # Authentication settings
-SECRET_KEY = secrets.token_urlsafe(32)  # Generate a random secret key
+# SECRET_KEY debe ser persistente para que los tokens JWT sigan siendo válidos después de reinicios
+# Prioridad: 1) Variable de entorno, 2) Archivo local, 3) Generar nueva y guardarla
+SECRET_KEY_FILE = "jwt_secret_key.txt"
+
+def get_or_create_secret_key():
+    """Get SECRET_KEY from environment variable, file, or create a new one"""
+    import os
+    
+    # 1. Intentar desde variable de entorno (para Render/producción)
+    env_key = os.getenv("JWT_SECRET_KEY")
+    if env_key:
+        print("🔑 Usando SECRET_KEY desde variable de entorno")
+        return env_key
+    
+    # 2. Intentar leer desde archivo local
+    try:
+        if os.path.exists(SECRET_KEY_FILE):
+            with open(SECRET_KEY_FILE, 'r') as f:
+                key = f.read().strip()
+                if key:
+                    print("🔑 Usando SECRET_KEY desde archivo local")
+                    return key
+    except Exception as e:
+        print(f"⚠️ Error leyendo SECRET_KEY desde archivo: {e}")
+    
+    # 3. Generar nueva clave y guardarla
+    new_key = secrets.token_urlsafe(32)
+    try:
+        with open(SECRET_KEY_FILE, 'w') as f:
+            f.write(new_key)
+        print("🔑 Generada nueva SECRET_KEY y guardada en archivo")
+    except Exception as e:
+        print(f"⚠️ No se pudo guardar SECRET_KEY en archivo: {e}")
+        print("⚠️ Usando SECRET_KEY temporal (los tokens se invalidarán al reiniciar)")
+    
+    return new_key
+
+SECRET_KEY = get_or_create_secret_key()
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
 
