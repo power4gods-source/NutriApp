@@ -818,6 +818,9 @@ def get_user_ingredients(current_user: dict = Depends(get_current_user)):
             "dietary_preferences": [],
             "favorite_cuisines": [],
             "ingredients": [],
+            "followers_count": 0,
+            "following_count": 0,
+            "connections_count": 0,
             "notification_settings": {
                 "email_notifications": True,
                 "push_notifications": True,
@@ -829,6 +832,16 @@ def get_user_ingredients(current_user: dict = Depends(get_current_user)):
             "updated_at": datetime.now().isoformat(),
         }
         save_profiles(profiles)
+        
+        # Initialize followers data
+        followers_data = load_followers()
+        if user_id not in followers_data:
+            followers_data[user_id] = {
+                "following": [],
+                "followers": [],
+                "connections": []
+            }
+            save_followers(followers_data)
     
     ingredients = profiles[user_id].get("ingredients", [])
     # Convert old format (list of strings) to new format if needed
@@ -1006,6 +1019,9 @@ def update_shopping_list(
                 "favorite_cuisines": [],
                 "ingredients": [],
                 "shopping_list": [],
+                "followers_count": 0,
+                "following_count": 0,
+                "connections_count": 0,
                 "notification_settings": {
                     "email_notifications": True,
                     "push_notifications": True,
@@ -1017,6 +1033,16 @@ def update_shopping_list(
                 "updated_at": datetime.now().isoformat(),
             }
             save_profiles(profiles)
+            
+            # Initialize followers data
+            followers_data = load_followers()
+            if user_id not in followers_data:
+                followers_data[user_id] = {
+                    "following": [],
+                    "followers": [],
+                    "connections": []
+                }
+                save_followers(followers_data)
         
         shopping_list = request.get("shopping_list", [])
         profiles[user_id]["shopping_list"] = shopping_list
@@ -2755,6 +2781,7 @@ def sync_update_files(files_data: dict):
         "ingredient_food_mapping.json": (load_ingredient_food_mapping, save_ingredient_food_mapping),
         "recipes_public.json": (load_recipes_public, save_recipes_public),
         "recipes_private.json": (load_recipes_private, save_recipes_private),
+        "followers.json": (load_followers, save_followers),
     }
     
     for file_name, data in files_data.items():
