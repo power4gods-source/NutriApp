@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import '../services/auth_service.dart';
 import '../services/tracking_service.dart';
+import '../services/recipe_service.dart';
 
 class AddConsumptionScreen extends StatefulWidget {
   const AddConsumptionScreen({super.key});
@@ -15,33 +16,128 @@ class AddConsumptionScreen extends StatefulWidget {
 class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
   final AuthService _authService = AuthService();
   final TrackingService _trackingService = TrackingService();
+  final RecipeService _recipeService = RecipeService();
   final TextEditingController _foodSearchController = TextEditingController();
+  final TextEditingController _recipeSearchController = TextEditingController();
   
   String _selectedDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
   String _selectedMealType = 'comida';
   List<Map<String, dynamic>> _selectedFoods = [];
   List<Map<String, dynamic>> _foodSuggestions = [];
+  List<Map<String, dynamic>> _recipeSuggestions = [];
   bool _isSearching = false;
+  bool _isSearchingRecipes = false;
+  int _activeSearchTab = 0; // 0 = alimentos, 1 = recetas
 
   @override
   void initState() {
     super.initState();
-    _foodSearchController.addListener(_onSearchChanged);
+    _foodSearchController.addListener(_onFoodSearchChanged);
+    _recipeSearchController.addListener(_onRecipeSearchChanged);
   }
 
   @override
   void dispose() {
     _foodSearchController.dispose();
+    _recipeSearchController.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
-    final query = _foodSearchController.text.trim();
-    if (query.length >= 2) {
-      _searchFoods(query);
-    } else {
-      setState(() => _foodSuggestions = []);
+  void _onFoodSearchChanged() {
+    if (_activeSearchTab == 0) {
+      final query = _foodSearchController.text.trim();
+      if (query.length >= 2) {
+        _searchFoods(query);
+      } else {
+        setState(() => _foodSuggestions = []);
+      }
     }
+  }
+
+  void _onRecipeSearchChanged() {
+    if (_activeSearchTab == 1) {
+      final query = _recipeSearchController.text.trim();
+      if (query.length >= 2) {
+        _searchRecipes(query);
+      } else {
+        setState(() => _recipeSuggestions = []);
+      }
+    }
+  }
+
+  Future<void> _searchRecipes(String query) async {
+    if (query.trim().length < 2) {
+      setState(() {
+        _recipeSuggestions = [];
+        _isSearchingRecipes = false;
+      });
+      return;
+    }
+    
+    setState(() => _isSearchingRecipes = true);
+    try {
+      final allRecipes = await _recipeService.getAllRecipes();
+      final filtered = allRecipes.where((recipe) {
+        final title = (recipe['title'] ?? '').toString().toLowerCase();
+        return title.contains(query.toLowerCase());
+      }).take(10).toList();
+      
+      setState(() {
+        _recipeSuggestions = filtered.cast<Map<String, dynamic>>();
+        _isSearchingRecipes = false;
+      });
+    } catch (e) {
+      print('Error searching recipes: $e');
+      setState(() {
+        _recipeSuggestions = [];
+        _isSearchingRecipes = false;
+      });
+    }
+  }
+
+  void _addRecipeAsConsumption(Map<String, dynamic> recipe) {
+    // Obtener calorías por porción
+    final caloriesPerServing = recipe['calories_per_serving'] ?? 
+                               (recipe['calories'] != null && recipe['servings'] != null 
+                                 ? (recipe['calories'] / recipe['servings']).round() 
+                                 : 0);
+    
+    if (caloriesPerServing <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Esta receta no tiene información nutricional calculada'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    
+    // Añadir la receta como un "alimento" especial con las calorías calculadas
+    final recipeTitle = recipe['title'] ?? 'Receta';
+    setState(() {
+      _selectedFoods.add({
+        'food_id': 'recipe_${recipeTitle.replaceAll(' ', '_')}',
+        'name': recipeTitle,
+        'quantity': 1.0,
+        'unit': 'ración',
+        'calories': caloriesPerServing.toDouble(),
+        'is_recipe': true,
+        'recipe_data': recipe,
+      });
+    });
+    
+    _recipeSearchController.clear();
+    setState(() {
+      _recipeSuggestions = [];
+    });
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Receta "$recipeTitle" añadida: $caloriesPerServing kcal/ración'),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   Future<void> _searchFoods(String query) async {
@@ -235,8 +331,11 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
       return;
     }
 
-    // Validar que todos los alimentos tengan food_id válido
+    // Validar que todos los alimentos tengan food_id válido (excepto recetas)
     final invalidFoods = _selectedFoods.where((food) {
+      if (food['is_recipe'] == true) {
+        return false; // Las recetas no necesitan food_id válido
+      }
       final foodId = food['food_id'] ?? '';
       return foodId.toString().isEmpty;
     }).toList();
@@ -252,8 +351,11 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
         }
       }
       
-      // Verificar de nuevo
+      // Verificar de nuevo (excluyendo recetas)
       final stillInvalid = _selectedFoods.where((food) {
+        if (food['is_recipe'] == true) {
+          return false; // Las recetas no necesitan food_id válido
+        }
         final foodId = food['food_id'] ?? '';
         return foodId.toString().isEmpty;
       }).toList();
@@ -279,8 +381,8 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
       final unit = food['unit'] ?? 'gramos';
       print('  - $name: food_id="$foodId", quantity=$quantity, unit=$unit');
       
-      // Verificar que el food_id no esté vacío
-      if (foodId.toString().isEmpty) {
+      // Verificar que el food_id no esté vacío (excepto recetas)
+      if (food['is_recipe'] != true && foodId.toString().isEmpty) {
         print('❌ ERROR: Alimento sin food_id: $name');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -449,37 +551,93 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
             ),
             const SizedBox(height: 20),
             
-            // Food search
+            // Food/Recipe search with tabs
             Container(
               padding: const EdgeInsets.all(20),
               color: Colors.white,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Buscar Alimento',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  // Tabs
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _activeSearchTab = 0;
+                              _recipeSuggestions = [];
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: _activeSearchTab == 0 ? const Color(0xFF4CAF50) : Colors.grey[200],
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                bottomLeft: Radius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Alimentos',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _activeSearchTab = 1;
+                              _foodSuggestions = [];
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: _activeSearchTab == 1 ? const Color(0xFF4CAF50) : Colors.grey[200],
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(8),
+                                bottomRight: Radius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Recetas',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
+                  // Search field
                   TextField(
-                    controller: _foodSearchController,
+                    controller: _activeSearchTab == 0 ? _foodSearchController : _recipeSearchController,
                     decoration: InputDecoration(
-                      hintText: 'Buscar alimento...',
+                      hintText: _activeSearchTab == 0 ? 'Buscar alimento...' : 'Buscar receta...',
                       prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
-                  if (_isSearching)
+                  if ((_isSearching && _activeSearchTab == 0) || (_isSearchingRecipes && _activeSearchTab == 1))
                     const Padding(
                       padding: EdgeInsets.all(16.0),
                       child: Center(child: CircularProgressIndicator()),
                     ),
-                  if (_foodSuggestions.isNotEmpty)
+                  // Food suggestions
+                  if (_activeSearchTab == 0 && _foodSuggestions.isNotEmpty)
                     Container(
                       margin: const EdgeInsets.only(top: 8),
                       decoration: BoxDecoration(
@@ -488,26 +646,59 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                       ),
                       child: Column(
                         children: _foodSuggestions.map((food) {
-                          // Asegurar que el food_id esté presente
                           final foodId = food['food_id'] ?? food['id'] ?? food['_id'] ?? '';
                           final foodName = food['name'] ?? '';
-                          
-                          print('📋 Sugerencia: $foodName (ID: $foodId)');
                           
                           return ListTile(
                             title: Text(foodName),
                             subtitle: Text('${food['nutrition_per_100g']?['calories'] ?? 0} kcal/100g'),
                             trailing: const Icon(Icons.add_circle, color: Color(0xFF4CAF50)),
                             onTap: () {
-                              // Si no tiene food_id, intentar buscarlo
                               if (foodId.toString().isEmpty) {
-                                print('⚠️ Alimento sin ID, buscando por nombre: $foodName');
                                 _findFoodIdByName(foodName, 100.0, 'gramos');
                               } else {
-                                print('✅ Alimento con ID válido, mostrando diálogo: $foodName (ID: $foodId)');
                                 _showAddFoodDialog(food);
                               }
                             },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  // Recipe suggestions
+                  if (_activeSearchTab == 1 && _recipeSuggestions.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: _recipeSuggestions.map((recipe) {
+                          final title = recipe['title'] ?? 'Sin título';
+                          final caloriesPerServing = recipe['calories_per_serving'] ?? 
+                                                     (recipe['calories'] != null && recipe['servings'] != null 
+                                                       ? (recipe['calories'] / recipe['servings']).round() 
+                                                       : 0);
+                          
+                          return ListTile(
+                            leading: recipe['image_url'] != null && recipe['image_url'].toString().isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: Image.network(
+                                      recipe['image_url'],
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, size: 30),
+                                    ),
+                                  )
+                                : const Icon(Icons.restaurant, size: 30, color: Color(0xFF4CAF50)),
+                            title: Text(title),
+                            subtitle: Text(caloriesPerServing > 0 
+                                ? '$caloriesPerServing kcal/ración' 
+                                : 'Sin información nutricional'),
+                            trailing: const Icon(Icons.add_circle, color: Color(0xFF4CAF50)),
+                            onTap: () => _addRecipeAsConsumption(recipe),
                           );
                         }).toList(),
                       ),
@@ -578,15 +769,22 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
   }
 
   Widget _buildSelectedFoodItem(Map<String, dynamic> food, int index) {
+    final isRecipe = food['is_recipe'] == true;
+    final calories = food['calories'] ?? 0.0;
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: isRecipe ? Colors.orange.withValues(alpha: 0.1) : Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
+        border: isRecipe ? Border.all(color: Colors.orange, width: 1) : null,
       ),
       child: Row(
         children: [
+          if (isRecipe)
+            const Icon(Icons.restaurant_menu, color: Colors.orange, size: 20),
+          if (isRecipe) const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -604,6 +802,15 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                     color: Colors.grey[600],
                   ),
                 ),
+                if (calories > 0)
+                  Text(
+                    '${calories.toInt()} kcal',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isRecipe ? Colors.orange : Colors.grey[600],
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
               ],
             ),
           ),

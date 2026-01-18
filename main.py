@@ -1512,6 +1512,8 @@ class RecipeCreate(BaseModel):
     image_url: Optional[str] = Field(default="", description="URL of recipe image")
     description: str = Field(..., min_length=1, description="Recipe description/instructions")
     nutrients: str = Field(default="calories 0", description="Nutritional information (e.g., 'calories 300')")
+    servings: Optional[float] = Field(default=4.0, description="Number of servings")
+    calories_per_serving: Optional[int] = Field(default=None, description="Calories per serving (calculated from ingredients)")
     user_id: Optional[str] = Field(default="anonymous", description="User ID (for future authentication)")
 
 @app.get("/recipes/general")
@@ -1618,6 +1620,21 @@ def create_private_recipe(recipe: RecipeCreate, current_user: dict = Depends(get
     recipes = load_recipes_private()
     user_id = current_user["user_id"]
     
+    # Calculate calories_per_serving from nutrients string if not provided
+    calories_per_serving = recipe.calories_per_serving
+    if calories_per_serving is None:
+        # Try to extract from nutrients string (format: "calories 300, protein 20, ...")
+        try:
+            nutrients_parts = recipe.nutrients.split(',')
+            for part in nutrients_parts:
+                if 'calories' in part.lower():
+                    calories_total = int(part.split()[-1])
+                    servings = recipe.servings or 4.0
+                    calories_per_serving = int(calories_total / servings)
+                    break
+        except:
+            calories_per_serving = 0
+    
     # Create recipe dictionary
     new_recipe = {
         "title": recipe.title,
@@ -1628,6 +1645,8 @@ def create_private_recipe(recipe: RecipeCreate, current_user: dict = Depends(get
         "image_url": recipe.image_url or "",
         "description": recipe.description,
         "nutrients": recipe.nutrients,
+        "servings": recipe.servings or 4.0,
+        "calories_per_serving": calories_per_serving or 0,
         "user_id": user_id,  # Use authenticated user ID
         "created_at": datetime.now().isoformat(),
         "is_public": False
@@ -1658,6 +1677,20 @@ def update_private_recipe(recipe_id: int, recipe: RecipeCreate, current_user: di
     if recipes[recipe_id].get("user_id") != user_id:
         raise HTTPException(status_code=403, detail="You don't have permission to update this recipe")
     
+    # Calculate calories_per_serving from nutrients string if not provided
+    calories_per_serving = recipe.calories_per_serving
+    if calories_per_serving is None:
+        try:
+            nutrients_parts = recipe.nutrients.split(',')
+            for part in nutrients_parts:
+                if 'calories' in part.lower():
+                    calories_total = int(part.split()[-1])
+                    servings = recipe.servings or 4.0
+                    calories_per_serving = int(calories_total / servings)
+                    break
+        except:
+            calories_per_serving = recipes[recipe_id].get("calories_per_serving", 0)
+    
     # Update recipe
     updated_recipe = {
         "title": recipe.title,
@@ -1668,6 +1701,8 @@ def update_private_recipe(recipe_id: int, recipe: RecipeCreate, current_user: di
         "image_url": recipe.image_url or "",
         "description": recipe.description,
         "nutrients": recipe.nutrients,
+        "servings": recipe.servings or recipes[recipe_id].get("servings", 4.0),
+        "calories_per_serving": calories_per_serving or recipes[recipe_id].get("calories_per_serving", 0),
         "user_id": user_id,
         "updated_at": datetime.now().isoformat()
     }
@@ -1703,6 +1738,20 @@ def update_public_recipe(recipe_id: int, recipe: RecipeCreate, current_user: dic
     if user_role != "admin" and recipes[recipe_id].get("user_id") != user_id:
         raise HTTPException(status_code=403, detail="You don't have permission to update this recipe. Only admins can edit all public recipes.")
     
+    # Calculate calories_per_serving from nutrients string if not provided
+    calories_per_serving = recipe.calories_per_serving
+    if calories_per_serving is None:
+        try:
+            nutrients_parts = recipe.nutrients.split(',')
+            for part in nutrients_parts:
+                if 'calories' in part.lower():
+                    calories_total = int(part.split()[-1])
+                    servings = recipe.servings or 4.0
+                    calories_per_serving = int(calories_total / servings)
+                    break
+        except:
+            calories_per_serving = recipes[recipe_id].get("calories_per_serving", 0)
+    
     # Update recipe
     updated_recipe = {
         "title": recipe.title,
@@ -1713,6 +1762,8 @@ def update_public_recipe(recipe_id: int, recipe: RecipeCreate, current_user: dic
         "image_url": recipe.image_url or "",
         "description": recipe.description,
         "nutrients": recipe.nutrients,
+        "servings": recipe.servings or recipes[recipe_id].get("servings", 4.0),
+        "calories_per_serving": calories_per_serving or recipes[recipe_id].get("calories_per_serving", 0),
         "user_id": user_id,
         "updated_at": datetime.now().isoformat()
     }
@@ -2379,6 +2430,34 @@ def add_consumption(
             continue
         
         print(f"🔍 Buscando alimento con food_id: {food_id}")
+        
+        # Si es una receta (food_id empieza con "recipe_"), usar calorías directamente
+        if food_id.startswith("recipe_"):
+            # Es una receta, usar las calorías proporcionadas
+            recipe_calories = food_dict.get("calories") or 0.0
+            recipe_name = food_dict.get("name") or "Receta"
+            quantity = food_dict.get("quantity") or 1.0
+            
+            if recipe_calories > 0:
+                processed_foods.append({
+                    "food_id": food_id,
+                    "name": recipe_name,
+                    "quantity": quantity,
+                    "unit": "ración",
+                    "calories": recipe_calories * quantity,
+                    "nutrition": {
+                        "calories": recipe_calories * quantity,
+                        "protein": 0.0,
+                        "carbohydrates": 0.0,
+                        "fat": 0.0,
+                        "fiber": 0.0,
+                        "sugar": 0.0,
+                        "sodium": 0.0,
+                    }
+                })
+                total_calories += recipe_calories * quantity
+                print(f"✅ Receta añadida: {recipe_name} ({recipe_calories * quantity} kcal)")
+            continue
         
         # Buscar el alimento en la base de datos
         food = next((f for f in foods_db if f.get("food_id") == food_id), None)

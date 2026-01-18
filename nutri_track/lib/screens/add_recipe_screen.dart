@@ -375,6 +375,11 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         fullDescription = 'Instrucciones:\n${_instructionsController.text.trim()}';
       }
 
+      final servings = double.tryParse(_servingsController.text) ?? 4.0;
+      final caloriesPerServing = _calculatedNutrition != null 
+          ? _calculatedNutrition!['calories'] as int 
+          : 0;
+      
       final recipe = {
         'title': _titleController.text.trim(),
         'description': fullDescription,
@@ -384,6 +389,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         'nutrients': nutrientsString,
         'image_url': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop', // Imagen por defecto
         'tags': '',
+        'servings': servings,
+        'calories_per_serving': caloriesPerServing, // Calorías por porción
         // NO incluir user_id aquí - el backend lo obtiene del token JWT
       };
       

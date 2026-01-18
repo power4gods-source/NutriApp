@@ -236,8 +236,14 @@ class TrackingService {
   ) async {
     try {
       // Validar y limpiar los datos antes de enviar
-      print('📋 Validando ${foods.length} alimentos antes de enviar...');
+      print('📋 Validando ${foods.length} alimentos/recetas antes de enviar...');
       final validFoods = foods.where((food) {
+        // Si es una receta, solo necesita tener calorías
+        if (food['is_recipe'] == true) {
+          final calories = food['calories'] ?? 0.0;
+          return calories > 0;
+        }
+        // Si es un alimento normal, necesita food_id
         final foodId = food['food_id'] ?? food['id'] ?? '';
         final foodIdStr = foodId.toString();
         final isValid = foodIdStr.isNotEmpty;
@@ -246,6 +252,26 @@ class TrackingService {
         }
         return isValid;
       }).map((food) {
+        // Si es una receta, crear un "alimento" especial con las calorías
+        if (food['is_recipe'] == true) {
+          final recipeData = food['recipe_data'] ?? {};
+          final caloriesPerServing = food['calories'] ?? 0.0;
+          final recipeTitle = recipeData['title'] ?? food['name'] ?? 'Receta';
+          
+          // Para recetas, necesitamos crear un alimento temporal o usar un ID especial
+          // El backend deberá manejar esto. Por ahora, usamos un ID especial
+          print('✅ Receta válida: $recipeTitle (${caloriesPerServing} kcal/ración)');
+          return {
+            'food_id': 'recipe_${recipeTitle.replaceAll(' ', '_')}',
+            'quantity': 1.0,
+            'unit': 'ración',
+            'name': recipeTitle,
+            'calories': caloriesPerServing,
+            'is_recipe': true,
+          };
+        }
+        
+        // Alimento normal
         final foodId = (food['food_id'] ?? food['id'] ?? '').toString();
         final quantity = (food['quantity'] ?? 0.0).toDouble();
         final unit = (food['unit'] ?? 'gramos').toString();

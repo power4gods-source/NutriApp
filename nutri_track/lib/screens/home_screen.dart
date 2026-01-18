@@ -332,7 +332,15 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ),
-        title: const SizedBox.shrink(),
+        title: const Text(
+          'NUTRITRACK',
+          style: TextStyle(
+            color: Color(0xFF4CAF50),
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            letterSpacing: 1.2,
+          ),
+        ),
         centerTitle: false,
       ),
       body: _isLoading
@@ -405,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Tres círculos: Diaria, Media Semanal, Media Mensual
+            // Tres círculos: Diaria (grande), Media Semanal y Mensual (pequeños)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -414,18 +422,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   value: consumed,
                   goal: goal,
                   color: Colors.orange,
+                  isLarge: true,
                 ),
-                _buildProgressCircle(
-                  label: 'Media Semanal',
-                  value: (_weeklyStats['avg_daily_calories'] ?? 0).toDouble(),
-                  goal: goal,
-                  color: Colors.blue,
-                ),
-                _buildProgressCircle(
-                  label: 'Media Mensual',
-                  value: (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
-                  goal: goal,
-                  color: Colors.purple,
+                Column(
+                  children: [
+                    _buildProgressCircle(
+                      label: 'Media Semanal',
+                      value: (_weeklyStats['avg_daily_calories'] ?? 0).toDouble(),
+                      goal: goal,
+                      color: Colors.blue,
+                      isLarge: false,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildProgressCircle(
+                      label: 'Media Mensual',
+                      value: (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
+                      goal: goal,
+                      color: Colors.purple,
+                      isLarge: false,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -497,6 +513,7 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitle: 'Ingredientes y compra',
               color: const Color(0xFF4CAF50),
               onTap: _navigateToIngredients,
+              horizontalLayout: true, // Icono al lado del texto
             ),
           ),
           const SizedBox(width: 12),
@@ -509,19 +526,20 @@ class _HomeScreenState extends State<HomeScreen> {
               subtitle: 'Añadir consumo',
               color: Colors.orange,
               onTap: _navigateToAddConsumption,
+              horizontalLayout: true, // Icono al lado del texto
             ),
           ),
           const SizedBox(width: 12),
-          // Lista Compra (1/4)
+          // Lista Compra (1/4) - Solo icono
           Expanded(
             flex: 1,
             child: _buildActionCard(
               icon: Icons.shopping_cart,
-              title: 'Lista Compra',
+              title: '',
               subtitle: '',
               color: Colors.blue,
               onTap: _navigateToShoppingList,
-              isSmall: true, // Indicar que es más pequeño
+              iconOnly: true, // Solo icono, sin texto
             ),
           ),
         ],
@@ -536,12 +554,16 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color color,
     required VoidCallback onTap,
     bool isSmall = false,
+    bool iconOnly = false, // Para Lista Compra: solo icono
+    bool horizontalLayout = false, // Para Alimentación y Registrar: icono al lado del texto
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(14),
-        constraints: const BoxConstraints(minHeight: 100), // Altura mínima igual para todos
+        constraints: BoxConstraints(
+          minHeight: horizontalLayout ? 70 : (isSmall ? 70 : 100), // Reducir altura si es horizontal o pequeño
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -553,45 +575,88 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(icon, color: color, size: isSmall ? 18 : 20),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: isSmall ? 12 : 20, // Texto más pequeño para Lista Compra
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-            if (subtitle.isNotEmpty) ...[
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: Colors.grey[600],
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ],
-        ),
+        child: iconOnly
+            ? Center(
+                child: Icon(icon, color: color, size: 28),
+              )
+            : horizontalLayout
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, color: color, size: 24),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (subtitle.isNotEmpty) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                subtitle,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey[600],
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(icon, color: color, size: isSmall ? 18 : 20),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: isSmall ? 12 : 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[600],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ],
+                  ),
       ),
     );
   }
@@ -601,20 +666,27 @@ class _HomeScreenState extends State<HomeScreen> {
     required double value,
     required double goal,
     required Color color,
+    bool isLarge = false,
   }) {
     final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
+    
+    final size = isLarge ? 140.0 : 90.0;
+    final strokeWidth = isLarge ? 14.0 : 10.0;
+    final valueFontSize = isLarge ? 28.0 : 20.0;
+    final goalFontSize = isLarge ? 14.0 : 11.0;
+    final labelFontSize = isLarge ? 14.0 : 11.0;
     
     return Column(
       children: [
         SizedBox(
-          width: 120, // Aumentado de 80 a 120
-          height: 120, // Aumentado de 80 a 120
+          width: size,
+          height: size,
           child: Stack(
             alignment: Alignment.center,
             children: [
               CircularProgressIndicator(
                 value: progress,
-                strokeWidth: 12, // Aumentado de 8 a 12
+                strokeWidth: strokeWidth,
                 backgroundColor: Colors.grey[200],
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
@@ -624,7 +696,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     value.toInt().toString(),
                     style: TextStyle(
-                      fontSize: 24, // Aumentado de 18 a 24
+                      fontSize: valueFontSize,
                       fontWeight: FontWeight.bold,
                       color: color,
                     ),
@@ -632,7 +704,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     '/ ${goal.toInt()}',
                     style: TextStyle(
-                      fontSize: 12, // Aumentado de 10 a 12
+                      fontSize: goalFontSize,
                       color: Colors.grey[600],
                     ),
                   ),
@@ -645,7 +717,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12, // Aumentado de 11 a 12
+            fontSize: labelFontSize,
             fontWeight: FontWeight.w600,
             color: Colors.grey[700],
           ),
@@ -859,6 +931,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final time = recipe['time_minutes'] ?? 0;
     final difficulty = recipe['difficulty'] ?? 'Fácil';
     final calories = recipe['calories'] ?? 0;
+    // Obtener calorías por porción (calcular si no existe)
+    final caloriesPerServing = recipe['calories_per_serving'] ?? 
+                               (recipe['calories'] != null && recipe['servings'] != null 
+                                 ? (recipe['calories'] / recipe['servings']).round() 
+                                 : 0);
     final imageUrl = recipe['image_url'] ?? recipe['image'] ?? '';
 
     return Container(
@@ -970,21 +1047,22 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.orange,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              '$calories',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
+                          if (caloriesPerServing > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.orange,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '$caloriesPerServing kcal/ración',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ],
@@ -1019,6 +1097,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final title = recipe['title'] ?? 'Sin título';
     final time = recipe['time_minutes'] ?? 0;
     final imageUrl = recipe['image_url'] ?? recipe['image'] ?? '';
+    // Obtener calorías por porción
+    final caloriesPerServing = recipe['calories_per_serving'] ?? 
+                               (recipe['calories'] != null && recipe['servings'] != null 
+                                 ? (recipe['calories'] / recipe['servings']).round() 
+                                 : 0);
     
     // Manejar ingredients de forma segura
     List<String> tags = [];
@@ -1118,6 +1201,24 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.grey[600],
                           ),
                         ),
+                        if (caloriesPerServing > 0) ...[
+                          const SizedBox(width: 12),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '$caloriesPerServing kcal/ración',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                     if (tags.isNotEmpty) ...[
