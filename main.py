@@ -64,6 +64,7 @@ CONSUMPTION_HISTORY_FILE = "consumption_history.json"  # Consumption history
 MEAL_PLANS_FILE = "meal_plans.json"  # Meal plans
 NUTRITION_STATS_FILE = "nutrition_stats.json"  # Nutrition statistics
 USER_GOALS_FILE = "user_goals.json"  # User goals
+FOLLOWERS_FILE = "followers.json"  # User following/followers relationships
 
 # Authentication settings
 SECRET_KEY = secrets.token_urlsafe(32)  # Generate a random secret key
@@ -289,6 +290,17 @@ def save_user_goals(goals):
     """Save user goals to Supabase Storage and local file"""
     save_json_with_sync(USER_GOALS_FILE, goals, USER_GOALS_FILE)
 
+def load_followers():
+    """Load followers/following relationships from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(FOLLOWERS_FILE, FOLLOWERS_FILE)
+    if not isinstance(data, dict):
+        return {}
+    return data
+
+def save_followers(followers_data):
+    """Save followers/following relationships to Supabase Storage and local file"""
+    save_json_with_sync(FOLLOWERS_FILE, followers_data, FOLLOWERS_FILE)
+
 @app.get("/")
 def read_root():
     return {"message": "Hello from Nutritrack backend!"}
@@ -398,6 +410,9 @@ def register(user_data: UserRegister):
         "favorite_cuisines": [],
         "favorite_recipes": [],
         "ingredients": [],
+        "followers_count": 0,
+        "following_count": 0,
+        "connections_count": 0,
         "notification_settings": {
             "email_notifications": True,
             "push_notifications": True,
@@ -409,6 +424,16 @@ def register(user_data: UserRegister):
         "created_at": datetime.now().isoformat(),
         "updated_at": None
     }
+    
+    # Initialize followers data
+    followers_data = load_followers()
+    if user_id not in followers_data:
+        followers_data[user_id] = {
+            "following": [],  # Users this user follows
+            "followers": [],  # Users that follow this user
+            "connections": []  # Mutual follows (bidirectional)
+        }
+        save_followers(followers_data)
     save_profiles(profiles)
     
     # Create access token
@@ -511,12 +536,22 @@ def get_all_profiles(current_user: dict = Depends(get_current_user)):
     """Get all user profiles (for friends screen)"""
     profiles = load_profiles()
     users = load_users()
+    followers_data = load_followers()
+    current_user_id = current_user["user_id"]
+    
+    # Get current user's following list
+    current_following = []
+    if current_user_id in followers_data:
+        current_following = followers_data[current_user_id].get("following", [])
     
     # Return all profiles as a list
     all_profiles = []
     
     # First, add all existing profiles
     for user_id, profile_data in profiles.items():
+        if user_id == current_user_id:
+            continue  # Skip current user
+            
         profile = profile_data.copy()
         
         # Count user's recipes
@@ -528,10 +563,22 @@ def get_all_profiles(current_user: dict = Depends(get_current_user)):
         profile["recipes_count"] = len(user_private) + len(user_public)
         profile["public_recipes_count"] = len(user_public)
         
+        # Add follow status
+        profile["is_following"] = user_id in current_following
+        
+        # Add follower counts
+        if user_id in followers_data:
+            profile["followers_count"] = len(followers_data[user_id].get("followers", []))
+        else:
+            profile["followers_count"] = 0
+        
         all_profiles.append(profile)
     
     # Then, add users that don't have a profile yet
     for user_id, user_data in users.items():
+        if user_id == current_user_id:
+            continue  # Skip current user
+            
         if user_id not in profiles:
             # Create a basic profile from user data
             profile = {
@@ -547,6 +594,8 @@ def get_all_profiles(current_user: dict = Depends(get_current_user)):
                 "favorite_recipes": [],
                 "recipes_count": 0,
                 "public_recipes_count": 0,
+                "followers_count": 0,
+                "is_following": user_id in current_following,
                 "created_at": user_data.get("created_at", datetime.now().isoformat()),
                 "updated_at": datetime.now().isoformat(),
             }
@@ -559,6 +608,10 @@ def get_all_profiles(current_user: dict = Depends(get_current_user)):
             
             profile["recipes_count"] = len(user_private) + len(user_public)
             profile["public_recipes_count"] = len(user_public)
+            
+            # Add follower counts
+            if user_id in followers_data:
+                profile["followers_count"] = len(followers_data[user_id].get("followers", []))
             
             all_profiles.append(profile)
     
@@ -1207,6 +1260,155 @@ def save_ai_menu(save_request: SaveMenuRequest, current_user: dict = Depends(get
         "recipe_ids": saved_recipe_ids
     }
 
+@app.post("/profile/follow/{target_user_id}")
+def follow_user(target_user_id: str, current_user: dict = Depends(get_current_user)):
+    """Follow a user"""
+    user_id = current_user["user_id"]
+    
+    if user_id == target_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot follow yourself"
+        )
+    
+    followers_data = load_followers()
+    profiles = load_profiles()
+    
+    # Initialize if needed
+    if user_id not in followers_data:
+        followers_data[user_id] = {"following": [], "followers": [], "connections": []}
+    if target_user_id not in followers_data:
+        followers_data[target_user_id] = {"following": [], "followers": [], "connections": []}
+    
+    # Check if already following
+    if target_user_id in followers_data[user_id]["following"]:
+        return {"message": "Already following", "following": True}
+    
+    # Add to following list
+    followers_data[user_id]["following"].append(target_user_id)
+    
+    # Add to target's followers list
+    if user_id not in followers_data[target_user_id]["followers"]:
+        followers_data[target_user_id]["followers"].append(user_id)
+    
+    # Check if it's a mutual follow (connection)
+    if user_id in followers_data[target_user_id]["following"]:
+        if target_user_id not in followers_data[user_id]["connections"]:
+            followers_data[user_id]["connections"].append(target_user_id)
+        if user_id not in followers_data[target_user_id]["connections"]:
+            followers_data[target_user_id]["connections"].append(user_id)
+    
+    save_followers(followers_data)
+    
+    # Update profile counts
+    if user_id in profiles:
+        profiles[user_id]["following_count"] = len(followers_data[user_id]["following"])
+        profiles[user_id]["connections_count"] = len(followers_data[user_id]["connections"])
+        save_profiles(profiles)
+    
+    if target_user_id in profiles:
+        profiles[target_user_id]["followers_count"] = len(followers_data[target_user_id]["followers"])
+        profiles[target_user_id]["connections_count"] = len(followers_data[target_user_id]["connections"])
+        save_profiles(profiles)
+    
+    # Create notification for target user
+    if target_user_id in profiles:
+        notifications = profiles[target_user_id].get("notifications", [])
+        notifications.append({
+            "type": "new_follower",
+            "from_user_id": user_id,
+            "from_username": profiles.get(user_id, {}).get("username", "Usuario"),
+            "message": f"{profiles.get(user_id, {}).get('username', 'Usuario')} empezó a seguirte",
+            "created_at": datetime.now().isoformat(),
+            "read": False
+        })
+        profiles[target_user_id]["notifications"] = notifications
+        save_profiles(profiles)
+    
+    return {"message": "User followed successfully", "following": True}
+
+@app.delete("/profile/follow/{target_user_id}")
+def unfollow_user(target_user_id: str, current_user: dict = Depends(get_current_user)):
+    """Unfollow a user"""
+    user_id = current_user["user_id"]
+    
+    followers_data = load_followers()
+    profiles = load_profiles()
+    
+    if user_id not in followers_data or target_user_id not in followers_data[user_id]["following"]:
+        return {"message": "Not following", "following": False}
+    
+    # Remove from following list
+    followers_data[user_id]["following"].remove(target_user_id)
+    
+    # Remove from target's followers list
+    if user_id in followers_data[target_user_id]["followers"]:
+        followers_data[target_user_id]["followers"].remove(user_id)
+    
+    # Remove from connections if it was mutual
+    if target_user_id in followers_data[user_id]["connections"]:
+        followers_data[user_id]["connections"].remove(target_user_id)
+    if user_id in followers_data[target_user_id]["connections"]:
+        followers_data[target_user_id]["connections"].remove(user_id)
+    
+    save_followers(followers_data)
+    
+    # Update profile counts
+    if user_id in profiles:
+        profiles[user_id]["following_count"] = len(followers_data[user_id]["following"])
+        profiles[user_id]["connections_count"] = len(followers_data[user_id]["connections"])
+        save_profiles(profiles)
+    
+    if target_user_id in profiles:
+        profiles[target_user_id]["followers_count"] = len(followers_data[target_user_id]["followers"])
+        profiles[target_user_id]["connections_count"] = len(followers_data[target_user_id]["connections"])
+        save_profiles(profiles)
+    
+    return {"message": "User unfollowed successfully", "following": False}
+
+@app.get("/profile/following")
+def get_following(current_user: dict = Depends(get_current_user)):
+    """Get users that current user is following"""
+    user_id = current_user["user_id"]
+    followers_data = load_followers()
+    profiles = load_profiles()
+    
+    if user_id not in followers_data:
+        return {"following": []}
+    
+    following_ids = followers_data[user_id]["following"]
+    following_profiles = []
+    
+    for follow_id in following_ids:
+        if follow_id in profiles:
+            profile = profiles[follow_id].copy()
+            private_recipes = load_recipes_private()
+            public_recipes = load_recipes_public()
+            user_public = [r for r in public_recipes if r.get("user_id") == follow_id]
+            profile["public_recipes_count"] = len(user_public)
+            following_profiles.append(profile)
+    
+    return {"following": following_profiles}
+
+@app.get("/profile/stats")
+def get_profile_stats(current_user: dict = Depends(get_current_user)):
+    """Get current user's follow stats"""
+    user_id = current_user["user_id"]
+    followers_data = load_followers()
+    
+    if user_id not in followers_data:
+        return {
+            "followers_count": 0,
+            "following_count": 0,
+            "connections_count": 0
+        }
+    
+    return {
+        "followers_count": len(followers_data[user_id]["followers"]),
+        "following_count": len(followers_data[user_id]["following"]),
+        "connections_count": len(followers_data[user_id]["connections"])
+    }
+
 @app.delete("/profile/account")
 def delete_account(current_user: dict = Depends(get_current_user)):
     """Delete user account and all associated data"""
@@ -1223,6 +1425,21 @@ def delete_account(current_user: dict = Depends(get_current_user)):
     if user_id in profiles:
         del profiles[user_id]
         save_profiles(profiles)
+    
+    # Remove from followers data
+    followers_data = load_followers()
+    if user_id in followers_data:
+        # Remove from all following/followers lists
+        for other_user_id in list(followers_data.keys()):
+            if other_user_id != user_id:
+                if user_id in followers_data[other_user_id]["following"]:
+                    followers_data[other_user_id]["following"].remove(user_id)
+                if user_id in followers_data[other_user_id]["followers"]:
+                    followers_data[other_user_id]["followers"].remove(user_id)
+                if user_id in followers_data[other_user_id]["connections"]:
+                    followers_data[other_user_id]["connections"].remove(user_id)
+        del followers_data[user_id]
+        save_followers(followers_data)
     
     # Delete user's private recipes
     private_recipes = load_recipes_private()

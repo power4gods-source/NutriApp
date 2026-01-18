@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
 import '../main.dart';
@@ -12,120 +13,363 @@ class FriendsScreen extends StatefulWidget {
   State<FriendsScreen> createState() => _FriendsScreenState();
 }
 
-class _FriendsScreenState extends State<FriendsScreen> {
+class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
-  List<Map<String, dynamic>> _profiles = [];
+  late TabController _tabController;
+  
+  List<Map<String, dynamic>> _allProfiles = [];
+  List<Map<String, dynamic>> _followingProfiles = [];
   bool _isLoading = true;
+  
+  int _followersCount = 0;
+  int _connectionsCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _loadProfiles();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadData();
   }
 
-  Future<void> _loadProfiles() async {
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadData() async {
     setState(() => _isLoading = true);
     
     try {
-      // Intentar cargar desde el backend primero
-      final url = await AppConfig.getBackendUrl();
-      final headers = await _authService.getAuthHeaders();
-      
-      try {
-        print('🔍 Cargando perfiles desde: $url/profiles/all');
-        final response = await http.get(
-          Uri.parse('$url/profiles/all'),
-          headers: headers,
-        ).timeout(const Duration(seconds: 10));
-        
-        print('📥 Respuesta del backend: ${response.statusCode}');
-        
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          print('📊 Datos recibidos: ${data.runtimeType}');
-          
-          List<Map<String, dynamic>> profilesList = [];
-          
-          if (data is List) {
-            profilesList = List<Map<String, dynamic>>.from(data);
-            print('✅ Perfiles cargados (List): ${profilesList.length}');
-          } else if (data is Map) {
-            if (data['profiles'] != null && data['profiles'] is List) {
-              profilesList = List<Map<String, dynamic>>.from(data['profiles']);
-              print('✅ Perfiles cargados (Map.profiles): ${profilesList.length}');
-            } else {
-              // Si es un Map pero no tiene 'profiles', intentar convertir el Map completo
-              print('⚠️ Formato inesperado, intentando convertir...');
-            }
-          }
-          
-          // Filtrar para excluir el usuario actual
-          final currentUserId = _authService.userId;
-          if (currentUserId != null) {
-            profilesList = profilesList.where((profile) {
-              final profileUserId = profile['user_id']?.toString();
-              return profileUserId != currentUserId.toString();
-            }).toList();
-          }
-          
-          setState(() {
-            _profiles = profilesList;
-            _isLoading = false;
-          });
-          
-          print('✅ Total perfiles mostrados: ${_profiles.length}');
-          return;
-        } else {
-          print('❌ Error del backend: ${response.statusCode} - ${response.body}');
-        }
-      } catch (e, stackTrace) {
-        print('❌ Error cargando perfiles desde backend: $e');
-        print('Stack trace: $stackTrace');
-      }
-      
-      // Fallback: mostrar mensaje si no hay perfiles
-      setState(() {
-        _profiles = [];
-        _isLoading = false;
-      });
+      await Future.wait([
+        _loadAllProfiles(),
+        _loadFollowingProfiles(),
+        _loadStats(),
+      ]);
     } catch (e) {
-      print('❌ Error general cargando perfiles: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      print('❌ Error cargando datos: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
-  Widget _buildAvatar(String? avatarUrl, String username) {
+  Future<void> _loadAllProfiles() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      
+      final response = await http.get(
+        Uri.parse('$url/profiles/all'),
+        headers: headers,
+      ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        List<Map<String, dynamic>> profilesList = [];
+        
+        if (data is List) {
+          profilesList = List<Map<String, dynamic>>.from(data);
+        } else if (data is Map && data['profiles'] != null) {
+          profilesList = List<Map<String, dynamic>>.from(data['profiles']);
+        }
+        
+        setState(() {
+          _allProfiles = profilesList;
+        });
+      }
+    } catch (e) {
+      print('❌ Error cargando perfiles: $e');
+    }
+  }
+
+  Future<void> _loadFollowingProfiles() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      
+      final response = await http.get(
+        Uri.parse('$url/profile/following'),
+        headers: headers,
+      ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        List<Map<String, dynamic>> followingList = [];
+        
+        if (data is Map && data['following'] != null) {
+          followingList = List<Map<String, dynamic>>.from(data['following']);
+        }
+        
+        setState(() {
+          _followingProfiles = followingList;
+        });
+      }
+    } catch (e) {
+      print('❌ Error cargando seguidos: $e');
+    }
+  }
+
+  Future<void> _loadStats() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      
+      final response = await http.get(
+        Uri.parse('$url/profile/stats'),
+        headers: headers,
+      ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _followersCount = data['followers_count'] ?? 0;
+          _connectionsCount = data['connections_count'] ?? 0;
+        });
+      }
+    } catch (e) {
+      print('❌ Error cargando estadísticas: $e');
+    }
+  }
+
+  Future<void> _toggleFollow(String targetUserId, bool currentlyFollowing) async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      
+      final endpoint = currentlyFollowing 
+          ? 'DELETE' 
+          : 'POST';
+      
+      final response = endpoint == 'POST'
+          ? await http.post(
+              Uri.parse('$url/profile/follow/$targetUserId'),
+              headers: headers,
+            ).timeout(const Duration(seconds: 10))
+          : await http.delete(
+              Uri.parse('$url/profile/follow/$targetUserId'),
+              headers: headers,
+            ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Recargar datos
+        await _loadData();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(currentlyFollowing ? 'Dejaste de seguir' : 'Ahora sigues a este usuario'),
+              duration: const Duration(seconds: 2),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('❌ Error al seguir/dejar de seguir: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al actualizar seguimiento'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Color _getAvatarColor(String userId) {
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.pink,
+      Colors.teal,
+      Colors.indigo,
+      Colors.amber,
+      Colors.cyan,
+      Colors.deepOrange,
+    ];
+    
+    final hash = userId.hashCode;
+    return colors[hash.abs() % colors.length];
+  }
+
+  Widget _buildAvatar(String? avatarUrl, String username, String userId) {
+    final avatarColor = _getAvatarColor(userId);
+    
     if (avatarUrl != null && avatarUrl.isNotEmpty) {
       return CircleAvatar(
-        radius: 30,
+        radius: 28,
         backgroundImage: NetworkImage(avatarUrl),
         onBackgroundImageError: (_, __) {
-          // Si falla la carga, mostrar inicial
+          // Fallback to colored avatar
         },
-        child: Text(
+        backgroundColor: avatarColor,
+        child: avatarUrl.isEmpty ? Text(
           username.isNotEmpty ? username[0].toUpperCase() : '?',
           style: const TextStyle(
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
-        ),
+        ) : null,
       );
     }
     
     return CircleAvatar(
-      radius: 30,
-      backgroundColor: const Color(0xFF4CAF50),
+      radius: 28,
+      backgroundColor: avatarColor,
       child: Text(
         username.isNotEmpty ? username[0].toUpperCase() : '?',
         style: const TextStyle(
-          fontSize: 24,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileCard(Map<String, dynamic> profile) {
+    final username = profile['username'] ?? 
+                     profile['display_name'] ?? 
+                     profile['email']?.split('@')[0] ?? 
+                     'Usuario';
+    final userId = profile['user_id'] ?? '';
+    final avatarUrl = profile['avatar_url'] ?? '';
+    final followersCount = profile['followers_count'] ?? 0;
+    final publicRecipesCount = profile['public_recipes_count'] ?? 0;
+    final isFollowing = profile['is_following'] ?? false;
+    
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            _buildAvatar(avatarUrl, username, userId),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    username,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.people, size: 14, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$followersCount seguidores',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 16),
+                      Row(
+                        children: [
+                          Icon(Icons.restaurant_menu, size: 14, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$publicRecipesCount recetas',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => _toggleFollow(userId, isFollowing),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isFollowing ? Colors.grey[300] : const Color(0xFF4CAF50),
+                foregroundColor: isFollowing ? Colors.black87 : Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: isFollowing ? 0 : 2,
+              ),
+              child: Text(
+                isFollowing ? 'Siguiendo' : 'Seguir',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatsHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          _buildStatItem('Te siguen', _followersCount),
+          const SizedBox(width: 24),
+          _buildStatItem('Conexiones', _connectionsCount),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String label, int value) {
+    return Column(
+      children: [
+        Text(
+          '$value',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF4CAF50),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
   }
 
@@ -142,7 +386,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
           onPressed: () {
             final mainNavState = MainNavigationScreen.of(context);
             if (mainNavState != null) {
-              mainNavState.setCurrentIndex(2); // Volver a Inicio
+              mainNavState.setCurrentIndex(2);
             } else if (Navigator.canPop(context)) {
               Navigator.pop(context);
             }
@@ -160,105 +404,122 @@ class _FriendsScreenState extends State<FriendsScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFF4CAF50)),
-            onPressed: _loadProfiles,
+            onPressed: _loadData,
             tooltip: 'Actualizar',
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(100),
+          child: Column(
+            children: [
+              _buildStatsHeader(),
+              TabBar(
+                controller: _tabController,
+                labelColor: const Color(0xFF4CAF50),
+                unselectedLabelColor: Colors.grey,
+                indicatorColor: const Color(0xFF4CAF50),
+                indicatorWeight: 3,
+                tabs: const [
+                  Tab(text: 'Amigos'),
+                  Tab(text: 'Explorar'),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _profiles.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.people_outline,
-                        size: 80,
-                        color: Colors.grey[300],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'No hay perfiles disponibles',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Los perfiles de usuarios aparecerán aquí',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : RefreshIndicator(
-                  onRefresh: _loadProfiles,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _profiles.length,
-                    itemBuilder: (context, index) {
-                      final profile = _profiles[index];
-                      final username = profile['username'] ?? 
-                                     profile['display_name'] ?? 
-                                     profile['email']?.split('@')[0] ?? 
-                                     'Usuario';
-                      final avatarUrl = profile['avatar_url'];
-                      
-                      // Omitir el perfil del usuario actual
-                      if (profile['user_id'] == _authService.userId) {
-                        return const SizedBox.shrink();
-                      }
-                      
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          leading: _buildAvatar(avatarUrl, username),
-                          title: Text(
-                            username,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                // Tab: Amigos (Following)
+                _followingProfiles.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.person_add_outlined,
+                              size: 80,
+                              color: Colors.grey[300],
                             ),
-                          ),
-                          subtitle: profile['bio'] != null && 
-                                   (profile['bio'] as String).isNotEmpty
-                              ? Text(
-                                  profile['bio'],
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
-                                  ),
-                                )
-                              : null,
-                          trailing: const Icon(
-                            Icons.chevron_right,
-                            color: Colors.grey,
-                          ),
-                          onTap: () {
-                            // TODO: Navegar al perfil del usuario
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Perfil de $username'),
-                                duration: const Duration(seconds: 1),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Aún no sigues a nadie',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
                               ),
-                            );
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Explora usuarios y comienza a seguir',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadData,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _followingProfiles.length,
+                          itemBuilder: (context, index) {
+                            final profile = _followingProfiles[index];
+                            profile['is_following'] = true;
+                            return _buildProfileCard(profile);
                           },
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      ),
+                
+                // Tab: Explorar (All Profiles)
+                _allProfiles.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.people_outline,
+                              size: 80,
+                              color: Colors.grey[300],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No hay perfiles disponibles',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Los perfiles de usuarios aparecerán aquí',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadData,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _allProfiles.length,
+                          itemBuilder: (context, index) {
+                            return _buildProfileCard(_allProfiles[index]);
+                          },
+                        ),
+                      ),
+              ],
+            ),
     );
   }
 }

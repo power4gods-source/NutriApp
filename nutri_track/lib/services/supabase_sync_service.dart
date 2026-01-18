@@ -25,6 +25,7 @@ class SupabaseSyncService {
     'ingredient_food_mapping.json',
     'recipes_public.json',
     'recipes_private.json',
+    'followers.json',
   ];
 
   /// Sube un archivo JSON a Supabase Storage
