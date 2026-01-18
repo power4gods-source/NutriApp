@@ -73,6 +73,13 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
           profilesList = List<Map<String, dynamic>>.from(data['profiles']);
         }
         
+        // Filtrar admin (power4gods@gmail.com) de la lista
+        profilesList = profilesList.where((profile) {
+          final email = (profile['email'] ?? '').toString().toLowerCase();
+          final role = (profile['role'] ?? 'user').toString().toLowerCase();
+          return email != 'power4gods@gmail.com' && role != 'admin';
+        }).toList();
+        
         setState(() {
           _allProfiles = profilesList;
         });

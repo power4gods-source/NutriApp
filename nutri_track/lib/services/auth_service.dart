@@ -321,16 +321,7 @@ class AuthService extends ChangeNotifier {
           final userId = data['user_id'];
           final passwordHash = _hashPassword(password);
           
-          // Registrar también en Supabase (sin esperar, en segundo plano para no bloquear)
-          _supabaseUserService.registerUser(
-            userId: userId,
-            email: email,
-            passwordHash: passwordHash,
-            username: username ?? data['username'],
-          ).catchError((e) {
-            print('⚠️ Error al registrar en Supabase (no crítico): $e');
-          });
-          
+          // Guardar datos de autenticación PRIMERO
           await _saveAuthData(
             data['access_token'],
             userId,
@@ -338,6 +329,28 @@ class AuthService extends ChangeNotifier {
             data['username'],
             role: data['role'] ?? (data['email'] == 'power4gods@gmail.com' ? 'admin' : 'user'),
           );
+          
+          // CRÍTICO: Recargar el token inmediatamente para que esté disponible
+          await _loadAuthData();
+          
+          // Registrar también en Supabase (en segundo plano, no bloquea)
+          _supabaseUserService.registerUser(
+            userId: userId,
+            email: email,
+            passwordHash: passwordHash,
+            username: username ?? data['username'],
+          ).then((success) {
+            if (success) {
+              print('✅ Usuario también registrado en Supabase Storage');
+            } else {
+              print('⚠️ No se pudo registrar en Supabase Storage (el backend ya lo tiene)');
+            }
+          }).catchError((e) {
+            print('⚠️ Error al registrar en Supabase (no crítico, el backend ya lo tiene): $e');
+          });
+          
+          print('✅ Usuario registrado correctamente, token guardado y recargado');
+          
           return {'success': true, 'data': data};
         } else {
           final error = jsonDecode(response.body);

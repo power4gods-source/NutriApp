@@ -551,6 +551,12 @@ def get_all_profiles(current_user: dict = Depends(get_current_user)):
     for user_id, profile_data in profiles.items():
         if user_id == current_user_id:
             continue  # Skip current user
+        
+        # Skip admin user (power4gods@gmail.com)
+        user_email = profile_data.get("email", "").lower()
+        user_role = users.get(user_id, {}).get("role", "user")
+        if user_email == "power4gods@gmail.com" or user_role == "admin":
+            continue  # Skip admin user
             
         profile = profile_data.copy()
         
@@ -578,6 +584,12 @@ def get_all_profiles(current_user: dict = Depends(get_current_user)):
     for user_id, user_data in users.items():
         if user_id == current_user_id:
             continue  # Skip current user
+        
+        # Skip admin user
+        user_email = user_data.get("email", "").lower()
+        user_role = user_data.get("role", "user")
+        if user_email == "power4gods@gmail.com" or user_role == "admin":
+            continue  # Skip admin user
             
         if user_id not in profiles:
             # Create a basic profile from user data
