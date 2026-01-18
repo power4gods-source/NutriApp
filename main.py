@@ -492,6 +492,13 @@ def register(user_data: UserRegister):
     save_profiles(profiles)
     print(f"✅ Perfil guardado para: {user_id}")
     
+    # Verificar que el perfil se guardó correctamente
+    profiles_verification = load_profiles()
+    if user_id in profiles_verification:
+        print(f"✅ Verificación: Perfil {user_id} existe en base de datos")
+    else:
+        print(f"❌ ERROR: Perfil {user_id} NO se encontró después de guardar")
+    
     # Create access token
     print(f"🔑 Generando token JWT para: {user_id}")
     access_token = create_access_token(data={"sub": user_id})
