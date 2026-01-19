@@ -111,20 +111,53 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
         }),
       ).timeout(const Duration(seconds: 60));
 
+      print('📥 Response status: ${response.statusCode}');
+      print('📥 Response body: ${response.body}');
+      
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _recipes = List<Map<String, dynamic>>.from(data['recipes'] ?? []);
-          _isGenerating = false;
-        });
+        try {
+          final data = jsonDecode(response.body);
+          print('📥 Parsed data: $data');
+          
+          final recipes = data['recipes'] ?? [];
+          print('📥 Recipes count: ${recipes.length}');
+          
+          if (recipes.isEmpty) {
+            setState(() {
+              _error = 'No se generaron recetas. Intenta con otros ingredientes o filtros.';
+              _isGenerating = false;
+            });
+          } else {
+            setState(() {
+              _recipes = List<Map<String, dynamic>>.from(recipes);
+              _isGenerating = false;
+            });
+            print('✅ Recetas cargadas: ${_recipes.length}');
+          }
+        } catch (e) {
+          print('❌ Error parseando respuesta: $e');
+          setState(() {
+            _error = 'Error al procesar las recetas: $e';
+            _isGenerating = false;
+          });
+        }
       } else {
-        final errorData = jsonDecode(response.body);
-        setState(() {
-          _error = errorData['error'] ?? errorData['detail'] ?? 'Error al generar recetas';
-          _isGenerating = false;
-        });
+        try {
+          final errorData = jsonDecode(response.body);
+          setState(() {
+            _error = errorData['error'] ?? errorData['detail'] ?? 'Error al generar recetas (${response.statusCode})';
+            _isGenerating = false;
+          });
+        } catch (e) {
+          setState(() {
+            _error = 'Error del servidor (${response.statusCode}): ${response.body}';
+            _isGenerating = false;
+          });
+        }
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('❌ Error completo: $e');
+      print('❌ Stack trace: $stackTrace');
       setState(() {
         _error = 'Error de conexión: $e';
         _isGenerating = false;
@@ -620,7 +653,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                                           size: 64, color: Colors.grey[400]),
                                       const SizedBox(height: 16),
                                       const Text(
-                                        'Haz clic en "Generar 5 Recetas" para comenzar',
+                                        'Haz clic en "Generar sugerencias" para comenzar',
                                         style: TextStyle(
                                           color: Colors.grey,
                                           fontSize: 16,

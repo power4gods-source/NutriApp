@@ -1627,6 +1627,15 @@ Reglas CRÍTICAS:
             
             print(f"✅ Generadas {len(formatted_recipes)} recetas con IA")
             
+            if len(formatted_recipes) == 0:
+                print("⚠️ No se generaron recetas después del filtrado")
+                return {
+                    "error": "No se pudieron generar recetas con los filtros seleccionados. Intenta con otros filtros o ingredientes.",
+                    "recipes": [],
+                    "meal_type": meal_type,
+                    "ai_generated": True
+                }
+            
             return {
                 "message": f"Recetas generadas exitosamente para {meal_type}",
                 "recipes": formatted_recipes,
@@ -1636,11 +1645,12 @@ Reglas CRÍTICAS:
             
         except json.JSONDecodeError as e:
             print(f"❌ Error parseando JSON de IA: {e}")
-            print(f"Respuesta recibida: {ai_response[:500]}")
+            print(f"Respuesta recibida (primeros 1000 chars): {ai_response[:1000]}")
+            print(f"Respuesta completa length: {len(ai_response)}")
             return {
-                "error": f"Error parseando respuesta de IA: {str(e)}",
+                "error": f"Error parseando respuesta de IA. La respuesta no es JSON válido: {str(e)}",
                 "recipes": [],
-                "raw_response": ai_response[:200]
+                "raw_response": ai_response[:500]
             }
             
     except Exception as e:
