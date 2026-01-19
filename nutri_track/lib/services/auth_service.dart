@@ -307,17 +307,47 @@ class AuthService extends ChangeNotifier {
       // Usar backend si está disponible
       try {
         final url = await baseUrl;
-        final response = await http
-            .post(
-              Uri.parse('$url/auth/register'),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode({
-                'email': email,
-                'password': password,
-                if (username != null) 'username': username,
-              }),
-            )
-            .timeout(const Duration(seconds: 10));
+        print('🔄 Intentando registrar en backend: $url/auth/register');
+        
+        // Intentar con timeout más largo y reintentos
+        http.Response? response;
+        Exception? lastError;
+        
+        for (int attempt = 1; attempt <= 3; attempt++) {
+          try {
+            print('🔄 Intento $attempt/3 de registro en backend...');
+            response = await http
+                .post(
+                  Uri.parse('$url/auth/register'),
+                  headers: {'Content-Type': 'application/json'},
+                  body: jsonEncode({
+                    'email': email,
+                    'password': password,
+                    if (username != null) 'username': username,
+                  }),
+                )
+                .timeout(const Duration(seconds: 60)); // Timeout más largo para Render
+            
+            if (response.statusCode == 200 || response.statusCode == 201) {
+              break; // Éxito, salir del loop
+            } else if (response.statusCode != 500 && response.statusCode != 502 && response.statusCode != 503) {
+              // Si no es un error de servidor, no reintentar
+              break;
+            }
+            print('⚠️ Intento $attempt falló con status ${response.statusCode}, reintentando...');
+            await Future.delayed(Duration(seconds: attempt * 2)); // Esperar antes de reintentar
+          } catch (e) {
+            lastError = e is Exception ? e : Exception(e.toString());
+            print('⚠️ Error en intento $attempt: $e');
+            if (attempt < 3) {
+              await Future.delayed(Duration(seconds: attempt * 2)); // Esperar antes de reintentar
+            }
+          }
+        }
+        
+        if (response == null) {
+          throw lastError ?? Exception('No se pudo conectar al backend después de 3 intentos');
+        }
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           final data = jsonDecode(response.body);
@@ -376,10 +406,14 @@ class AuthService extends ChangeNotifier {
           
           return {'success': true, 'data': data};
         } else {
+          print('❌ Registro falló con status: ${response.statusCode}');
+          print('❌ Response body: ${response.body}');
           final error = jsonDecode(response.body);
           return {'success': false, 'error': error['detail'] ?? 'Registration failed'};
         }
       } catch (e) {
+        print('❌ Error al registrar en backend: $e');
+        print('🔄 Intentando registro en Supabase como fallback...');
         // Si falla el backend, intentar registro en Supabase directamente
         return await _registerSupabase(email, password, username: username);
       }
@@ -464,76 +498,109 @@ class AuthService extends ChangeNotifier {
       await prefs.setString(_localUsersKey, jsonEncode(users));
       
       // CRÍTICO: Intentar registrar en el backend para obtener JWT válido
-      // Aumentar timeout y manejar errores mejor
+      // Aumentar timeout y manejar errores mejor con reintentos
       String? backendToken;
       try {
         final url = await baseUrl;
-        print('🔄 Registrando en backend para obtener JWT válido (timeout: 30s)...');
-        final registerResponse = await http.post(
-          Uri.parse('$url/auth/register'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'email': normalizedEmail,
-            'password': password,
-            if (username != null) 'username': username,
-          }),
-        ).timeout(
-          const Duration(seconds: 30),  // Aumentado de 10 a 30 segundos para operaciones críticas
-          onTimeout: () {
-            throw TimeoutException('Timeout al registrar en backend (30s)');
-          },
-        );
+        print('🔄 Registrando en backend para obtener JWT válido: $url/auth/register');
         
-        if (registerResponse.statusCode == 200 || registerResponse.statusCode == 201) {
-          final registerData = jsonDecode(registerResponse.body);
-          backendToken = registerData['access_token'];
-          print('✅ Usuario registrado en backend, JWT obtenido: ${backendToken?.substring(0, 20)}...');
-        } else {
-          print('⚠️ Registro en backend falló: ${registerResponse.statusCode} - ${registerResponse.body}');
-          // Si el usuario ya existe (400/409), intentar login
-          if (registerResponse.statusCode == 400 || registerResponse.statusCode == 409) {
-            print('🔄 Usuario ya existe, intentando login...');
-            try {
-              final loginResponse = await http.post(
-                Uri.parse('$url/auth/login'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode({
-                  'email': normalizedEmail,
-                  'password': password,
-                }),
-              ).timeout(const Duration(seconds: 30));
-              
-              if (loginResponse.statusCode == 200) {
-                final loginData = jsonDecode(loginResponse.body);
-                backendToken = loginData['access_token'];
-                print('✅ Login exitoso, JWT obtenido: ${backendToken?.substring(0, 20)}...');
-              } else {
-                print('❌ Login falló: ${loginResponse.statusCode} - ${loginResponse.body}');
+        // Intentar con reintentos
+        http.Response? registerResponse;
+        for (int attempt = 1; attempt <= 3; attempt++) {
+          try {
+            print('🔄 Intento $attempt/3 de registro en backend...');
+            registerResponse = await http.post(
+              Uri.parse('$url/auth/register'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'email': normalizedEmail,
+                'password': password,
+                if (username != null) 'username': username,
+              }),
+            ).timeout(
+              const Duration(seconds: 60),  // Timeout más largo para Render
+              onTimeout: () {
+                throw TimeoutException('Timeout al registrar en backend (60s)');
+              },
+            );
+            
+            if (registerResponse.statusCode == 200 || registerResponse.statusCode == 201) {
+              break; // Éxito
+            } else if (registerResponse.statusCode == 400 || registerResponse.statusCode == 409) {
+              // Usuario ya existe, no reintentar
+              break;
+            } else if (registerResponse.statusCode != 500 && registerResponse.statusCode != 502 && registerResponse.statusCode != 503) {
+              // Otro error no relacionado con servidor, no reintentar
+              break;
+            }
+            print('⚠️ Intento $attempt falló con status ${registerResponse.statusCode}, reintentando...');
+            await Future.delayed(Duration(seconds: attempt * 2));
+          } catch (e) {
+            print('⚠️ Error en intento $attempt: $e');
+            if (attempt < 3) {
+              await Future.delayed(Duration(seconds: attempt * 2));
+            }
+          }
+        }
+        
+        if (registerResponse != null) {
+          if (registerResponse.statusCode == 200 || registerResponse.statusCode == 201) {
+            final registerData = jsonDecode(registerResponse.body);
+            backendToken = registerData['access_token'];
+            print('✅ Usuario registrado en backend, JWT obtenido: ${backendToken?.substring(0, 20)}...');
+          } else {
+            print('⚠️ Registro en backend falló: ${registerResponse.statusCode} - ${registerResponse.body}');
+            // Si el usuario ya existe (400/409), intentar login
+            if (registerResponse.statusCode == 400 || registerResponse.statusCode == 409) {
+              print('🔄 Usuario ya existe, intentando login...');
+              try {
+                final loginResponse = await http.post(
+                  Uri.parse('$url/auth/login'),
+                  headers: {'Content-Type': 'application/json'},
+                  body: jsonEncode({
+                    'email': normalizedEmail,
+                    'password': password,
+                  }),
+                ).timeout(const Duration(seconds: 60));
+                
+                if (loginResponse.statusCode == 200) {
+                  final loginData = jsonDecode(loginResponse.body);
+                  backendToken = loginData['access_token'];
+                  print('✅ Login exitoso, JWT obtenido: ${backendToken?.substring(0, 20)}...');
+                } else {
+                  print('❌ Login falló: ${loginResponse.statusCode} - ${loginResponse.body}');
+                }
+              } catch (e) {
+                print('❌ Error al hacer login: $e');
               }
-            } catch (e) {
-              print('❌ Error al hacer login: $e');
             }
           }
         }
       } catch (e) {
-        print('❌ ERROR: No se pudo registrar/login en el backend: $e');
-        print('❌ El usuario tendrá un token local que NO funcionará');
+        print('❌ ERROR: No se pudo registrar/login en el backend después de 3 intentos: $e');
+        print('❌ El usuario tendrá un token local que NO funcionará con el backend');
       }
       
-      // Usar el token del backend si está disponible, sino usar token local
-      // El token local funcionará para operaciones que no requieren backend (Supabase)
-      final token = backendToken ?? _generateLocalToken(userId, normalizedEmail);
-      
+      // CRÍTICO: Si no hay token del backend, NO guardar token local
+      // En su lugar, forzar al usuario a hacer login cuando el backend esté disponible
       if (backendToken == null) {
-        print('⚠️ Backend no disponible - usando modo offline con Supabase');
-        print('ℹ️ El usuario puede usar la app normalmente, pero algunas funciones del backend no estarán disponibles');
-        print('ℹ️ Cuando el backend esté disponible, el usuario puede hacer login para obtener JWT válido');
-      } else {
-        print('✅ Token JWT válido obtenido del backend');
+        print('❌ CRÍTICO: No se obtuvo token JWT del backend');
+        print('❌ El usuario NO podrá usar funciones que requieren autenticación');
+        print('ℹ️ SOLUCIÓN: El usuario debe hacer LOGIN cuando el backend esté disponible');
+        print('ℹ️ El backend puede estar "spinning down" - espera 30-60 segundos y vuelve a intentar');
+        
+        // NO guardar token local - forzar login
+        return {
+          'success': false,
+          'error': 'Backend no disponible. Por favor, intenta hacer login cuando el backend esté disponible.',
+          'requires_login': true,
+        };
       }
       
+      // Usar el token del backend (ya verificado que existe)
+      print('✅ Token JWT válido obtenido del backend');
       final role = normalizedEmail == 'power4gods@gmail.com' ? 'admin' : 'user';
-      await _saveAuthData(token, userId, normalizedEmail, username ?? normalizedEmail.split('@')[0], role: role);
+      await _saveAuthData(backendToken, userId, normalizedEmail, username ?? normalizedEmail.split('@')[0], role: role);
       
       return {
         'success': true,

@@ -135,15 +135,33 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           ),
         );
       } else if (mounted) {
-        final errorMessage = result['error'] ?? 'Error al registrar usuario';
-        print('❌ Error en registro: $errorMessage');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        // Verificar si requiere login (backend no disponible)
+        if (result['requires_login'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['error'] ?? 'Backend no disponible. Por favor, intenta hacer login.'),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 6),
+              action: SnackBarAction(
+                label: 'Hacer Login',
+                textColor: Colors.white,
+                onPressed: () {
+                  _tabController.animateTo(0); // Cambiar a pestaña de login
+                },
+              ),
+            ),
+          );
+        } else {
+          final errorMessage = result['error'] ?? 'Error al registrar usuario';
+          print('❌ Error en registro: $errorMessage');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
     } catch (e, stackTrace) {
       print('❌ Excepción durante el registro: $e');
