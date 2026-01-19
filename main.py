@@ -110,13 +110,26 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
 
 # Password hashing
 # Initialize password context with explicit bcrypt backend to avoid compatibility issues
+# Force bcrypt backend to avoid version detection issues
+import passlib.handlers.bcrypt
+try:
+    # Explicitly set bcrypt backend before creating context
+    passlib.handlers.bcrypt.bcrypt.set_backend("bcrypt")
+except:
+    pass
+
 try:
     # Try to use bcrypt with explicit backend
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__ident="2b")
 except Exception as e:
     print(f"⚠️ Warning: Could not initialize bcrypt with explicit backend: {e}")
     # Fallback to default initialization
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    try:
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    except Exception as e2:
+        print(f"❌ Error: Could not initialize bcrypt at all: {e2}")
+        # Last resort: use pbkdf2_sha256 instead
+        pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 # Security
 security = HTTPBearer()
