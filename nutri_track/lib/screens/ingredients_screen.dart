@@ -582,9 +582,15 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
     }
     
     final trimmedNew = newName.trim().toLowerCase();
+    // Normalizar al singular
+    final normalizedNew = _normalizeToSingular(trimmedNew);
+    final normalizedOld = _normalizeToSingular(oldName.toLowerCase());
     
     // Check if new name already exists (and it's not the same ingredient)
-    if (_ingredients.any((ing) => ing.name.toLowerCase() == trimmedNew && ing.name.toLowerCase() != oldName.toLowerCase())) {
+    if (_ingredients.any((ing) {
+      final ingNormalized = _normalizeToSingular(ing.name.toLowerCase());
+      return ingNormalized == normalizedNew && ingNormalized != normalizedOld;
+    })) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Este ingrediente ya existe')),
       );
@@ -594,20 +600,18 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
 
     try {
       final headers = await _authService.getAuthHeaders();
-      // Convertir nuevo nombre a plural
-      final pluralNewName = PluralHelper.toPlural(trimmedNew).toLowerCase();
       
       // Eliminar el ingrediente antiguo y añadir el nuevo
       final url = await AppConfig.getBackendUrl();
-      // Primero eliminar el antiguo
-      final encodedOldName = Uri.encodeComponent(oldName.toLowerCase());
+      // Primero eliminar el antiguo (usar nombre normalizado)
+      final encodedOldName = Uri.encodeComponent(normalizedOld);
       await http.delete(
         Uri.parse('$url/profile/ingredients/$encodedOldName'),
         headers: headers,
       ).timeout(const Duration(seconds: 10));
       
-      // Luego añadir el nuevo
-      final encodedNewName = Uri.encodeComponent(pluralNewName);
+      // Luego añadir el nuevo (usar nombre normalizado al singular)
+      final encodedNewName = Uri.encodeComponent(normalizedNew);
       final finalQuantity = quantity ?? _ingredients.firstWhere(
         (ing) => ing.name.toLowerCase() == oldName.toLowerCase(),
         orElse: () => Ingredient(name: '', quantity: 1.0, unit: 'unidades'),
