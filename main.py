@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import secrets
+import bcrypt
 from supabase_storage import load_json_with_fallback, save_json_with_sync, load_json_from_supabase, save_json_to_supabase
 
 app = FastAPI()
@@ -109,27 +110,19 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
 
 # Password hashing
-# Initialize password context with explicit bcrypt backend to avoid compatibility issues
-# Force bcrypt backend to avoid version detection issues
-import passlib.handlers.bcrypt
+# Initialize password context - use direct bcrypt to avoid passlib version detection issues
+# We'll use bcrypt directly for hashing, and passlib only for verification when needed
+pwd_context = None
 try:
-    # Explicitly set bcrypt backend before creating context
-    passlib.handlers.bcrypt.bcrypt.set_backend("bcrypt")
-except:
-    pass
-
-try:
-    # Try to use bcrypt with explicit backend
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__ident="2b")
+    # Try to initialize with bcrypt
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    # Test that it works
+    test_hash = pwd_context.hash("test")
+    print("✅ Password context initialized with bcrypt")
 except Exception as e:
-    print(f"⚠️ Warning: Could not initialize bcrypt with explicit backend: {e}")
-    # Fallback to default initialization
-    try:
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    except Exception as e2:
-        print(f"❌ Error: Could not initialize bcrypt at all: {e2}")
-        # Last resort: use pbkdf2_sha256 instead
-        pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
+    print(f"⚠️ Warning: Could not initialize passlib bcrypt context: {e}")
+    print("ℹ️ Will use direct bcrypt library instead")
+    pwd_context = None
 
 # Security
 security = HTTPBearer()
@@ -149,11 +142,25 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return sha256_hash == hashed_password
 
 def get_password_hash(password: str) -> str:
-    """Hash a password"""
+    """Hash a password using bcrypt directly (more reliable than passlib)"""
     # Bcrypt has a 72-byte limit, truncate if necessary
-    if len(password.encode('utf-8')) > 72:
-        password = password[:72]
-    return pwd_context.hash(password)
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+    
+    # Use bcrypt directly to avoid passlib version detection issues
+    try:
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password_bytes, salt)
+        return hashed.decode('utf-8')
+    except Exception as e:
+        print(f"⚠️ Error hashing password with bcrypt: {e}")
+        # Fallback to passlib if available
+        if pwd_context:
+            return pwd_context.hash(password)
+        # Last resort: SHA256 (not secure, but better than nothing)
+        import hashlib
+        return hashlib.sha256(password.encode()).hexdigest()
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a JWT access token"""
