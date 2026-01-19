@@ -520,9 +520,9 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
           final userId = authService.userId;
           
           if (userId != null) {
-            // Agregar a la lista local
+            // Agregar a la lista local (usar nombre normalizado al singular)
             final newIngredient = Ingredient(
-              name: pluralName,
+              name: normalizedName,
               quantity: defaultQuantity,
               unit: defaultUnit,
             );
