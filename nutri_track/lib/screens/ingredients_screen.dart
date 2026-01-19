@@ -8,6 +8,7 @@ import '../services/supabase_user_service.dart';
 import '../services/tracking_service.dart';
 import '../utils/ingredient_suggestions.dart';
 import '../utils/plural_helper.dart';
+import '../utils/ingredient_normalizer.dart';
 import '../config/app_config.dart';
 import 'ai_menu_screen.dart';
 import 'ingredients_tab.dart';

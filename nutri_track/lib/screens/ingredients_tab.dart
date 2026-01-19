@@ -7,6 +7,7 @@ import '../services/auth_service.dart';
 import '../services/supabase_user_service.dart';
 import '../config/app_config.dart';
 import '../utils/ingredient_suggestions.dart';
+import '../utils/ingredient_normalizer.dart';
 import 'ai_menu_screen.dart';
 
 class Ingredient {
@@ -190,9 +191,14 @@ class _IngredientsTabState extends State<IngredientsTab> {
     if (ingredientName.trim().isEmpty) return;
     
     final trimmedName = ingredientName.trim().toLowerCase();
+    // Normalizar al singular
+    final normalizedName = IngredientNormalizer.normalize(trimmedName);
     
-    // Check if ingredient already exists
-    if (_ingredients.any((ing) => ing.name.toLowerCase() == trimmedName)) {
+    // Check if ingredient already exists (comparar con nombres normalizados)
+    if (_ingredients.any((ing) {
+      final ingNormalized = IngredientNormalizer.normalize(ing.name.toLowerCase());
+      return ingNormalized == normalizedName || ing.name.toLowerCase() == normalizedName;
+    })) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Este ingrediente ya está en tu lista')),
       );
@@ -200,7 +206,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
     }
 
     try {
-      final newIngredient = Ingredient(name: trimmedName, quantity: 1.0, unit: 'unidades');
+      final newIngredient = Ingredient(name: normalizedName, quantity: 1.0, unit: 'unidades');
       final updatedIngredients = [..._ingredients, newIngredient];
       final ingredientsJson = updatedIngredients.map((ing) => ing.toJson()).toList();
       
@@ -308,16 +314,22 @@ class _IngredientsTabState extends State<IngredientsTab> {
     }
     
     final trimmedNew = newName.trim().toLowerCase();
+    // Normalizar al singular
+    final normalizedNew = IngredientNormalizer.normalize(trimmedNew);
     final oldIngredient = _ingredients.firstWhere((ing) => ing.name == oldName);
     
-    if (trimmedNew == oldName.toLowerCase() && 
+    if (normalizedNew == IngredientNormalizer.normalize(oldName.toLowerCase()) && 
         (quantity == null || quantity == oldIngredient.quantity) &&
         (unit == null || unit == oldIngredient.unit)) {
       _cancelEdit(oldName);
       return;
     }
     
-    if (_ingredients.any((ing) => ing.name.toLowerCase() == trimmedNew && ing.name != oldName)) {
+    // Verificar si el nuevo nombre normalizado ya existe
+    if (_ingredients.any((ing) {
+      final ingNormalized = IngredientNormalizer.normalize(ing.name.toLowerCase());
+      return ingNormalized == normalizedNew && ing.name != oldName;
+    })) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Este ingrediente ya existe')),
       );
@@ -329,7 +341,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
       final updatedIngredients = _ingredients.map((ing) {
         if (ing.name == oldName) {
           return Ingredient(
-            name: trimmedNew,
+            name: normalizedNew,
             quantity: quantity ?? ing.quantity,
             unit: unit ?? ing.unit,
           );
