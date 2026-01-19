@@ -1541,8 +1541,15 @@ Reglas:
                 recipes = [recipes]
             
             # Ensure all recipes have required fields and format correctly
+            # Also apply filters if specified
             formatted_recipes = []
             for recipe in recipes[:num_recipes]:
+                # Apply filters
+                if difficulty and recipe.get("difficulty", "").lower() != difficulty.lower():
+                    continue
+                if max_time and recipe.get("time_minutes", 999) > max_time:
+                    continue
+                
                 formatted_recipe = {
                     "title": recipe.get("title", "Receta sin título"),
                     "description": recipe.get("description", ""),
@@ -1558,6 +1565,28 @@ Reglas:
                     "meal_type": meal_type,
                 }
                 formatted_recipes.append(formatted_recipe)
+            
+            # Si después de filtrar no hay suficientes recetas, intentar generar más
+            if len(formatted_recipes) < num_recipes and len(formatted_recipes) < len(recipes):
+                # Añadir recetas que no cumplen filtros pero están cerca
+                for recipe in recipes[len(formatted_recipes):]:
+                    if len(formatted_recipes) >= num_recipes:
+                        break
+                    formatted_recipe = {
+                        "title": recipe.get("title", "Receta sin título"),
+                        "description": recipe.get("description", ""),
+                        "ingredients": recipe.get("ingredients", ""),
+                        "time_minutes": int(recipe.get("time_minutes", 30)),
+                        "difficulty": recipe.get("difficulty", "Media"),
+                        "tags": recipe.get("tags", ""),
+                        "image_url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
+                        "nutrients": recipe.get("nutrients", ""),
+                        "servings": int(recipe.get("servings", 4)),
+                        "calories_per_serving": int(recipe.get("calories_per_serving", 0)),
+                        "is_ai_generated": True,
+                        "meal_type": meal_type,
+                    }
+                    formatted_recipes.append(formatted_recipe)
             
             print(f"✅ Generadas {len(formatted_recipes)} recetas con IA")
             
