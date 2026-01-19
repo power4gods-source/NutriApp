@@ -11,6 +11,7 @@ import '../utils/plural_helper.dart';
 import '../utils/ingredient_normalizer.dart';
 import '../config/app_config.dart';
 import 'ai_menu_screen.dart';
+import 'ai_recipe_generator_screen.dart';
 import 'ingredients_tab.dart';
 import 'shopping_list_screen.dart';
 import 'suggestions_screen.dart';
@@ -134,7 +135,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                     },
                     icon: const Icon(Icons.auto_awesome, size: 24),
                     label: const Text(
-                      'Generar sugerencias',
+                      'Generar Recetas con IA',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(

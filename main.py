@@ -1241,6 +1241,11 @@ class MenuGenerationRequest(BaseModel):
     ingredients: List[str]  # List of ingredient names (for compatibility)
     meal_types: Optional[List[str]] = None  # List of meal types (Desayuno, Comida, Cena)
 
+class RecipeGenerationRequest(BaseModel):
+    meal_type: str = "Comida"  # Desayuno, Comida, or Cena
+    ingredients: Optional[List[str]] = None  # Optional list of ingredients to use
+    num_recipes: int = 5  # Number of recipes to generate
+
 @app.post("/ai/generate-menu")
 def generate_menu_with_ai(request: MenuGenerationRequest, current_user: dict = Depends(get_current_user)):
     """Generate menu suggestions using AI based on user's ingredients"""
@@ -1410,6 +1415,149 @@ def generate_menu_with_ai(request: MenuGenerationRequest, current_user: dict = D
 class SaveMenuRequest(BaseModel):
     menu: List[dict]
     menu_name: Optional[str] = "Menú generado por IA"
+
+@app.post("/ai/generate-recipes")
+def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dict = Depends(get_current_user)):
+    """Generate 5 recipes using AI based on meal type and optional ingredients"""
+    import os
+    import json
+    
+    meal_type = request.meal_type
+    ingredients = request.ingredients or []
+    num_recipes = min(request.num_recipes, 10)  # Limit to 10 recipes max
+    
+    # Try to use OpenAI API (gpt-3.5-turbo is cheap: $0.50 per 1M tokens)
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    
+    if not OPENAI_API_KEY:
+        # Fallback to rule-based if no API key
+        return {
+            "error": "OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.",
+            "recipes": [],
+            "fallback": True
+        }
+    
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=OPENAI_API_KEY)
+        
+        # Build prompt
+        ingredients_text = f"usando estos ingredientes: {', '.join(ingredients)}" if ingredients else "con ingredientes comunes y nutritivos"
+        
+        prompt = f"""Eres un chef profesional y nutricionista experto. Genera exactamente {num_recipes} recetas para {meal_type.lower()} {ingredients_text}.
+
+IMPORTANTE: Responde SOLO con un JSON válido, sin texto adicional antes o después.
+
+Formato requerido (array de objetos):
+[
+  {{
+    "title": "Nombre de la receta",
+    "description": "Descripción breve y atractiva de la receta",
+    "ingredients": "ingrediente1,ingrediente2,ingrediente3",
+    "time_minutes": 30,
+    "difficulty": "Fácil",
+    "tags": "tag1,tag2,tag3",
+    "nutrients": "calories 450,protein 25.0g,carbs 50.0g,fat 15.0g",
+    "servings": 4,
+    "calories_per_serving": 450
+  }},
+  ...
+]
+
+Reglas:
+- Genera exactamente {num_recipes} recetas
+- Todas deben ser para {meal_type.lower()}
+- "difficulty" debe ser: "Fácil", "Media", o "Difícil"
+- "time_minutes" debe ser un número realista (15-120)
+- "servings" debe ser un número (2-8)
+- "calories_per_serving" debe ser un número razonable (200-800)
+- "ingredients" debe ser una cadena separada por comas, sin espacios después de las comas
+- "nutrients" debe incluir: calories, protein, carbs, fat (en gramos)
+- Las recetas deben ser variadas, creativas y nutritivas
+- Si se proporcionaron ingredientes, úsalos como base pero puedes añadir otros comunes
+"""
+        
+        print(f"🤖 Generando {num_recipes} recetas para {meal_type} con IA...")
+        
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Eres un chef profesional que crea recetas creativas y nutritivas. Responde SIEMPRE en formato JSON válido, sin texto adicional."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.8,
+            max_tokens=3000
+        )
+        
+        ai_response = response.choices[0].message.content.strip()
+        
+        # Clean response - remove markdown code blocks if present
+        if ai_response.startswith("```json"):
+            ai_response = ai_response[7:]
+        if ai_response.startswith("```"):
+            ai_response = ai_response[3:]
+        if ai_response.endswith("```"):
+            ai_response = ai_response[:-3]
+        ai_response = ai_response.strip()
+        
+        # Parse JSON response
+        try:
+            recipes = json.loads(ai_response)
+            if not isinstance(recipes, list):
+                recipes = [recipes]
+            
+            # Ensure all recipes have required fields and format correctly
+            formatted_recipes = []
+            for recipe in recipes[:num_recipes]:
+                formatted_recipe = {
+                    "title": recipe.get("title", "Receta sin título"),
+                    "description": recipe.get("description", ""),
+                    "ingredients": recipe.get("ingredients", ""),
+                    "time_minutes": int(recipe.get("time_minutes", 30)),
+                    "difficulty": recipe.get("difficulty", "Media"),
+                    "tags": recipe.get("tags", ""),
+                    "image_url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
+                    "nutrients": recipe.get("nutrients", ""),
+                    "servings": int(recipe.get("servings", 4)),
+                    "calories_per_serving": int(recipe.get("calories_per_serving", 0)),
+                    "is_ai_generated": True,
+                    "meal_type": meal_type,
+                }
+                formatted_recipes.append(formatted_recipe)
+            
+            print(f"✅ Generadas {len(formatted_recipes)} recetas con IA")
+            
+            return {
+                "message": f"Recetas generadas exitosamente para {meal_type}",
+                "recipes": formatted_recipes,
+                "meal_type": meal_type,
+                "ai_generated": True
+            }
+            
+        except json.JSONDecodeError as e:
+            print(f"❌ Error parseando JSON de IA: {e}")
+            print(f"Respuesta recibida: {ai_response[:500]}")
+            return {
+                "error": f"Error parseando respuesta de IA: {str(e)}",
+                "recipes": [],
+                "raw_response": ai_response[:200]
+            }
+            
+    except Exception as e:
+        print(f"❌ Error con OpenAI API: {e}")
+        import traceback
+        traceback.print_exc()
+        return {
+            "error": f"Error con API de IA: {str(e)}",
+            "recipes": [],
+            "fallback": True
+        }
 
 @app.post("/ai/save-menu")
 def save_ai_menu(save_request: SaveMenuRequest, current_user: dict = Depends(get_current_user)):

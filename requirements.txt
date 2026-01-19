@@ -8,3 +8,4 @@ passlib[bcrypt]==1.7.4
 bcrypt==4.1.2
 python-multipart==0.0.12
 supabase==2.27.2
+openai==1.12.0

@@ -9,6 +9,7 @@ import '../config/app_config.dart';
 import '../utils/ingredient_suggestions.dart';
 import '../utils/ingredient_normalizer.dart';
 import 'ai_menu_screen.dart';
+import 'ai_recipe_generator_screen.dart';
 
 class Ingredient {
   final String name;
@@ -693,21 +694,21 @@ class _IngredientsTabState extends State<IngredientsTab> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    onPressed: _ingredients.isEmpty
-                        ? null
-                        : () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AIMenuScreen(
-                                  ingredients: _ingredients.map((ing) => ing.name).toList(),
-                                ),
-                              ),
-                            );
-                          },
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AIRecipeGeneratorScreen(
+                            ingredients: _ingredients.isEmpty 
+                                ? null 
+                                : _ingredients.map((ing) => ing.name).toList(),
+                          ),
+                        ),
+                      );
+                    },
                     icon: const Icon(Icons.auto_awesome, size: 24),
                     label: const Text(
-                      'Generar Menú con IA',
+                      'Generar Recetas con IA',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
