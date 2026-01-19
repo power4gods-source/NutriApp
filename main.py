@@ -1474,53 +1474,49 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
         
         filters_text = f"\nRestricciones adicionales:\n" + "\n".join(f"- {c}" for c in filter_constraints) if filter_constraints else ""
         
-        prompt = f"""Eres un chef profesional y nutricionista experto. Genera exactamente {num_recipes} recetas completas para {meal_type.lower()} {ingredients_text}.{filters_text}
+        # Optimize prompt to be more concise to save tokens
+        prompt = f"""Genera {num_recipes} recetas para {meal_type.lower()} {ingredients_text}.{filters_text}
 
-IMPORTANTE: Responde SOLO con un JSON válido, sin texto adicional antes o después.
+Responde SOLO con JSON válido (array de objetos), sin texto adicional.
 
-Formato requerido (array de objetos):
+Formato:
 [
   {{
-    "title": "Nombre de la receta",
-    "description": "Descripción breve y atractiva de la receta (2-3 frases)",
-    "ingredients": "ingrediente1,ingrediente2,ingrediente3",
+    "title": "Nombre",
+    "description": "Descripción breve (2-3 frases)",
+    "ingredients": "ing1,ing2,ing3",
     "ingredients_detailed": [
-      {{"name": "ingrediente1", "quantity": 200, "unit": "gramos", "notes": "opcional: notas de preparación"}},
-      {{"name": "ingrediente2", "quantity": 2, "unit": "unidades", "notes": ""}},
-      {{"name": "ingrediente3", "quantity": 1, "unit": "cucharada", "notes": ""}}
+      {{"name": "ing1", "quantity": 200, "unit": "gramos", "notes": ""}},
+      {{"name": "ing2", "quantity": 2, "unit": "unidades", "notes": ""}}
     ],
     "instructions": [
-      "Paso 1: Descripción detallada del primer paso",
-      "Paso 2: Descripción detallada del segundo paso",
-      "Paso 3: Descripción detallada del tercer paso",
-      "... (continúa con todos los pasos necesarios)"
+      "Paso 1: ...",
+      "Paso 2: ...",
+      "Paso 3: ..."
     ],
     "time_minutes": 30,
     "difficulty": "Fácil",
-    "tags": "tag1,tag2,tag3",
+    "tags": "tag1,tag2",
     "nutrients": "calories 450,protein 25.0g,carbs 50.0g,fat 15.0g",
     "servings": 4,
     "calories_per_serving": 450
-  }},
-  ...
+  }}
 ]
 
-Reglas CRÍTICAS:
-- Genera exactamente {num_recipes} recetas completas
-- Todas deben ser para {meal_type.lower()}
-{f"- Dificultad: {difficulty}" if difficulty else "- Dificultad: variada (Fácil, Media, o Difícil)"}
-{f"- Tiempo máximo: {max_time} minutos por receta" if max_time else "- Tiempo: realista (15-120 minutos)"}
-- "difficulty" debe ser EXACTAMENTE: "Fácil", "Media", o "Difícil"
-- "time_minutes" debe ser un número entero realista (15-120){" y NO exceder " + str(max_time) + " minutos" if max_time else ""}
-- "servings" debe ser un número entero (2-8)
-- "calories_per_serving" debe ser un número entero razonable (200-800)
-- "ingredients" debe ser una cadena separada por comas, sin espacios después de las comas (ejemplo: "pollo,tomate,cebolla")
-- "ingredients_detailed" debe ser un ARRAY de objetos, cada uno con: name (string), quantity (número), unit (string como "gramos", "unidades", "cucharadas"), notes (string, puede estar vacío)
-- "instructions" debe ser un ARRAY de strings, cada string es un paso numerado y detallado (mínimo 3 pasos, máximo 10)
-- "description" debe ser una descripción breve y atractiva (2-3 frases)
-- "nutrients" debe incluir: calories, protein, carbs, fat (en gramos) - formato: "calories 450,protein 25.0g,carbs 50.0g,fat 15.0g"
-- Las recetas deben ser variadas, creativas, nutritivas y con instrucciones claras y detalladas
-- Cada paso en "instructions" debe ser específico y accionable
+Reglas:
+- Exactamente {num_recipes} recetas
+- Para {meal_type.lower()}
+{f"- Dificultad: {difficulty}" if difficulty else "- Dificultad: Fácil/Media/Difícil"}
+{f"- Tiempo ≤ {max_time} min" if max_time else "- Tiempo: 15-120 min"}
+- difficulty: "Fácil", "Media" o "Difícil"
+- time_minutes: entero 15-120{" (≤" + str(max_time) + ")" if max_time else ""}
+- servings: entero 2-8
+- calories_per_serving: entero 200-800
+- ingredients: string separado por comas sin espacios (ej: "pollo,tomate")
+- ingredients_detailed: array de {{name, quantity, unit, notes}}
+- instructions: array de strings (3-8 pasos, concisos pero claros)
+- nutrients: "calories X,protein Yg,carbs Zg,fat Wg"
+- Variadas, creativas, nutritivas
 """
         
         print(f"🤖 Generando {num_recipes} recetas para {meal_type} con IA...")
@@ -1541,7 +1537,7 @@ Reglas CRÍTICAS:
                     }
                 ],
                 temperature=0.8,
-                max_tokens=6000  # Aumentado para recetas completas con pasos detallados
+                max_tokens=4000  # GPT-3.5-turbo supports max 4096 completion tokens
                 # Not using response_format="json_object" because we need an array, not an object
             )
             
