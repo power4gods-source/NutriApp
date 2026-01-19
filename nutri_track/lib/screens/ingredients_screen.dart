@@ -135,7 +135,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                     },
                     icon: const Icon(Icons.auto_awesome, size: 24),
                     label: const Text(
-                      'Generar Recetas con IA',
+                      'Generar Receta',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
