@@ -1248,7 +1248,6 @@ class RecipeGenerationRequest(BaseModel):
     must_include_all: bool = False  # If True, all ingredients must be in every recipe
     difficulty: Optional[str] = None  # Fácil, Media, Difícil
     max_time: Optional[int] = None  # Maximum time in minutes
-    taste_type: Optional[str] = None  # "dulce" or "salado"
 
 @app.post("/ai/generate-menu")
 def generate_menu_with_ai(request: MenuGenerationRequest, current_user: dict = Depends(get_current_user)):
@@ -1432,7 +1431,6 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
     must_include_all = request.must_include_all
     difficulty = request.difficulty
     max_time = request.max_time
-    taste_type = request.taste_type
     
     # Try to use OpenAI API (gpt-3.5-turbo is cheap: $0.50 per 1M tokens)
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -1465,8 +1463,6 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
             filter_constraints.append(f"Dificultad: {difficulty}")
         if max_time:
             filter_constraints.append(f"Tiempo máximo: {max_time} minutos")
-        if taste_type:
-            filter_constraints.append(f"Tipo: {taste_type}")
         
         filters_text = f"\nRestricciones adicionales:\n" + "\n".join(f"- {c}" for c in filter_constraints) if filter_constraints else ""
         

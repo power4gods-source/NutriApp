@@ -539,8 +539,9 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          // Alimentación - Solo texto
+          // Alimentación - Más pequeña con icono a la izquierda y flecha a la derecha
           Expanded(
+            flex: 2, // Hacer más pequeña (2/3 del espacio)
             child: _buildActionCard(
               icon: Icons.restaurant,
               title: 'Alimentación',
@@ -548,17 +549,22 @@ class _HomeScreenState extends State<HomeScreen> {
               color: const Color(0xFF4CAF50),
               onTap: _navigateToIngredients,
               horizontalLayout: true, // Icono al lado del texto
+              showArrow: true, // Mostrar flecha a la derecha
             ),
           ),
           const SizedBox(width: 12),
-          // Lista Compra - Solo icono del carrito
-          _buildActionCard(
-            icon: Icons.shopping_cart,
-            title: '',
-            subtitle: '',
-            color: Colors.blue,
-            onTap: _navigateToShoppingList,
-            iconOnly: true, // Solo icono, sin texto
+          // Lista Compra - Más grande, solo icono del carrito
+          Expanded(
+            flex: 1, // Más grande (1/3 del espacio, pero más grande que antes)
+            child: _buildActionCard(
+              icon: Icons.shopping_cart,
+              title: '',
+              subtitle: '',
+              color: Colors.blue,
+              onTap: _navigateToShoppingList,
+              iconOnly: true, // Solo icono, sin texto
+              isLarge: true, // Hacer más grande
+            ),
           ),
         ],
       ),
@@ -574,13 +580,15 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isSmall = false,
     bool iconOnly = false, // Para Lista Compra: solo icono
     bool horizontalLayout = false, // Para Alimentación y Registrar: icono al lado del texto
+    bool showArrow = false, // Para mostrar flecha a la derecha
+    bool isLarge = false, // Para hacer más grande el carrito
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
-        constraints: const BoxConstraints(
-          minHeight: 80, // Misma altura para todas las cajas
+        padding: EdgeInsets.all(isLarge ? 18 : 14), // Más padding para carrito grande
+        constraints: BoxConstraints(
+          minHeight: isLarge ? 100 : 70, // Más alto para carrito, más bajo para Alimentación
         ),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -595,20 +603,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: iconOnly
             ? Center(
-                child: Icon(icon, color: color, size: 28),
+                child: Icon(icon, color: color, size: isLarge ? 40 : 28), // Icono más grande para carrito
               )
             : horizontalLayout
                 ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(icon, color: color, size: 24),
-                      const SizedBox(width: 8),
+                      Icon(icon, color: color, size: 20), // Icono más pequeño
                       Flexible(
                         child: Text(
                           title,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 14, // Texto más pequeño
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
@@ -616,6 +622,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (showArrow)
+                        Icon(Icons.arrow_forward_ios, 
+                          color: color.withValues(alpha: 0.6), 
+                          size: 16,
+                        ),
                     ],
                   )
                 : Column(
@@ -670,10 +681,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
     
-    final size = isLarge ? 160.0 : 90.0; // Aumentado de 140 a 160 para el círculo diaria
-    final strokeWidth = isLarge ? 16.0 : 10.0; // Aumentado de 14 a 16
-    final valueFontSize = isLarge ? 32.0 : 20.0; // Aumentado de 28 a 32
-    final goalFontSize = isLarge ? 16.0 : 11.0; // Aumentado de 14 a 16
+    final size = isLarge ? 200.0 : 90.0; // Aumentado de 160 a 200 para el círculo diaria
+    final strokeWidth = isLarge ? 18.0 : 10.0; // Aumentado de 16 a 18
+    final valueFontSize = isLarge ? 38.0 : 20.0; // Aumentado de 32 a 38
+    final goalFontSize = isLarge ? 18.0 : 11.0; // Aumentado de 16 a 18
     final labelFontSize = isLarge ? 14.0 : 11.0;
     
     return Column(

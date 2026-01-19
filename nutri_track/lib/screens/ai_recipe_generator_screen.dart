@@ -24,7 +24,6 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
   // Filtros
   String? _selectedDifficulty;
   int? _maxTime;
-  String? _tasteType; // "dulce" o "salado" o null (ambos)
   String? _mealType; // "Desayuno", "Comida", "Cena" o null (todos)
   
   // Resultados
@@ -109,7 +108,6 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
           'must_include_all': mustIncludeAll, // Si hay 3 o menos, deben aparecer todos
           'difficulty': _selectedDifficulty,
           'max_time': _maxTime,
-          'taste_type': _tasteType, // "dulce" o "salado"
         }),
       ).timeout(const Duration(seconds: 60));
 
@@ -532,27 +530,6 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                                   _maxTime = value.isEmpty ? null : int.tryParse(value);
                                 });
                               },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      // Dulce/Salado
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildFilterChip(
-                              'Dulce',
-                              _tasteType == 'dulce',
-                              () => setState(() => _tasteType = _tasteType == 'dulce' ? null : 'dulce'),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildFilterChip(
-                              'Salado',
-                              _tasteType == 'salado',
-                              () => setState(() => _tasteType = _tasteType == 'salado' ? null : 'salado'),
                             ),
                           ),
                         ],
