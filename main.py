@@ -1001,15 +1001,19 @@ def update_user_ingredients(request: dict, current_user: dict = Depends(get_curr
         normalized_ingredients = []
         for ing in ingredients_list:
             if isinstance(ing, dict):
+                raw_name = str(ing.get("name", "")).lower().strip()
+                normalized_name = to_singular(raw_name)
                 normalized_ingredients.append({
-                    "name": str(ing.get("name", "")).lower().strip(),
+                    "name": normalized_name,
                     "quantity": float(ing.get("quantity", 1.0)),
                     "unit": str(ing.get("unit", "unidades"))
                 })
             elif isinstance(ing, str):
                 # Backward compatibility with string format
+                raw_name = ing.lower().strip()
+                normalized_name = to_singular(raw_name)
                 normalized_ingredients.append({
-                    "name": ing.lower().strip(),
+                    "name": normalized_name,
                     "quantity": 1.0,
                     "unit": "unidades"
                 })
@@ -1032,6 +1036,67 @@ def update_user_ingredients(request: dict, current_user: dict = Depends(get_curr
             detail=f"Error updating ingredients: {str(e)}"
         )
 
+def to_singular(ingredient: str) -> str:
+    """Convierte un nombre de ingrediente del plural al singular"""
+    if not ingredient:
+        return ingredient
+    
+    lower = ingredient.lower().strip()
+    
+    # Reglas específicas para ingredientes comunes
+    specific_rules = {
+        'pollos': 'pollo',
+        'cebollas': 'cebolla',
+        'patatas': 'patata',
+        'zanahorias': 'zanahoria',
+        'tomates': 'tomate',
+        'pimientos': 'pimiento',
+        'ajos': 'ajo',
+        'huevos': 'huevo',
+        'limones': 'limón',
+        'naranjas': 'naranja',
+        'manzanas': 'manzana',
+        'plátanos': 'plátano',
+        'fresas': 'fresa',
+        'uvas': 'uva',
+        'lechugas': 'lechuga',
+        'espinacas': 'espinaca',
+        'pepinos': 'pepino',
+        'calabacines': 'calabacín',
+        'berenjenas': 'berenjena',
+        'champiñones': 'champiñón',
+        'setas': 'seta',
+        'judías': 'judía',
+        'garbanzos': 'garbanzo',
+        'lentejas': 'lenteja',
+        'alubias': 'alubia',
+        'guisantes': 'guisante',
+    }
+    
+    # Verificar reglas específicas primero
+    if lower in specific_rules:
+        return specific_rules[lower]
+    
+    # Reglas generales para plurales en español
+    if lower.endswith('ces') and len(lower) > 3:
+        return lower[:-3] + 'z'
+    elif lower.endswith('es') and len(lower) > 3:
+        without_es = lower[:-2]
+        # Si termina en vocal antes de 'es', solo quitar 'es'
+        if without_es and without_es[-1] in 'aeiou':
+            return without_es
+        return without_es
+    elif lower.endswith('s') and len(lower) > 2:
+        without_s = lower[:-1]
+        # Si termina en vocal, solo quitar 's'
+        if without_s and without_s[-1] in 'aeiou':
+            return without_s
+        # Si termina en consonante, mantener (puede ser singular ya)
+        return lower
+    
+    # Si no coincide con ninguna regla, retornar original
+    return lower
+
 @app.post("/profile/ingredients/{ingredient_name}")
 def add_user_ingredient(
     ingredient_name: str,
@@ -1049,9 +1114,13 @@ def add_user_ingredient(
             detail="Profile not found"
         )
     
+    # Normalizar al singular
+    normalized_name = to_singular(ingredient_name.lower().strip())
+    print(f"🔄 Normalizando ingrediente: '{ingredient_name}' -> '{normalized_name}'")
+    
     ingredients = profiles[user_id].get("ingredients", [])
     ingredient_normalized = {
-        "name": ingredient_name.lower().strip(),
+        "name": normalized_name,
         "quantity": float(quantity),
         "unit": str(unit)
     }

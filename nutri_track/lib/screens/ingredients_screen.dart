@@ -423,9 +423,12 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
     try {
       final headers = await _authService.getAuthHeaders();
       
+      // Normalizar al singular antes de enviar
+      final normalizedName = _normalizeToSingular(pluralName);
+      
       // Usar POST para añadir ingrediente individual (como favoritos)
       final url = await AppConfig.getBackendUrl();
-      final encodedName = Uri.encodeComponent(pluralName);
+      final encodedName = Uri.encodeComponent(normalizedName);
       final response = await http.post(
         Uri.parse('$url/profile/ingredients/$encodedName?quantity=$defaultQuantity&unit=$defaultUnit'),
         headers: headers,
@@ -436,7 +439,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
         },
       );
       
-      print('📤 POST ingrediente: $pluralName');
+      print('📤 POST ingrediente: $pluralName (normalizado: $normalizedName)');
       print('📥 Response status: ${response.statusCode}');
       print('📥 Response body: ${response.body}');
 
