@@ -396,17 +396,17 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
     if (ingredientName.trim().isEmpty) return;
     
     final trimmedName = ingredientName.trim().toLowerCase();
-    // Convertir a plural para comparación y guardado
-    final pluralName = PluralHelper.toPlural(trimmedName).toLowerCase();
+    // Normalizar al singular
+    final normalizedName = _normalizeToSingular(trimmedName);
     
     // Check if ingredient already exists (comparar tanto singular como plural)
     if (_ingredients.any((ing) {
       final ingName = ing.name.toLowerCase();
-      final ingPlural = PluralHelper.toPlural(ingName).toLowerCase();
+      final ingNormalized = _normalizeToSingular(ingName);
       return ingName == trimmedName || 
-             ingName == pluralName ||
-             ingPlural == trimmedName ||
-             ingPlural == pluralName;
+             ingName == normalizedName ||
+             ingNormalized == trimmedName ||
+             ingNormalized == normalizedName;
     })) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Este ingrediente ya está en tu lista')),
@@ -416,15 +416,12 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
 
     // Para carnes y pescados, usar gramos por defecto
     // Definir estas variables ANTES del try para que estén disponibles en el catch
-    final isMeatOrFish = _isMeatOrFish(trimmedName);
+    final isMeatOrFish = _isMeatOrFish(normalizedName);
     final double defaultQuantity = isMeatOrFish ? 100.0 : 1.0;
     final String defaultUnit = isMeatOrFish ? 'gramos' : 'unidades';
     
     try {
       final headers = await _authService.getAuthHeaders();
-      
-      // Normalizar al singular antes de enviar
-      final normalizedName = _normalizeToSingular(pluralName);
       
       // Usar POST para añadir ingrediente individual (como favoritos)
       final url = await AppConfig.getBackendUrl();
