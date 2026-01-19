@@ -1150,5 +1150,9 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
       ),
     );
   }
+  
+  String _normalizeToSingular(String ingredient) {
+    return IngredientNormalizer.normalize(ingredient);
+  }
 }
 
