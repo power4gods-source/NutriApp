@@ -439,7 +439,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
         },
       );
       
-      print('📤 POST ingrediente: $pluralName (normalizado: $normalizedName)');
+      print('📤 POST ingrediente: $trimmedName (normalizado: $normalizedName)');
       print('📥 Response status: ${response.statusCode}');
       print('📥 Response body: ${response.body}');
 
