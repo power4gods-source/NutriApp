@@ -307,7 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final firstLetter = username.isNotEmpty ? username[0].toUpperCase() : '?';
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF5F9F5), // Verde muy ligero con toques grisáceos
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -404,13 +404,48 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Tu progreso',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+            // Título con botón de registrar consumo a la derecha
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Tu progreso',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                InkWell(
+                  onTap: _navigateToAddConsumption,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.orange, width: 1.5),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.local_fire_department, 
+                          color: Colors.orange, 
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                        const Text(
+                          'Registrar',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             // Tres círculos: Diaria (grande), Media Semanal y Mensual (pequeños)
@@ -504,43 +539,26 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          // Alimentación (3/4)
+          // Alimentación - Solo texto
           Expanded(
-            flex: 3,
             child: _buildActionCard(
               icon: Icons.restaurant,
               title: 'Alimentación',
-              subtitle: 'Ingredientes y compra',
+              subtitle: '',
               color: const Color(0xFF4CAF50),
               onTap: _navigateToIngredients,
               horizontalLayout: true, // Icono al lado del texto
             ),
           ),
           const SizedBox(width: 12),
-          // Registrar Comida (3/4)
-          Expanded(
-            flex: 3,
-            child: _buildActionCard(
-              icon: Icons.local_fire_department,
-              title: 'Registrar Comida',
-              subtitle: 'Añadir consumo',
-              color: Colors.orange,
-              onTap: _navigateToAddConsumption,
-              horizontalLayout: true, // Icono al lado del texto
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Lista Compra (1/4) - Solo icono
-          Expanded(
-            flex: 1,
-            child: _buildActionCard(
-              icon: Icons.shopping_cart,
-              title: '',
-              subtitle: '',
-              color: Colors.blue,
-              onTap: _navigateToShoppingList,
-              iconOnly: true, // Solo icono, sin texto
-            ),
+          // Lista Compra - Solo icono del carrito
+          _buildActionCard(
+            icon: Icons.shopping_cart,
+            title: '',
+            subtitle: '',
+            color: Colors.blue,
+            onTap: _navigateToShoppingList,
+            iconOnly: true, // Solo icono, sin texto
           ),
         ],
       ),
@@ -587,33 +605,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       Icon(icon, color: color, size: 24),
                       const SizedBox(width: 8),
                       Flexible(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (subtitle.isNotEmpty) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                subtitle,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey[600],
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ],
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
