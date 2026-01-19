@@ -1541,8 +1541,8 @@ Reglas CRÍTICAS:
                     }
                 ],
                 temperature=0.8,
-                max_tokens=6000,  # Aumentado para recetas completas con pasos detallados
-                response_format={"type": "json_object"}  # Force JSON output
+                max_tokens=6000  # Aumentado para recetas completas con pasos detallados
+                # Not using response_format="json_object" because we need an array, not an object
             )
             
             if not response.choices or len(response.choices) == 0:
