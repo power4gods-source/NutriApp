@@ -122,14 +122,11 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                         return;
                       }
 
-                      // Navegar a pantalla de sugerencias con los tipos de comida seleccionados
+                      // Navegar a pantalla de generación de recetas con IA
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => SuggestionsScreen(
-                            ingredients: ingredients.map((ing) => ing.name).toList(),
-                            mealTypes: _selectedMealTypes.toList(),
-                          ),
+                          builder: (_) => const AIRecipeGeneratorScreen(),
                         ),
                       );
                     },
