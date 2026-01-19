@@ -553,9 +553,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          // Lista Compra - Más grande, solo icono del carrito
+          // Lista Compra - Mismo tamaño que Alimentación, solo icono del carrito
           Expanded(
-            flex: 1, // Más grande (1/3 del espacio, pero más grande que antes)
+            flex: 1, // 1/3 del espacio
             child: _buildActionCard(
               icon: Icons.shopping_cart,
               title: '',
@@ -563,7 +563,6 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.blue,
               onTap: _navigateToShoppingList,
               iconOnly: true, // Solo icono, sin texto
-              isLarge: true, // Hacer más grande
             ),
           ),
         ],
@@ -586,9 +585,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(isLarge ? 18 : 14), // Más padding para carrito grande
-        constraints: BoxConstraints(
-          minHeight: isLarge ? 100 : 70, // Más alto para carrito, más bajo para Alimentación
+        padding: const EdgeInsets.all(14), // Mismo padding para ambos
+        constraints: const BoxConstraints(
+          minHeight: 70, // Misma altura para ambos
         ),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -603,7 +602,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: iconOnly
             ? Center(
-                child: Icon(icon, color: color, size: isLarge ? 40 : 28), // Icono más grande para carrito
+                child: Icon(icon, color: color, size: 28), // Mismo tamaño de icono
               )
             : horizontalLayout
                 ? Row(
