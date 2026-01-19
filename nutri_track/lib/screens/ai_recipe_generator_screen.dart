@@ -123,16 +123,43 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
           print('📥 Recipes count: ${recipes.length}');
           
           if (recipes.isEmpty) {
+            // Check if there's an error message
+            final errorMsg = data['error'] as String?;
             setState(() {
-              _error = 'No se generaron recetas. Intenta con otros ingredientes o filtros.';
+              _error = errorMsg ?? 'No se generaron recetas. Intenta con otros ingredientes o filtros.';
               _isGenerating = false;
             });
           } else {
+            // Validate that recipes have required fields
+            final validRecipes = <Map<String, dynamic>>[];
+            for (var recipe in recipes) {
+              if (recipe is Map<String, dynamic>) {
+                // Ensure all required fields exist
+                final validRecipe = {
+                  'title': recipe['title'] ?? 'Receta sin título',
+                  'description': recipe['description'] ?? '',
+                  'ingredients': recipe['ingredients'] ?? '',
+                  'ingredients_detailed': recipe['ingredients_detailed'] ?? [],
+                  'instructions': recipe['instructions'] ?? [],
+                  'time_minutes': recipe['time_minutes'] ?? 30,
+                  'difficulty': recipe['difficulty'] ?? 'Media',
+                  'tags': recipe['tags'] ?? '',
+                  'image_url': recipe['image_url'] ?? '',
+                  'nutrients': recipe['nutrients'] ?? 'calories 0',
+                  'servings': recipe['servings'] ?? 4,
+                  'calories_per_serving': recipe['calories_per_serving'] ?? 0,
+                  'is_ai_generated': true,
+                  'meal_type': recipe['meal_type'] ?? _mealType ?? 'Comida',
+                };
+                validRecipes.add(validRecipe);
+              }
+            }
+            
             setState(() {
-              _recipes = List<Map<String, dynamic>>.from(recipes);
+              _recipes = validRecipes;
               _isGenerating = false;
             });
-            print('✅ Recetas cargadas: ${_recipes.length}');
+            print('✅ Recetas cargadas y validadas: ${_recipes.length}');
           }
         } catch (e) {
           print('❌ Error parseando respuesta: $e');

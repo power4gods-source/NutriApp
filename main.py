@@ -1445,7 +1445,15 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
     
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=OPENAI_API_KEY)
+        from openai import OpenAIError, APIError, APIConnectionError, APITimeoutError, RateLimitError, AuthenticationError
+        
+        # Initialize client with proper timeout configuration
+        import httpx
+        client = OpenAI(
+            api_key=OPENAI_API_KEY,
+            timeout=httpx.Timeout(connect=10.0, read=120.0, write=15.0, pool=5.0),
+            max_retries=2
+        )
         
         # Build prompt with filters
         ingredients_text = ""
@@ -1516,24 +1524,81 @@ Reglas CRÍTICAS:
 """
         
         print(f"🤖 Generando {num_recipes} recetas para {meal_type} con IA...")
+        print(f"📝 Ingredientes: {ingredients}")
+        print(f"🔍 Filtros: difficulty={difficulty}, max_time={max_time}, must_include_all={must_include_all}")
         
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "Eres un chef profesional que crea recetas creativas y nutritivas. Responde SIEMPRE en formato JSON válido, sin texto adicional."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            temperature=0.8,
-            max_tokens=6000  # Aumentado para recetas completas con pasos detallados
-        )
-        
-        ai_response = response.choices[0].message.content.strip()
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Eres un chef profesional que crea recetas creativas y nutritivas. Responde SIEMPRE en formato JSON válido, sin texto adicional. El JSON debe ser un array de objetos de recetas."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.8,
+                max_tokens=6000,  # Aumentado para recetas completas con pasos detallados
+                response_format={"type": "json_object"}  # Force JSON output
+            )
+            
+            if not response.choices or len(response.choices) == 0:
+                raise ValueError("OpenAI no devolvió ninguna respuesta")
+            
+            ai_response = response.choices[0].message.content
+            if not ai_response:
+                raise ValueError("La respuesta de OpenAI está vacía")
+            
+            ai_response = ai_response.strip()
+            print(f"📥 Respuesta recibida (primeros 500 chars): {ai_response[:500]}")
+            
+        except RateLimitError as e:
+            print(f"❌ Rate limit error: {e}")
+            return {
+                "error": "Demasiadas solicitudes. Por favor, espera un momento e intenta de nuevo.",
+                "recipes": [],
+                "fallback": True
+            }
+        except APITimeoutError as e:
+            print(f"❌ Timeout error: {e}")
+            return {
+                "error": "La solicitud tardó demasiado. Por favor, intenta de nuevo.",
+                "recipes": [],
+                "fallback": True
+            }
+        except APIConnectionError as e:
+            print(f"❌ Connection error: {e}")
+            return {
+                "error": "Error de conexión con OpenAI. Verifica tu conexión a internet.",
+                "recipes": [],
+                "fallback": True
+            }
+        except AuthenticationError as e:
+            print(f"❌ Authentication error: {e}")
+            return {
+                "error": "Error de autenticación con OpenAI. Verifica la configuración de la API key.",
+                "recipes": [],
+                "fallback": True
+            }
+        except APIError as e:
+            print(f"❌ API error: {e}")
+            return {
+                "error": f"Error de la API de OpenAI: {str(e)}",
+                "recipes": [],
+                "fallback": True
+            }
+        except Exception as e:
+            print(f"❌ Unexpected error calling OpenAI: {e}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "error": f"Error inesperado: {str(e)}",
+                "recipes": [],
+                "fallback": True
+            }
         
         # Clean response - remove markdown code blocks if present
         if ai_response.startswith("```json"):
@@ -1544,11 +1609,36 @@ Reglas CRÍTICAS:
             ai_response = ai_response[:-3]
         ai_response = ai_response.strip()
         
+        # Try to extract JSON if wrapped in text
+        # Sometimes GPT returns text before/after JSON
+        json_start = ai_response.find('[')
+        json_end = ai_response.rfind(']')
+        if json_start != -1 and json_end != -1 and json_end > json_start:
+            ai_response = ai_response[json_start:json_end+1]
+        
         # Parse JSON response
         try:
-            recipes = json.loads(ai_response)
+            parsed = json.loads(ai_response)
+            
+            # Handle different response formats
+            if isinstance(parsed, dict):
+                # If it's a dict, try to find a 'recipes' key or use the dict as a single recipe
+                if 'recipes' in parsed:
+                    recipes = parsed['recipes']
+                elif 'data' in parsed:
+                    recipes = parsed['data']
+                else:
+                    # Treat the whole dict as a single recipe
+                    recipes = [parsed]
+            elif isinstance(parsed, list):
+                recipes = parsed
+            else:
+                raise ValueError(f"Formato de respuesta inesperado: {type(parsed)}")
+            
             if not isinstance(recipes, list):
                 recipes = [recipes]
+            
+            print(f"✅ Parseadas {len(recipes)} recetas del JSON")
             
             # Ensure all recipes have required fields and format correctly
             # Also apply filters if specified
@@ -1603,21 +1693,47 @@ Reglas CRÍTICAS:
                 }
                 formatted_recipes.append(formatted_recipe)
             
-            # Si después de filtrar no hay suficientes recetas, intentar generar más
+            # Si después de filtrar no hay suficientes recetas, intentar añadir más sin filtros estrictos
             if len(formatted_recipes) < num_recipes and len(formatted_recipes) < len(recipes):
+                print(f"⚠️ Solo {len(formatted_recipes)} recetas pasaron los filtros, añadiendo más...")
                 # Añadir recetas que no cumplen filtros pero están cerca
                 for recipe in recipes[len(formatted_recipes):]:
                     if len(formatted_recipes) >= num_recipes:
                         break
+                    
+                    # Parse instructions e ingredients_detailed para estas recetas también
+                    instructions = recipe.get("instructions", [])
+                    if isinstance(instructions, str):
+                        instructions = [step.strip() for step in instructions.split('\n') if step.strip()]
+                    elif not isinstance(instructions, list):
+                        instructions = []
+                    
+                    ingredients_detailed = recipe.get("ingredients_detailed", [])
+                    if not ingredients_detailed or not isinstance(ingredients_detailed, list):
+                        ingredients_str = recipe.get("ingredients", "")
+                        if ingredients_str:
+                            ingredients_list = [ing.strip() for ing in ingredients_str.split(',') if ing.strip()]
+                            ingredients_detailed = [
+                                {
+                                    "name": ing,
+                                    "quantity": 100,
+                                    "unit": "gramos",
+                                    "notes": ""
+                                }
+                                for ing in ingredients_list
+                            ]
+                    
                     formatted_recipe = {
                         "title": recipe.get("title", "Receta sin título"),
                         "description": recipe.get("description", ""),
                         "ingredients": recipe.get("ingredients", ""),
+                        "ingredients_detailed": ingredients_detailed,
+                        "instructions": instructions,
                         "time_minutes": int(recipe.get("time_minutes", 30)),
                         "difficulty": recipe.get("difficulty", "Media"),
                         "tags": recipe.get("tags", ""),
-                        "image_url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
-                        "nutrients": recipe.get("nutrients", ""),
+                        "image_url": "",  # Sin foto para recetas generadas por IA
+                        "nutrients": recipe.get("nutrients", "calories 0"),
                         "servings": int(recipe.get("servings", 4)),
                         "calories_per_serving": int(recipe.get("calories_per_serving", 0)),
                         "is_ai_generated": True,
@@ -1647,14 +1763,39 @@ Reglas CRÍTICAS:
             print(f"❌ Error parseando JSON de IA: {e}")
             print(f"Respuesta recibida (primeros 1000 chars): {ai_response[:1000]}")
             print(f"Respuesta completa length: {len(ai_response)}")
+            # Try to extract any valid JSON from the response
+            import re
+            json_match = re.search(r'\[.*\]', ai_response, re.DOTALL)
+            if json_match:
+                try:
+                    recipes = json.loads(json_match.group(0))
+                    if not isinstance(recipes, list):
+                        recipes = [recipes]
+                    print(f"✅ JSON extraído usando regex: {len(recipes)} recetas")
+                except:
+                    return {
+                        "error": f"Error parseando respuesta de IA. La respuesta no es JSON válido: {str(e)}",
+                        "recipes": [],
+                        "raw_response": ai_response[:500]
+                    }
+            else:
+                return {
+                    "error": f"Error parseando respuesta de IA. La respuesta no es JSON válido: {str(e)}",
+                    "recipes": [],
+                    "raw_response": ai_response[:500]
+                }
+        except Exception as e:
+            print(f"❌ Error procesando respuesta de IA: {e}")
+            import traceback
+            traceback.print_exc()
             return {
-                "error": f"Error parseando respuesta de IA. La respuesta no es JSON válido: {str(e)}",
+                "error": f"Error procesando respuesta de IA: {str(e)}",
                 "recipes": [],
-                "raw_response": ai_response[:500]
+                "fallback": True
             }
             
     except Exception as e:
-        print(f"❌ Error con OpenAI API: {e}")
+        print(f"❌ Error general con OpenAI API: {e}")
         import traceback
         traceback.print_exc()
         return {
