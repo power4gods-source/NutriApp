@@ -1242,9 +1242,13 @@ class MenuGenerationRequest(BaseModel):
     meal_types: Optional[List[str]] = None  # List of meal types (Desayuno, Comida, Cena)
 
 class RecipeGenerationRequest(BaseModel):
-    meal_type: str = "Comida"  # Desayuno, Comida, or Cena
+    meal_type: Optional[str] = "Comida"  # Desayuno, Comida, or Cena
     ingredients: Optional[List[str]] = None  # Optional list of ingredients to use
     num_recipes: int = 5  # Number of recipes to generate
+    must_include_all: bool = False  # If True, all ingredients must be in every recipe
+    difficulty: Optional[str] = None  # Fácil, Media, Difícil
+    max_time: Optional[int] = None  # Maximum time in minutes
+    taste_type: Optional[str] = None  # "dulce" or "salado"
 
 @app.post("/ai/generate-menu")
 def generate_menu_with_ai(request: MenuGenerationRequest, current_user: dict = Depends(get_current_user)):
@@ -1422,9 +1426,13 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
     import os
     import json
     
-    meal_type = request.meal_type
+    meal_type = request.meal_type or "Comida"
     ingredients = request.ingredients or []
     num_recipes = min(request.num_recipes, 10)  # Limit to 10 recipes max
+    must_include_all = request.must_include_all
+    difficulty = request.difficulty
+    max_time = request.max_time
+    taste_type = request.taste_type
     
     # Try to use OpenAI API (gpt-3.5-turbo is cheap: $0.50 per 1M tokens)
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -1441,10 +1449,28 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
         from openai import OpenAI
         client = OpenAI(api_key=OPENAI_API_KEY)
         
-        # Build prompt
-        ingredients_text = f"usando estos ingredientes: {', '.join(ingredients)}" if ingredients else "con ingredientes comunes y nutritivos"
+        # Build prompt with filters
+        ingredients_text = ""
+        if ingredients:
+            if must_include_all and len(ingredients) <= 3:
+                ingredients_text = f"OBLIGATORIAMENTE usando TODOS estos ingredientes: {', '.join(ingredients)}. Cada receta DEBE incluir todos estos ingredientes."
+            else:
+                ingredients_text = f"usando estos ingredientes como base: {', '.join(ingredients)}. Puedes combinarlos entre sí y añadir otros ingredientes comunes. No es necesario usar todos."
+        else:
+            ingredients_text = "con ingredientes comunes y nutritivos"
         
-        prompt = f"""Eres un chef profesional y nutricionista experto. Genera exactamente {num_recipes} recetas para {meal_type.lower()} {ingredients_text}.
+        # Build filter constraints
+        filter_constraints = []
+        if difficulty:
+            filter_constraints.append(f"Dificultad: {difficulty}")
+        if max_time:
+            filter_constraints.append(f"Tiempo máximo: {max_time} minutos")
+        if taste_type:
+            filter_constraints.append(f"Tipo: {taste_type}")
+        
+        filters_text = f"\nRestricciones adicionales:\n" + "\n".join(f"- {c}" for c in filter_constraints) if filter_constraints else ""
+        
+        prompt = f"""Eres un chef profesional y nutricionista experto. Genera exactamente {num_recipes} recetas para {meal_type.lower()} {ingredients_text}.{filters_text}
 
 IMPORTANTE: Responde SOLO con un JSON válido, sin texto adicional antes o después.
 
@@ -1467,14 +1493,16 @@ Formato requerido (array de objetos):
 Reglas:
 - Genera exactamente {num_recipes} recetas
 - Todas deben ser para {meal_type.lower()}
+{f"- Dificultad: {difficulty}" if difficulty else "- Dificultad: variada (Fácil, Media, o Difícil)"}
+{f"- Tiempo máximo: {max_time} minutos por receta" if max_time else "- Tiempo: realista (15-120 minutos)"}
+{f"- Tipo: {taste_type}" if taste_type else "- Tipo: variado (dulce o salado)"}
 - "difficulty" debe ser: "Fácil", "Media", o "Difícil"
-- "time_minutes" debe ser un número realista (15-120)
+- "time_minutes" debe ser un número realista (15-120){" y no exceder " + str(max_time) + " minutos" if max_time else ""}
 - "servings" debe ser un número (2-8)
 - "calories_per_serving" debe ser un número razonable (200-800)
 - "ingredients" debe ser una cadena separada por comas, sin espacios después de las comas
 - "nutrients" debe incluir: calories, protein, carbs, fat (en gramos)
 - Las recetas deben ser variadas, creativas y nutritivas
-- Si se proporcionaron ingredientes, úsalos como base pero puedes añadir otros comunes
 """
         
         print(f"🤖 Generando {num_recipes} recetas para {meal_type} con IA...")
