@@ -1466,7 +1466,7 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
         
         filters_text = f"\nRestricciones adicionales:\n" + "\n".join(f"- {c}" for c in filter_constraints) if filter_constraints else ""
         
-        prompt = f"""Eres un chef profesional y nutricionista experto. Genera exactamente {num_recipes} recetas para {meal_type.lower()} {ingredients_text}.{filters_text}
+        prompt = f"""Eres un chef profesional y nutricionista experto. Genera exactamente {num_recipes} recetas completas para {meal_type.lower()} {ingredients_text}.{filters_text}
 
 IMPORTANTE: Responde SOLO con un JSON válido, sin texto adicional antes o después.
 
@@ -1474,8 +1474,19 @@ Formato requerido (array de objetos):
 [
   {{
     "title": "Nombre de la receta",
-    "description": "Descripción breve y atractiva de la receta",
+    "description": "Descripción breve y atractiva de la receta (2-3 frases)",
     "ingredients": "ingrediente1,ingrediente2,ingrediente3",
+    "ingredients_detailed": [
+      {{"name": "ingrediente1", "quantity": 200, "unit": "gramos", "notes": "opcional: notas de preparación"}},
+      {{"name": "ingrediente2", "quantity": 2, "unit": "unidades", "notes": ""}},
+      {{"name": "ingrediente3", "quantity": 1, "unit": "cucharada", "notes": ""}}
+    ],
+    "instructions": [
+      "Paso 1: Descripción detallada del primer paso",
+      "Paso 2: Descripción detallada del segundo paso",
+      "Paso 3: Descripción detallada del tercer paso",
+      "... (continúa con todos los pasos necesarios)"
+    ],
     "time_minutes": 30,
     "difficulty": "Fácil",
     "tags": "tag1,tag2,tag3",
@@ -1486,19 +1497,22 @@ Formato requerido (array de objetos):
   ...
 ]
 
-Reglas:
-- Genera exactamente {num_recipes} recetas
+Reglas CRÍTICAS:
+- Genera exactamente {num_recipes} recetas completas
 - Todas deben ser para {meal_type.lower()}
 {f"- Dificultad: {difficulty}" if difficulty else "- Dificultad: variada (Fácil, Media, o Difícil)"}
 {f"- Tiempo máximo: {max_time} minutos por receta" if max_time else "- Tiempo: realista (15-120 minutos)"}
-{f"- Tipo: {taste_type}" if taste_type else "- Tipo: variado (dulce o salado)"}
-- "difficulty" debe ser: "Fácil", "Media", o "Difícil"
-- "time_minutes" debe ser un número realista (15-120){" y no exceder " + str(max_time) + " minutos" if max_time else ""}
-- "servings" debe ser un número (2-8)
-- "calories_per_serving" debe ser un número razonable (200-800)
-- "ingredients" debe ser una cadena separada por comas, sin espacios después de las comas
-- "nutrients" debe incluir: calories, protein, carbs, fat (en gramos)
-- Las recetas deben ser variadas, creativas y nutritivas
+- "difficulty" debe ser EXACTAMENTE: "Fácil", "Media", o "Difícil"
+- "time_minutes" debe ser un número entero realista (15-120){" y NO exceder " + str(max_time) + " minutos" if max_time else ""}
+- "servings" debe ser un número entero (2-8)
+- "calories_per_serving" debe ser un número entero razonable (200-800)
+- "ingredients" debe ser una cadena separada por comas, sin espacios después de las comas (ejemplo: "pollo,tomate,cebolla")
+- "ingredients_detailed" debe ser un ARRAY de objetos, cada uno con: name (string), quantity (número), unit (string como "gramos", "unidades", "cucharadas"), notes (string, puede estar vacío)
+- "instructions" debe ser un ARRAY de strings, cada string es un paso numerado y detallado (mínimo 3 pasos, máximo 10)
+- "description" debe ser una descripción breve y atractiva (2-3 frases)
+- "nutrients" debe incluir: calories, protein, carbs, fat (en gramos) - formato: "calories 450,protein 25.0g,carbs 50.0g,fat 15.0g"
+- Las recetas deben ser variadas, creativas, nutritivas y con instrucciones claras y detalladas
+- Cada paso en "instructions" debe ser específico y accionable
 """
         
         print(f"🤖 Generando {num_recipes} recetas para {meal_type} con IA...")
@@ -1516,7 +1530,7 @@ Reglas:
                 }
             ],
             temperature=0.8,
-            max_tokens=3000
+            max_tokens=6000  # Aumentado para recetas completas con pasos detallados
         )
         
         ai_response = response.choices[0].message.content.strip()
@@ -1546,15 +1560,42 @@ Reglas:
                 if max_time and recipe.get("time_minutes", 999) > max_time:
                     continue
                 
+                # Parse instructions - puede venir como array o string
+                instructions = recipe.get("instructions", [])
+                if isinstance(instructions, str):
+                    # Si es string, convertir a array dividiendo por saltos de línea
+                    instructions = [step.strip() for step in instructions.split('\n') if step.strip()]
+                elif not isinstance(instructions, list):
+                    instructions = []
+                
+                # Parse ingredients_detailed - puede venir como array o necesitar generarse
+                ingredients_detailed = recipe.get("ingredients_detailed", [])
+                if not ingredients_detailed or not isinstance(ingredients_detailed, list):
+                    # Si no hay ingredients_detailed, generarlo desde ingredients string
+                    ingredients_str = recipe.get("ingredients", "")
+                    if ingredients_str:
+                        ingredients_list = [ing.strip() for ing in ingredients_str.split(',') if ing.strip()]
+                        ingredients_detailed = [
+                            {
+                                "name": ing,
+                                "quantity": 100,
+                                "unit": "gramos",
+                                "notes": ""
+                            }
+                            for ing in ingredients_list
+                        ]
+                
                 formatted_recipe = {
                     "title": recipe.get("title", "Receta sin título"),
                     "description": recipe.get("description", ""),
                     "ingredients": recipe.get("ingredients", ""),
+                    "ingredients_detailed": ingredients_detailed,
+                    "instructions": instructions,
                     "time_minutes": int(recipe.get("time_minutes", 30)),
                     "difficulty": recipe.get("difficulty", "Media"),
                     "tags": recipe.get("tags", ""),
-                    "image_url": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop",
-                    "nutrients": recipe.get("nutrients", ""),
+                    "image_url": "",  # Sin foto para recetas generadas por IA
+                    "nutrients": recipe.get("nutrients", "calories 0"),
                     "servings": int(recipe.get("servings", 4)),
                     "calories_per_serving": int(recipe.get("calories_per_serving", 0)),
                     "is_ai_generated": True,
