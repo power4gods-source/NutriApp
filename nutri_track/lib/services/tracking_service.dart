@@ -252,22 +252,21 @@ class TrackingService {
         }
         return isValid;
       }).map((food) {
-        // Si es una receta, crear un "alimento" especial con las calorías
+        // Si es una receta, crear un "alimento" especial con las calorías y nutrientes
         if (food['is_recipe'] == true) {
           final recipeData = food['recipe_data'] ?? {};
           final caloriesPerServing = food['calories'] ?? 0.0;
           final recipeTitle = recipeData['title'] ?? food['name'] ?? 'Receta';
           
-          // Para recetas, necesitamos crear un alimento temporal o usar un ID especial
-          // El backend deberá manejar esto. Por ahora, usamos un ID especial
+          // Incluir toda la información de la receta para que el backend pueda parsear nutrientes
           print('✅ Receta válida: $recipeTitle (${caloriesPerServing} kcal/ración)');
           return {
             'food_id': 'recipe_${recipeTitle.replaceAll(' ', '_')}',
-            'quantity': 1.0,
+            'quantity': food['quantity'] ?? 1.0,
             'unit': 'ración',
             'name': recipeTitle,
             'calories': caloriesPerServing,
-            'is_recipe': true,
+            'recipe_data': recipeData, // Incluir recipe_data para que el backend parse los nutrientes
           };
         }
         

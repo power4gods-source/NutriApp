@@ -795,6 +795,30 @@ def update_avatar(avatar_data: AvatarUpdate, current_user: dict = Depends(get_cu
     
     return {"message": "Avatar updated successfully", "avatar_url": avatar_data.avatar_url}
 
+@app.put("/profile/username")
+def update_username(username_update: dict, current_user: dict = Depends(get_current_user)):
+    """Update username in users.json"""
+    users = load_users()
+    user_id = current_user["user_id"]
+    
+    if user_id not in users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    new_username = username_update.get("username", "").strip()
+    if not new_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username cannot be empty"
+        )
+    
+    users[user_id]["username"] = new_username
+    save_users(users)
+    
+    return {"message": "Username updated successfully", "username": new_username}
+
 @app.post("/profile/password")
 def update_password(password_update: PasswordUpdate, current_user: dict = Depends(get_current_user)):
     """Update user password"""
@@ -3066,6 +3090,70 @@ def find_food_by_ingredient(ingredient_name: str):
     
     return None
 
+def parse_nutrients_string(nutrients_str: str):
+    """Parse nutrients string (e.g., 'calories 300,protein 20g,carbs 50g,fat 15g') into a dict"""
+    if not nutrients_str or not isinstance(nutrients_str, str):
+        return {
+            "calories": 0.0,
+            "protein": 0.0,
+            "carbohydrates": 0.0,
+            "fat": 0.0,
+            "fiber": 0.0,
+            "sugar": 0.0,
+            "sodium": 0.0,
+        }
+    
+    result = {
+        "calories": 0.0,
+        "protein": 0.0,
+        "carbohydrates": 0.0,
+        "fat": 0.0,
+        "fiber": 0.0,
+        "sugar": 0.0,
+        "sodium": 0.0,
+    }
+    
+    try:
+        # Split by comma and process each part
+        parts = nutrients_str.split(',')
+        for part in parts:
+            part = part.strip().lower()
+            # Remove common suffixes like 'g', 'mg', etc.
+            if 'calories' in part:
+                # Extract number (can be after "calories" or before)
+                import re
+                numbers = re.findall(r'\d+\.?\d*', part)
+                if numbers:
+                    result["calories"] = float(numbers[0])
+            elif 'protein' in part:
+                numbers = re.findall(r'\d+\.?\d*', part)
+                if numbers:
+                    result["protein"] = float(numbers[0])
+            elif 'carbs' in part or 'carbohydrates' in part or 'carbohidratos' in part:
+                numbers = re.findall(r'\d+\.?\d*', part)
+                if numbers:
+                    result["carbohydrates"] = float(numbers[0])
+            elif 'fat' in part or 'grasas' in part or 'grasa' in part:
+                numbers = re.findall(r'\d+\.?\d*', part)
+                if numbers:
+                    result["fat"] = float(numbers[0])
+            elif 'fiber' in part or 'fibra' in part:
+                numbers = re.findall(r'\d+\.?\d*', part)
+                if numbers:
+                    result["fiber"] = float(numbers[0])
+            elif 'sugar' in part or 'azúcar' in part or 'azucar' in part:
+                numbers = re.findall(r'\d+\.?\d*', part)
+                if numbers:
+                    result["sugar"] = float(numbers[0])
+            elif 'sodium' in part or 'sodio' in part:
+                numbers = re.findall(r'\d+\.?\d*', part)
+                if numbers:
+                    result["sodium"] = float(numbers[0])
+    except Exception as e:
+        print(f"⚠️ Error parsing nutrients string '{nutrients_str}': {e}")
+    
+    return result
+
 def calculate_nutrition(food: dict, quantity: float, unit: str):
     """Calculate nutrition values for a given quantity of food"""
     # Convert to grams
@@ -3268,32 +3356,50 @@ def add_consumption(
         
         print(f"🔍 Buscando alimento con food_id: {food_id}")
         
-        # Si es una receta (food_id empieza con "recipe_"), usar calorías directamente
+        # Si es una receta (food_id empieza con "recipe_"), parsear nutrientes
         if food_id.startswith("recipe_"):
-            # Es una receta, usar las calorías proporcionadas
-            recipe_calories = food_dict.get("calories") or 0.0
+            # Es una receta, parsear nutrientes desde recipe_data
             recipe_name = food_dict.get("name") or "Receta"
             quantity = food_dict.get("quantity") or 1.0
+            recipe_data = food_dict.get("recipe_data") or {}
             
-            if recipe_calories > 0:
+            # Obtener nutrientes de la receta
+            nutrients_str = recipe_data.get("nutrients", "")
+            servings = recipe_data.get("servings", 4.0) or 4.0
+            
+            # Parsear nutrientes por ración
+            recipe_nutrition = parse_nutrients_string(nutrients_str)
+            
+            # Si no hay nutrientes parseados, intentar usar calories_per_serving
+            if recipe_nutrition["calories"] == 0:
+                calories_per_serving = recipe_data.get("calories_per_serving") or food_dict.get("calories") or 0.0
+                if calories_per_serving > 0:
+                    recipe_nutrition["calories"] = float(calories_per_serving)
+            
+            # Multiplicar por cantidad de raciones
+            nutrition_per_serving = {
+                "calories": recipe_nutrition["calories"] * quantity,
+                "protein": recipe_nutrition["protein"] * quantity,
+                "carbohydrates": recipe_nutrition["carbohydrates"] * quantity,
+                "fat": recipe_nutrition["fat"] * quantity,
+                "fiber": recipe_nutrition["fiber"] * quantity,
+                "sugar": recipe_nutrition["sugar"] * quantity,
+                "sodium": recipe_nutrition["sodium"] * quantity,
+            }
+            
+            if nutrition_per_serving["calories"] > 0:
                 processed_foods.append({
                     "food_id": food_id,
                     "name": recipe_name,
                     "quantity": quantity,
                     "unit": "ración",
-                    "calories": recipe_calories * quantity,
-                    "nutrition": {
-                        "calories": recipe_calories * quantity,
-                        "protein": 0.0,
-                        "carbohydrates": 0.0,
-                        "fat": 0.0,
-                        "fiber": 0.0,
-                        "sugar": 0.0,
-                        "sodium": 0.0,
-                    }
+                    "calories": nutrition_per_serving["calories"],
+                    "nutrition": nutrition_per_serving
                 })
-                total_calories += recipe_calories * quantity
-                print(f"✅ Receta añadida: {recipe_name} ({recipe_calories * quantity} kcal)")
+                total_calories += nutrition_per_serving["calories"]
+                for key in total_nutrition:
+                    total_nutrition[key] += nutrition_per_serving[key]
+                print(f"✅ Receta añadida: {recipe_name} ({nutrition_per_serving['calories']:.1f} kcal, {nutrition_per_serving['protein']:.1f}g proteína)")
             continue
         
         # Buscar el alimento en la base de datos

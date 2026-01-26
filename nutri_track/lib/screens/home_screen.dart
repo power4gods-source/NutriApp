@@ -947,6 +947,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                  ? (recipe['calories'] / recipe['servings']).round() 
                                  : 0);
     final imageUrl = recipe['image_url'] ?? recipe['image'] ?? '';
+    
+    // Parsear información nutricional completa
+    final nutrition = NutritionParser.getNutritionPerServing(recipe);
 
     return Container(
       width: isHorizontal ? 200 : double.infinity,
@@ -1029,18 +1032,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
                         children: [
-                          Icon(Icons.access_time, size: 14, color: Colors.white.withValues(alpha: 0.9)),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$time min',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 12,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.access_time, size: 14, color: Colors.white.withValues(alpha: 0.9)),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$time min',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 12),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
@@ -1056,7 +1065,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                           ),
-                          const Spacer(),
+                          if (recipe['servings'] != null && recipe['servings'] > 0) ...[
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.restaurant, size: 14, color: Colors.white.withValues(alpha: 0.9)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '${recipe['servings']} raciones',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.9),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                           if (caloriesPerServing > 0)
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
 import '../services/supabase_recipe_service.dart';
+import '../utils/nutrition_parser.dart';
 import '../widgets/search_dialog.dart';
 import '../main.dart';
 import 'add_recipe_screen.dart';
@@ -934,31 +935,72 @@ class _RecipesScreenState extends State<RecipesScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Time and difficulty
-                  Row(
+                  // Time, difficulty, servings, and calories per serving
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 8,
                     children: [
-                      Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${recipe['time_minutes'] ?? 0} min',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${recipe['time_minutes'] ?? 0} min',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Icon(Icons.trending_up, size: 18, color: Colors.grey[600]),
-                      const SizedBox(width: 4),
-                      Text(
-                        recipe['difficulty'] ?? 'N/A',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.trending_up, size: 18, color: Colors.grey[600]),
+                          const SizedBox(width: 4),
+                          Text(
+                            recipe['difficulty'] ?? 'N/A',
+                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                          ),
+                        ],
                       ),
                       if (recipe['servings'] != null) ...[
-                        const SizedBox(width: 16),
-                        Icon(Icons.people, size: 18, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${recipe['servings']} porciones',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.people, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${recipe['servings']} porciones',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                            ),
+                          ],
                         ),
                       ],
+                      // Calorías por ración
+                      Builder(
+                        builder: (context) {
+                          final nutrition = NutritionParser.getNutritionPerServing(recipe);
+                          final caloriesPerServing = nutrition['calories']?.round() ?? 
+                                                     (recipe['calories_per_serving'] ?? 0);
+                          if (caloriesPerServing > 0) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                '$caloriesPerServing kcal/ración',
+                                style: const TextStyle(
+                                  color: Colors.orange,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -1194,32 +1236,132 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    // Time and difficulty
-                    Row(
+                    // Time, difficulty, servings, and calories per serving
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 8,
                       children: [
-                        Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${recipe['time_minutes'] ?? 0} min',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${recipe['time_minutes'] ?? 0} min',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        Icon(Icons.trending_up, size: 18, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          recipe['difficulty'] ?? 'N/A',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.trending_up, size: 18, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              recipe['difficulty'] ?? 'N/A',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                            ),
+                          ],
                         ),
                         if (recipe['servings'] != null) ...[
-                          const SizedBox(width: 16),
-                          Icon(Icons.people, size: 18, color: Colors.grey[600]),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${recipe['servings']} porciones',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.people, size: 18, color: Colors.grey[600]),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${recipe['servings']} porciones',
+                                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                              ),
+                            ],
                           ),
                         ],
+                        // Calorías por ración
+                        Builder(
+                          builder: (context) {
+                            final nutrition = NutritionParser.getNutritionPerServing(recipe);
+                            final caloriesPerServing = nutrition['calories']?.round() ?? 
+                                                       (recipe['calories_per_serving'] ?? 0);
+                            if (caloriesPerServing > 0) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  '$caloriesPerServing kcal/ración',
+                                  style: const TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
                       ],
+                    ),
+                    // Información nutricional completa (si está disponible)
+                    Builder(
+                      builder: (context) {
+                        final nutrition = NutritionParser.getNutritionPerServing(recipe);
+                        final hasNutrition = nutrition['protein']! > 0 || 
+                                           nutrition['carbohydrates']! > 0 || 
+                                           nutrition['fat']! > 0;
+                        if (hasNutrition) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 16),
+                              const Divider(),
+                              const SizedBox(height: 12),
+                              const Text(
+                                'Información nutricional (por ración)',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 12,
+                                runSpacing: 8,
+                                children: [
+                                  if (nutrition['calories']! > 0)
+                                    _buildNutritionChip(
+                                      'Calorías',
+                                      '${nutrition['calories']!.round()}',
+                                      Colors.orange,
+                                    ),
+                                  if (nutrition['protein']! > 0)
+                                    _buildNutritionChip(
+                                      'Proteína',
+                                      '${nutrition['protein']!.toStringAsFixed(1)}g',
+                                      Colors.purple,
+                                    ),
+                                  if (nutrition['carbohydrates']! > 0)
+                                    _buildNutritionChip(
+                                      'Carbohidratos',
+                                      '${nutrition['carbohydrates']!.toStringAsFixed(1)}g',
+                                      Colors.blue,
+                                    ),
+                                  if (nutrition['fat']! > 0)
+                                    _buildNutritionChip(
+                                      'Grasas',
+                                      '${nutrition['fat']!.toStringAsFixed(1)}g',
+                                      Colors.red,
+                                    ),
+                                ],
+                              ),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
                     ),
                     // Description
                     if (description.isNotEmpty) ...[
@@ -1370,6 +1512,37 @@ class _RecipesScreenState extends State<RecipesScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+  
+  Widget _buildNutritionChip(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[700],
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
       ),
     );
   }

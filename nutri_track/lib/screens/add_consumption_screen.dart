@@ -112,7 +112,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
       return;
     }
     
-    // Añadir la receta como un "alimento" especial con las calorías calculadas
+    // Añadir la receta como un "alimento" especial con las calorías y nutrientes
     final recipeTitle = recipe['title'] ?? 'Receta';
     setState(() {
       _selectedFoods.add({
@@ -122,7 +122,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
         'unit': 'ración',
         'calories': caloriesPerServing.toDouble(),
         'is_recipe': true,
-        'recipe_data': recipe,
+        'recipe_data': recipe, // Incluir toda la receta para que el backend pueda parsear nutrientes
       });
     });
     
