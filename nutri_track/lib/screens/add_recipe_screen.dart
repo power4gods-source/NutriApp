@@ -14,12 +14,14 @@ class AddRecipeScreen extends StatefulWidget {
   final Map<String, dynamic>? recipeToEdit; // Receta a editar (null si es nueva)
   final String? recipeType; // 'general', 'public', 'private'
   final int? recipeIndex; // Índice de la receta en la lista (para actualización)
+  final bool forceCreate; // Si true, pre-rellena pero guarda como nueva
   
   const AddRecipeScreen({
     super.key,
     this.recipeToEdit,
     this.recipeType,
     this.recipeIndex,
+    this.forceCreate = false,
   });
 
   @override
@@ -49,7 +51,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   final TextEditingController _ingredientQuantityController = TextEditingController();
   String _ingredientUnit = 'gramos';
   
-  bool get _isEditing => widget.recipeToEdit != null;
+  bool get _isEditing => widget.recipeToEdit != null && !widget.forceCreate;
 
   @override
   void initState() {

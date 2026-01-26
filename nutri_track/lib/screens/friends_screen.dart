@@ -5,6 +5,7 @@ import 'dart:math';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
 import '../main.dart';
+import 'chat_screen.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -23,6 +24,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
   
   int _followersCount = 0;
   int _connectionsCount = 0;
+  Set<String> _connectionIds = {};
 
   @override
   void initState() {
@@ -45,11 +47,32 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
         _loadAllProfiles(),
         _loadFollowingProfiles(),
         _loadStats(),
+        _loadConnections(),
       ]);
     } catch (e) {
       print('❌ Error cargando datos: $e');
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadConnections() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      final resp = await http.get(Uri.parse('$url/profile/connections'), headers: headers).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        final data = json.decode(resp.body);
+        final conns = (data['connections'] as List?) ?? [];
+        setState(() {
+          _connectionIds = conns
+              .map((e) => (e as Map)['user_id']?.toString() ?? '')
+              .where((id) => id.isNotEmpty)
+              .toSet();
+        });
+      }
+    } catch (e) {
+      print('❌ Error cargando conexiones: $e');
     }
   }
 
@@ -248,6 +271,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
     final followersCount = profile['followers_count'] ?? 0;
     final publicRecipesCount = profile['public_recipes_count'] ?? 0;
     final isFollowing = profile['is_following'] ?? false;
+    final isConnection = _connectionIds.contains(userId);
     
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -308,24 +332,51 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                 ],
               ),
             ),
-            ElevatedButton(
-              onPressed: () => _toggleFollow(userId, isFollowing),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isFollowing ? Colors.grey[300] : const Color(0xFF4CAF50),
-                foregroundColor: isFollowing ? Colors.black87 : Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isConnection)
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            otherUserId: userId,
+                            otherUsername: username.toString(),
+                          ),
+                        ),
+                      );
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF4CAF50),
+                      side: const BorderSide(color: Color(0xFF4CAF50)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    child: const Text('Chatear', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => _toggleFollow(userId, isFollowing),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isFollowing ? Colors.grey[300] : const Color(0xFF4CAF50),
+                    foregroundColor: isFollowing ? Colors.black87 : Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    elevation: isFollowing ? 0 : 2,
+                  ),
+                  child: Text(
+                    isFollowing ? 'Siguiendo' : 'Seguir',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-                elevation: isFollowing ? 0 : 2,
-              ),
-              child: Text(
-                isFollowing ? 'Siguiendo' : 'Seguir',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              ],
             ),
           ],
         ),

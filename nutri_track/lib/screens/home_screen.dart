@@ -409,9 +409,9 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Tu progreso',
+                  'Mi consumo',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -453,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildProgressCircle(
-                  label: 'Diaria',
+                  label: 'Diario (kcal)',
                   value: consumed,
                   goal: goal,
                   color: Colors.orange,
@@ -680,11 +680,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
     
-    final size = isLarge ? 200.0 : 90.0; // Aumentado de 160 a 200 para el círculo diaria
-    final strokeWidth = isLarge ? 18.0 : 10.0; // Aumentado de 16 a 18
-    final valueFontSize = isLarge ? 38.0 : 20.0; // Aumentado de 32 a 38
-    final goalFontSize = isLarge ? 18.0 : 11.0; // Aumentado de 16 a 18
-    final labelFontSize = isLarge ? 14.0 : 11.0;
+    final size = isLarge ? 220.0 : 105.0; // Más grande (como captura)
+    final strokeWidth = isLarge ? 18.0 : 12.0;
+    final valueFontSize = isLarge ? 40.0 : 22.0;
+    final goalFontSize = isLarge ? 18.0 : 12.0;
+    final labelFontSize = isLarge ? 20.0 : 12.0;
     
     return Column(
       children: [
@@ -723,12 +723,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-        const SizedBox(height: 6), // Reducido de 8 a 6
+        const SizedBox(height: 8),
         Text(
           label,
           style: TextStyle(
             fontSize: labelFontSize,
-            fontWeight: FontWeight.w600,
+            fontWeight: isLarge ? FontWeight.bold : FontWeight.w600,
             color: Colors.grey[700],
           ),
           textAlign: TextAlign.center,

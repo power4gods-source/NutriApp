@@ -66,6 +66,7 @@ MEAL_PLANS_FILE = "meal_plans.json"  # Meal plans
 NUTRITION_STATS_FILE = "nutrition_stats.json"  # Nutrition statistics
 USER_GOALS_FILE = "user_goals.json"  # User goals
 FOLLOWERS_FILE = "followers.json"  # User following/followers relationships
+CHATS_FILE = "chats.json"  # Direct messages between connections
 
 # Authentication settings
 # SECRET_KEY debe ser persistente para que los tokens JWT sigan siendo válidos después de reinicios
@@ -378,6 +379,17 @@ def save_followers(followers_data):
     """Save followers/following relationships to Supabase Storage and local file"""
     save_json_with_sync(FOLLOWERS_FILE, followers_data, FOLLOWERS_FILE)
 
+def load_chats():
+    """Load chats from Supabase Storage with fallback to local file"""
+    data = load_json_with_fallback(CHATS_FILE, CHATS_FILE)
+    if not isinstance(data, dict):
+        return {}
+    return data
+
+def save_chats(chats: dict):
+    """Save chats to Supabase Storage and local file"""
+    save_json_with_sync(CHATS_FILE, chats, CHATS_FILE)
+
 @app.get("/")
 def read_root():
     return {"message": "Hello from Nutritrack backend!"}
@@ -427,6 +439,15 @@ class NotificationSettings(BaseModel):
     new_followers: Optional[bool] = True
     comments_on_recipes: Optional[bool] = True
     likes_on_recipes: Optional[bool] = True
+
+
+class ShareRecipeRequest(BaseModel):
+    target_user_id: str
+    recipe: dict
+
+class ChatMessageCreate(BaseModel):
+    text: Optional[str] = ""
+    recipe: Optional[dict] = None
 
 class ProfileResponse(BaseModel):
     user_id: str
@@ -1248,6 +1269,7 @@ class RecipeGenerationRequest(BaseModel):
     must_include_all: bool = False  # If True, all ingredients must be in every recipe
     difficulty: Optional[str] = None  # Fácil, Media, Difícil
     max_time: Optional[int] = None  # Maximum time in minutes
+    save_to_private: bool = True  # Auto-save generated recipes to user's private recipes
 
 @app.post("/ai/generate-menu")
 def generate_menu_with_ai(request: MenuGenerationRequest, current_user: dict = Depends(get_current_user)):
@@ -1431,6 +1453,7 @@ def generate_recipes_with_ai(request: RecipeGenerationRequest, current_user: dic
     must_include_all = request.must_include_all
     difficulty = request.difficulty
     max_time = request.max_time
+    save_to_private = request.save_to_private
     
     # Try to use OpenAI API (gpt-3.5-turbo is cheap: $0.50 per 1M tokens)
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -1738,6 +1761,80 @@ Reglas:
                     formatted_recipes.append(formatted_recipe)
             
             print(f"✅ Generadas {len(formatted_recipes)} recetas con IA")
+
+            # Auto-save generated recipes into private recipes (with dedupe)
+            saved_count = 0
+            duplicate_count = 0
+            saved_ids = []
+            duplicates = []
+
+            if save_to_private:
+                try:
+                    user_id = current_user["user_id"]
+                    private_recipes = load_recipes_private()
+
+                    def _norm(s: str) -> str:
+                        return " ".join((s or "").strip().lower().split())
+
+                    def _sig(r: dict) -> str:
+                        title = _norm(r.get("title", ""))
+                        ings = _norm(r.get("ingredients", ""))
+                        time = str(r.get("time_minutes", ""))
+                        return f"{user_id}::{title}::{ings}::{time}"
+
+                    existing = set(_sig(r) for r in private_recipes if r.get("user_id") == user_id)
+
+                    for r in formatted_recipes:
+                        sig = _sig(r)
+                        if sig in existing:
+                            r["saved"] = False
+                            r["duplicate"] = True
+                            duplicate_count += 1
+                            duplicates.append({"title": r.get("title", ""), "ingredients": r.get("ingredients", "")})
+                            continue
+
+                        # Save as private recipe keeping full structure for the app
+                        instructions = r.get("instructions", [])
+                        if isinstance(instructions, list):
+                            instructions_text = "\n".join([f"{i+1}. {str(step)}" for i, step in enumerate(instructions)])
+                        else:
+                            instructions_text = str(instructions or "")
+
+                        description = (r.get("description", "") or "").strip()
+                        full_description = description
+                        if instructions_text.strip():
+                            full_description = f"{description}\n\nInstrucciones:\n{instructions_text}".strip()
+
+                        new_private = {
+                            "title": r.get("title", "Receta sin título"),
+                            "ingredients": r.get("ingredients", ""),
+                            "ingredients_detailed": r.get("ingredients_detailed", []),
+                            "instructions": r.get("instructions", []),
+                            "time_minutes": int(r.get("time_minutes", 30)),
+                            "difficulty": r.get("difficulty", "Media"),
+                            "tags": r.get("tags", ""),
+                            "image_url": "",  # IA recipes saved without photo
+                            "description": full_description,
+                            "nutrients": r.get("nutrients", "calories 0"),
+                            "servings": float(r.get("servings", 4)) if r.get("servings") is not None else 4.0,
+                            "calories_per_serving": int(r.get("calories_per_serving", 0)),
+                            "user_id": user_id,
+                            "created_at": datetime.now().isoformat(),
+                            "is_public": False,
+                            "is_ai_generated": True,
+                            "ai_source": "openai",
+                        }
+
+                        private_recipes.append(new_private)
+                        existing.add(sig)
+                        r["saved"] = True
+                        r["duplicate"] = False
+                        saved_ids.append(len(private_recipes) - 1)
+                        saved_count += 1
+
+                    save_recipes_private(private_recipes)
+                except Exception as e:
+                    print(f"⚠️ Error auto-saving IA recipes: {e}")
             
             if len(formatted_recipes) == 0:
                 print("⚠️ No se generaron recetas después del filtrado")
@@ -1745,14 +1842,19 @@ Reglas:
                     "error": "No se pudieron generar recetas con los filtros seleccionados. Intenta con otros filtros o ingredientes.",
                     "recipes": [],
                     "meal_type": meal_type,
-                    "ai_generated": True
+                    "ai_generated": True,
+                    "saved_count": 0,
+                    "duplicate_count": 0
                 }
             
             return {
                 "message": f"Recetas generadas exitosamente para {meal_type}",
                 "recipes": formatted_recipes,
                 "meal_type": meal_type,
-                "ai_generated": True
+                "ai_generated": True,
+                "saved_count": saved_count,
+                "duplicate_count": duplicate_count,
+                "duplicates": duplicates
             }
             
         except json.JSONDecodeError as e:
@@ -2003,6 +2105,172 @@ def get_profile_stats(current_user: dict = Depends(get_current_user)):
         "following_count": len(followers_data[user_id]["following"]),
         "connections_count": len(followers_data[user_id]["connections"])
     }
+
+
+@app.get("/profile/connections")
+def get_connections(current_user: dict = Depends(get_current_user)):
+    """Get mutual connections (users who follow each other)."""
+    user_id = current_user["user_id"]
+    followers_data = load_followers()
+    profiles = load_profiles()
+
+    connections = followers_data.get(user_id, {}).get("connections", [])
+    result = []
+    for cid in connections:
+        p = profiles.get(cid)
+        if not p:
+            continue
+        # Exclude admin
+        if p.get("email") == "power4gods@gmail.com" or p.get("role") == "admin":
+            continue
+        result.append({
+            "user_id": cid,
+            "username": p.get("username", cid),
+            "avatar_url": p.get("avatar_url", ""),
+            "avatar_color": p.get("avatar_color"),
+        })
+
+    return {"connections": result, "count": len(result)}
+
+
+@app.post("/recipes/share")
+def share_recipe(request: ShareRecipeRequest, current_user: dict = Depends(get_current_user)):
+    """Share a recipe with a connected user (adds to notifications + inbox)."""
+    user_id = current_user["user_id"]
+    target_user_id = request.target_user_id
+
+    followers_data = load_followers()
+    if target_user_id not in followers_data.get(user_id, {}).get("connections", []):
+        raise HTTPException(status_code=403, detail="You can only share recipes with connected users")
+
+    profiles = load_profiles()
+    if target_user_id not in profiles:
+        raise HTTPException(status_code=404, detail="Target user not found")
+
+    recipe = request.recipe or {}
+    title = recipe.get("title", "Receta compartida")
+    now = datetime.now().isoformat()
+
+    # Notification
+    notifications = profiles[target_user_id].get("notifications", [])
+    notifications.append({
+        "type": "recipe_shared",
+        "message": f"Te han compartido una receta: {title}",
+        "from_user_id": user_id,
+        "recipe_title": title,
+        "created_at": now,
+        "read": False,
+    })
+    profiles[target_user_id]["notifications"] = notifications
+
+    # Inbox payload
+    inbox = profiles[target_user_id].get("shared_recipes", [])
+    inbox.append({
+        "type": "recipe_shared",
+        "title": title,
+        "recipe": recipe,
+        "from_user_id": user_id,
+        "created_at": now,
+    })
+    profiles[target_user_id]["shared_recipes"] = inbox
+
+    # Also push into chat thread (DM) so it appears in chat UI
+    try:
+        chats = load_chats()
+        a, b = sorted([user_id, target_user_id])
+        conversation_id = f"{a}__{b}"
+        conv = chats.get(conversation_id, {"users": [a, b], "messages": []})
+        conv_messages = conv.get("messages", [])
+        conv_messages.append({
+            "type": "recipe",
+            "text": "",
+            "recipe": recipe,
+            "recipe_title": title,
+            "from_user_id": user_id,
+            "to_user_id": target_user_id,
+            "created_at": now,
+            "read_by": [user_id],
+        })
+        conv["messages"] = conv_messages
+        chats[conversation_id] = conv
+        save_chats(chats)
+    except Exception as e:
+        print(f"⚠️ Could not append recipe to chat: {e}")
+
+    save_profiles(profiles)
+    return {"message": "Recipe shared", "shared": True}
+
+
+@app.get("/chat/{other_user_id}")
+def get_chat(other_user_id: str, current_user: dict = Depends(get_current_user)):
+    """Get chat messages with a mutual connection."""
+    user_id = current_user["user_id"]
+    followers_data = load_followers()
+    if other_user_id not in followers_data.get(user_id, {}).get("connections", []):
+        raise HTTPException(status_code=403, detail="You can only chat with connected users")
+
+    a, b = sorted([user_id, other_user_id])
+    conversation_id = f"{a}__{b}"
+    chats = load_chats()
+    conv = chats.get(conversation_id, {"users": [a, b], "messages": []})
+    return {"conversation_id": conversation_id, "messages": conv.get("messages", [])}
+
+
+@app.post("/chat/{other_user_id}/message")
+def send_chat_message(other_user_id: str, msg: ChatMessageCreate, current_user: dict = Depends(get_current_user)):
+    """Send a DM to a mutual connection. Can include a recipe payload."""
+    user_id = current_user["user_id"]
+    followers_data = load_followers()
+    if other_user_id not in followers_data.get(user_id, {}).get("connections", []):
+        raise HTTPException(status_code=403, detail="You can only chat with connected users")
+
+    now = datetime.now().isoformat()
+    chats = load_chats()
+    a, b = sorted([user_id, other_user_id])
+    conversation_id = f"{a}__{b}"
+    conv = chats.get(conversation_id, {"users": [a, b], "messages": []})
+    conv_messages = conv.get("messages", [])
+
+    message_obj = {
+        "type": "recipe" if msg.recipe else "text",
+        "text": (msg.text or "").strip(),
+        "recipe": msg.recipe,
+        "recipe_title": (msg.recipe or {}).get("title") if msg.recipe else None,
+        "from_user_id": user_id,
+        "to_user_id": other_user_id,
+        "created_at": now,
+        "read_by": [user_id],
+    }
+    conv_messages.append(message_obj)
+    conv["messages"] = conv_messages
+    chats[conversation_id] = conv
+    save_chats(chats)
+
+    # Create notification on receiver
+    profiles = load_profiles()
+    if other_user_id in profiles:
+        notifications = profiles[other_user_id].get("notifications", [])
+        if msg.recipe:
+            title = (msg.recipe or {}).get("title", "Receta")
+            notifications.append({
+                "type": "chat_recipe",
+                "message": f"Te han enviado una receta: {title}",
+                "from_user_id": user_id,
+                "created_at": now,
+                "read": False,
+            })
+        elif message_obj["text"]:
+            notifications.append({
+                "type": "chat_message",
+                "message": "Tienes un nuevo mensaje",
+                "from_user_id": user_id,
+                "created_at": now,
+                "read": False,
+            })
+        profiles[other_user_id]["notifications"] = notifications
+        save_profiles(profiles)
+
+    return {"message": "sent", "conversation_id": conversation_id}
 
 @app.delete("/profile/account")
 def delete_account(current_user: dict = Depends(get_current_user)):

@@ -597,51 +597,50 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
     }
 
     try {
+      // Use a single PUT with the full ingredients list (avoids duplicates/race conditions).
+      final updatedIngredients = _ingredients.map((ing) {
+        if (ing.name == oldName) {
+          return Ingredient(
+            name: normalizedNew,
+            quantity: quantity ?? ing.quantity,
+            unit: unit ?? ing.unit,
+          );
+        }
+        return ing;
+      }).toList();
+
       final headers = await _authService.getAuthHeaders();
-      
-      // Eliminar el ingrediente antiguo y añadir el nuevo
       final url = await AppConfig.getBackendUrl();
-      // Primero eliminar el antiguo (usar nombre normalizado)
-      final encodedOldName = Uri.encodeComponent(normalizedOld);
-      await http.delete(
-        Uri.parse('$url/profile/ingredients/$encodedOldName'),
-        headers: headers,
-      ).timeout(const Duration(seconds: 10));
-      
-      // Luego añadir el nuevo (usar nombre normalizado al singular)
-      final encodedNewName = Uri.encodeComponent(normalizedNew);
-      final finalQuantity = quantity ?? _ingredients.firstWhere(
-        (ing) => ing.name.toLowerCase() == oldName.toLowerCase(),
-        orElse: () => Ingredient(name: '', quantity: 1.0, unit: 'unidades'),
-      ).quantity;
-      final finalUnit = unit ?? _ingredients.firstWhere(
-        (ing) => ing.name.toLowerCase() == oldName.toLowerCase(),
-        orElse: () => Ingredient(name: '', quantity: 1.0, unit: 'unidades'),
-      ).unit;
-      
-      final response = await http.post(
-        Uri.parse('$url/profile/ingredients/$encodedNewName?quantity=$finalQuantity&unit=$finalUnit'),
-        headers: headers,
+      final ingredientsJson = updatedIngredients.map((ing) => ing.toJson()).toList();
+
+      final response = await http.put(
+        Uri.parse('$url/profile/ingredients'),
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'ingredients': ingredientsJson}),
       ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
-        // Recargar desde el servidor para confirmar que se guardó
-        await _loadIngredients();
-        
-        // Sincronizar con Firebase
+        // Sync to Supabase storage + local state
         final userId = _authService.userId;
         if (userId != null) {
-          final ingredientsJson = _ingredients.map((ing) => ing.toJson()).toList();
           await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
         }
-        
-        if (mounted) {
+
+        setState(() {
+          _ingredients = updatedIngredients;
           _editingIngredient = null;
-          _editingControllers[oldName]?.dispose();
-          _editingControllers.remove(oldName);
-          _quantityControllers[oldName]?.dispose();
-          _quantityControllers.remove(oldName);
-          _unitControllers.remove(oldName);
+        });
+
+        _editingControllers[oldName]?.dispose();
+        _editingControllers.remove(oldName);
+        _quantityControllers[oldName]?.dispose();
+        _quantityControllers.remove(oldName);
+        _unitControllers.remove(oldName);
+
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('✅ Ingrediente actualizado correctamente'),
