@@ -17,12 +17,11 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
   final AuthService _authService = AuthService();
   final TrackingService _trackingService = TrackingService();
   
-  // Ingredientes disponibles (desde "Alimentación")
+  // Ingredientes disponibles (cargados desde "Alimentación")
   List<String> _availableIngredients = [];
   // Ingredientes seleccionados por el usuario
   Set<String> _selectedIngredients = {};
-  // Ingredientes adicionales añadidos manualmente
-  List<String> _customIngredients = [];
+  // Buscador de nuevos ingredientes
   final TextEditingController _ingredientSearchController = TextEditingController();
   List<Map<String, dynamic>> _ingredientSuggestions = [];
   bool _isLoadingIngredients = true;
@@ -110,40 +109,27 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
     }
   }
 
-  void _toggleIngredient(String ingredient) {
-    setState(() {
-      if (_selectedIngredients.contains(ingredient)) {
-        _selectedIngredients.remove(ingredient);
-      } else {
-        _selectedIngredients.add(ingredient);
-      }
-    });
-  }
-
-  void _addCustomIngredient(String ingredient) {
+  void _addIngredient(String ingredient) {
     final trimmed = ingredient.trim();
     if (trimmed.isEmpty) return;
-    if (!_customIngredients.contains(trimmed) && !_availableIngredients.contains(trimmed)) {
-      setState(() {
-        _customIngredients.add(trimmed);
-        _selectedIngredients.add(trimmed);
-        _ingredientSearchController.clear();
-        _ingredientSuggestions = [];
-      });
-    }
+    setState(() {
+      _selectedIngredients.add(trimmed);
+      if (!_availableIngredients.contains(trimmed)) {
+        _availableIngredients.add(trimmed);
+      }
+    });
+    _ingredientSearchController.clear();
+    setState(() => _ingredientSuggestions = []);
   }
 
-  void _removeCustomIngredient(String ingredient) {
+  void _removeIngredient(String ingredient) {
     setState(() {
-      _customIngredients.remove(ingredient);
       _selectedIngredients.remove(ingredient);
     });
   }
 
-  List<String> get _allSelectedIngredients => _selectedIngredients.toList();
-
   Future<void> _generateRecipes() async {
-    if (_allSelectedIngredients.isEmpty) {
+    if (_selectedIngredients.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Selecciona al menos un ingrediente'),
@@ -163,8 +149,9 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
       final headers = await _authService.getAuthHeaders();
       final url = await AppConfig.getBackendUrl();
       
+      final selectedList = _selectedIngredients.toList();
       // Determinar lógica de ingredientes
-      final mustIncludeAll = _userIngredients.length <= 3;
+      final mustIncludeAll = selectedList.length <= 3;
       
       final response = await http.post(
         Uri.parse('$url/ai/generate-recipes'),
@@ -174,7 +161,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
         },
         body: jsonEncode({
           'meal_type': _mealType ?? 'Comida',
-          'ingredients': _userIngredients,
+          'ingredients': selectedList,
           'num_recipes': 5,
           'must_include_all': mustIncludeAll, // Si hay 3 o menos, deben aparecer todos
           'difficulty': _selectedDifficulty,
