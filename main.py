@@ -3155,27 +3155,113 @@ def parse_nutrients_string(nutrients_str: str):
     return result
 
 def calculate_nutrition(food: dict, quantity: float, unit: str):
-    """Calculate nutrition values for a given quantity of food"""
-    # Convert to grams
-    unit_conversions = food.get("unit_conversions", {})
-    if unit in unit_conversions:
-        grams = quantity * unit_conversions[unit]
-    else:
-        grams = quantity  # Assume grams if unit not found
+    """
+    Calculate nutrition values for a given quantity of food with precision.
     
-    # Calculate nutrition per gram
+    Args:
+        food: Dictionary containing food data with 'nutrition_per_100g' and 'unit_conversions'
+        quantity: Amount of food
+        unit: Unit of measurement (e.g., 'gramos', 'unidades', 'tazas', etc.)
+    
+    Returns:
+        Dictionary with calculated nutrition values for the specified quantity
+    """
+    if not food:
+        print("⚠️ Warning: calculate_nutrition called with empty food dict")
+        return {
+            "calories": 0.0,
+            "protein": 0.0,
+            "carbohydrates": 0.0,
+            "fat": 0.0,
+            "fiber": 0.0,
+            "sugar": 0.0,
+            "sodium": 0.0,
+        }
+    
+    # Get nutrition data per 100g
     nutrition_per_100g = food.get("nutrition_per_100g", {})
+    if not nutrition_per_100g:
+        print(f"⚠️ Warning: Food '{food.get('name', 'unknown')}' has no nutrition_per_100g data")
+        return {
+            "calories": 0.0,
+            "protein": 0.0,
+            "carbohydrates": 0.0,
+            "fat": 0.0,
+            "fiber": 0.0,
+            "sugar": 0.0,
+            "sodium": 0.0,
+        }
+    
+    # Get unit conversions
+    unit_conversions = food.get("unit_conversions", {})
+    default_unit = food.get("default_unit", "gramos")
+    
+    # Normalize unit name (case-insensitive, remove spaces)
+    unit_normalized = unit.lower().strip()
+    
+    # Convert quantity to grams
+    grams = None
+    if unit_normalized in unit_conversions:
+        # Direct conversion from unit_conversions
+        conversion_factor = float(unit_conversions[unit_normalized])
+        grams = quantity * conversion_factor
+        print(f"📊 Conversión: {quantity} {unit} × {conversion_factor} = {grams:.2f} gramos")
+    elif unit_normalized == "gramos" or unit_normalized == "g" or unit_normalized == "gramo":
+        # Already in grams
+        grams = quantity
+        print(f"📊 Cantidad ya en gramos: {quantity} gramos")
+    elif unit_normalized == "unidades" or unit_normalized == "unidad" or unit_normalized == "ud":
+        # If "unidades" is not in unit_conversions, try to use default_unit
+        if default_unit == "gramos" and "unidades" in unit_conversions:
+            conversion_factor = float(unit_conversions["unidades"])
+            grams = quantity * conversion_factor
+        else:
+            # Fallback: assume 1 unidad = 100g if no conversion specified
+            grams = quantity * 100.0
+            print(f"⚠️ Warning: No conversion for 'unidades', assuming 1 unidad = 100g")
+    else:
+        # Unknown unit - try to use default_unit conversion or assume grams
+        if default_unit in unit_conversions:
+            # Try to estimate based on default_unit
+            default_conversion = float(unit_conversions[default_unit])
+            # Assume the unknown unit is similar to default_unit
+            grams = quantity * default_conversion
+            print(f"⚠️ Warning: Unknown unit '{unit}', using default_unit '{default_unit}' conversion")
+        else:
+            # Last resort: assume grams
+            grams = quantity
+            print(f"⚠️ Warning: Unknown unit '{unit}' and no default_unit conversion, assuming grams")
+    
+    if grams is None or grams <= 0:
+        print(f"❌ Error: Invalid quantity or conversion result: {grams}")
+        return {
+            "calories": 0.0,
+            "protein": 0.0,
+            "carbohydrates": 0.0,
+            "fat": 0.0,
+            "fiber": 0.0,
+            "sugar": 0.0,
+            "sodium": 0.0,
+        }
+    
+    # Calculate multiplier (grams / 100g)
     multiplier = grams / 100.0
     
-    return {
-        "calories": round(nutrition_per_100g.get("calories", 0) * multiplier, 1),
-        "protein": round(nutrition_per_100g.get("protein", 0) * multiplier, 1),
-        "carbohydrates": round(nutrition_per_100g.get("carbohydrates", 0) * multiplier, 1),
-        "fat": round(nutrition_per_100g.get("fat", 0) * multiplier, 1),
-        "fiber": round(nutrition_per_100g.get("fiber", 0) * multiplier, 1),
-        "sugar": round(nutrition_per_100g.get("sugar", 0) * multiplier, 1),
-        "sodium": round(nutrition_per_100g.get("sodium", 0) * multiplier, 1),
+    # Calculate nutrition values with precision
+    result = {
+        "calories": round(float(nutrition_per_100g.get("calories", 0)) * multiplier, 1),
+        "protein": round(float(nutrition_per_100g.get("protein", 0)) * multiplier, 2),
+        "carbohydrates": round(float(nutrition_per_100g.get("carbohydrates", 0)) * multiplier, 2),
+        "fat": round(float(nutrition_per_100g.get("fat", 0)) * multiplier, 2),
+        "fiber": round(float(nutrition_per_100g.get("fiber", 0)) * multiplier, 2),
+        "sugar": round(float(nutrition_per_100g.get("sugar", 0)) * multiplier, 2),
+        "sodium": round(float(nutrition_per_100g.get("sodium", 0)) * multiplier, 2),
     }
+    
+    food_name = food.get("name", "unknown")
+    print(f"✅ Nutrición calculada para {food_name}: {quantity} {unit} ({grams:.2f}g) = {result['calories']:.1f} kcal, {result['protein']:.2f}g proteína")
+    
+    return result
 
 def calculate_stats_for_period(entries: list, start_date: str, end_date: str):
     """Calculate aggregated statistics for a date range"""
@@ -3429,10 +3515,17 @@ def add_consumption(
             else:
                 continue
         
-        quantity = food_dict.get("quantity", 0) or getattr(food_item, "quantity", 0)
-        unit = food_dict.get("unit", "gramos") or getattr(food_item, "unit", "gramos")
+        quantity = float(food_dict.get("quantity", 0) or getattr(food_item, "quantity", 0))
+        unit = str(food_dict.get("unit", "gramos") or getattr(food_item, "unit", "gramos"))
+        
+        # Si el frontend envió unit_conversions, actualizar el food dict para mayor precisión
+        if "unit_conversions" in food_dict:
+            food["unit_conversions"] = food_dict["unit_conversions"]
+        if "default_unit" in food_dict:
+            food["default_unit"] = food_dict["default_unit"]
         
         print(f"✅ Procesando alimento: {food.get('name')} - {quantity} {unit}")
+        print(f"   Unit conversions disponibles: {food.get('unit_conversions', {})}")
         nutrition = calculate_nutrition(food, quantity, unit)
         
         processed_foods.append({

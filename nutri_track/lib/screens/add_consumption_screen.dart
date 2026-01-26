@@ -204,6 +204,9 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
         'name': food['name'] ?? '',
         'quantity': quantity,
         'unit': unit,
+        // Incluir unit_conversions y default_unit para que el backend pueda calcular correctamente
+        'unit_conversions': food['unit_conversions'],
+        'default_unit': food['default_unit'] ?? 'gramos',
       });
     });
     
@@ -274,13 +277,16 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
               'name': (foundFood?['name'] ?? foodName).toString(),
               'quantity': quantity,
               'unit': unit,
+              // Incluir unit_conversions y default_unit para que el backend pueda calcular correctamente
+              'unit_conversions': foundFood?['unit_conversions'],
+              'default_unit': foundFood?['default_unit'] ?? 'gramos',
             });
           });
           _foodSearchController.clear();
           setState(() {
             _foodSuggestions = [];
           });
-          print('✅ Alimento añadido correctamente: ${foundFood?['name'] ?? foodName} (ID: $foodId)');
+          print('✅ Alimento añadido correctamente: ${foundFood?['name'] ?? foodName} (ID: $foodId, cantidad: $quantity $unit)');
         } else {
           print('❌ No se pudo obtener food_id del alimento: ${foundFood?['name']}');
           if (mounted) {
@@ -795,12 +801,35 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                Text(
-                  '${food['quantity']} ${food['unit']}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _editFoodQuantity(index),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '${food['quantity']} ${food['unit']}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.edit, size: 14, color: Colors.blue),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 if (calories > 0)
                   Text(
@@ -819,6 +848,92 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
             onPressed: () => _removeFood(index),
           ),
         ],
+      ),
+    );
+  }
+  
+  void _editFoodQuantity(int index) {
+    final food = _selectedFoods[index];
+    final quantityController = TextEditingController(text: food['quantity'].toString());
+    String selectedUnit = food['unit'] ?? 'gramos';
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('Editar cantidad: ${food['name']}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: quantityController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: 'Cantidad',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedUnit,
+                decoration: const InputDecoration(
+                  labelText: 'Unidad',
+                  border: OutlineInputBorder(),
+                ),
+                items: [
+                  const DropdownMenuItem(value: 'gramos', child: Text('gramos')),
+                  const DropdownMenuItem(value: 'unidades', child: Text('unidades')),
+                  if (food['unit_conversions'] != null)
+                    ...(food['unit_conversions'] as Map<String, dynamic>).keys.map((unit) =>
+                      DropdownMenuItem(value: unit, child: Text(unit))
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setDialogState(() {
+                      selectedUnit = value;
+                    });
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final quantity = double.tryParse(quantityController.text);
+                if (quantity != null && quantity > 0) {
+                  setState(() {
+                    _selectedFoods[index]['quantity'] = quantity;
+                    _selectedFoods[index]['unit'] = selectedUnit;
+                    // Recalcular calorías si es receta (el backend lo hará, pero actualizamos visualmente)
+                    if (food['is_recipe'] == true && food['calories'] != null) {
+                      final caloriesPerServing = food['calories'] ?? 0.0;
+                      _selectedFoods[index]['calories'] = caloriesPerServing * quantity;
+                    }
+                  });
+                  Navigator.pop(context);
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Por favor ingresa una cantidad válida'),
+                      backgroundColor: Colors.orange,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Guardar'),
+            ),
+          ],
+        ),
       ),
     );
   }
