@@ -8,6 +8,7 @@ import '../services/recipe_service.dart';
 import '../services/tracking_service.dart';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
+import '../utils/nutrition_parser.dart';
 import '../main.dart';
 import 'recipe_detail_screen.dart';
 import 'tracking_screen.dart';
