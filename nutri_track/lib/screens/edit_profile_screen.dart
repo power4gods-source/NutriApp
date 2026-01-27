@@ -322,6 +322,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
+  ImageProvider? _getAvatarImage() {
+    if (_selectedImage != null) {
+      return FileImage(_selectedImage!);
+    } else if (_currentAvatarUrl != null && _currentAvatarUrl!.isNotEmpty) {
+      return NetworkImage(_currentAvatarUrl!);
+    }
+    return null;
+  }
+  
   Widget _buildAvatarSection() {
     return Center(
       child: Column(
@@ -331,13 +340,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: const Color(0xFF4CAF50),
-                backgroundImage: _selectedImage != null
-                    ? FileImage(_selectedImage!)
-                    : (_currentAvatarUrl != null && _currentAvatarUrl!.isNotEmpty)
-                        ? NetworkImage(_currentAvatarUrl!)
-                        : null,
-                child: _selectedImage == null && 
-                       (_currentAvatarUrl == null || _currentAvatarUrl!.isEmpty)
+                backgroundImage: _getAvatarImage(),
+                child: _getAvatarImage() == null
                     ? Text(
                         (_authService.username ?? 'U')[0].toUpperCase(),
                         style: const TextStyle(
