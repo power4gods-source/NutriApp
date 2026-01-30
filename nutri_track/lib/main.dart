@@ -1,12 +1,14 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'config/supabase_config.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'firebase_options.dart';
 import 'services/auth_service.dart';
-import 'services/supabase_sync_service.dart';
-import 'services/supabase_user_service.dart';
+import 'services/firebase_sync_service.dart';
+import 'services/firebase_user_service.dart';
 import 'config/app_config.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
@@ -18,34 +20,33 @@ import 'screens/friends_screen.dart';
 import 'screens/coming_soon_screen.dart';
 
 void main() async {
-  // OBLIGATORIO: Inicializar Flutter binding antes de Firebase
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inicializar locale data para DateFormat con español
+
+  // 1. Firebase (Spark) - inicializar antes que nada
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FlutterError.onError = (error) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(error);
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+    print('✅ Firebase inicializado (Spark)');
+  } catch (e) {
+    print('⚠️ Firebase no inicializado (ejecuta flutterfire configure en nutri_track): $e');
+  }
+
+  // 2. Locale data para DateFormat
   try {
     await initializeDateFormatting('es', null);
     print('✅ Locale data inicializado (español)');
   } catch (e) {
     print('⚠️ Error al inicializar locale data: $e');
   }
-  
-  // Inicializar Supabase
-  try {
-    if (SupabaseConfig.isConfigured) {
-      await Supabase.initialize(
-        url: SupabaseConfig.supabaseUrl,
-        anonKey: SupabaseConfig.supabaseAnonKey,
-      );
-      print('✅ Supabase inicializado correctamente');
-    } else {
-      print('⚠️ Supabase no está configurado. Edita lib/config/supabase_config.dart con tus credenciales.');
-      print('ℹ️ La aplicación continuará usando el backend local');
-    }
-  } catch (e) {
-    print('⚠️ Error al inicializar Supabase: $e');
-    print('ℹ️ La aplicación continuará usando el backend local');
-  }
-  
+
   runApp(const NutriTrackApp());
 }
 
@@ -143,43 +144,31 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
     }
     
-    // 4. Sincronizar datos desde Supabase (si está disponible)
+    // 4. Sincronizar datos desde Firestore
     try {
-      if (SupabaseConfig.isConfigured) {
-        final supabaseService = SupabaseSyncService();
-        print('☁️ Intentando sincronizar con Supabase...');
-        
-        try {
-          // Sincronizar en segundo plano sin bloquear la UI
-          supabaseService.downloadAllJsonFiles().then((data) {
-            if (data.isNotEmpty) {
-              print('✅ Datos sincronizados desde Supabase: ${data.length} archivos');
-            }
-          }).catchError((e) {
-            print('⚠️ Error sincronizando desde Supabase: $e');
-          });
-        } catch (e) {
-          print('⚠️ Supabase no disponible: $e');
+      final firebaseSyncService = FirebaseSyncService();
+      print('☁️ Intentando sincronizar con Firestore...');
+      firebaseSyncService.downloadAllJsonFiles().then((data) {
+        if (data.isNotEmpty) {
+          print('✅ Datos sincronizados desde Firestore: ${data.length} archivos');
         }
-      } else {
-        print('ℹ️ Supabase no configurado - usando solo backend local');
-      }
+      }).catchError((e) {
+        print('⚠️ Error sincronizando desde Firestore: $e');
+      });
     } catch (e) {
-      print('⚠️ Error al inicializar SupabaseSyncService: $e');
+      print('⚠️ Error al inicializar FirebaseSyncService: $e');
     }
     
-    // 5. Si hay usuario autenticado, cargar sus datos desde Supabase
-    if (_isAuthenticated && userId != null && SupabaseConfig.isConfigured) {
+    // 5. Si hay usuario autenticado, cargar sus datos desde Firestore
+    if (_isAuthenticated && userId != null) {
       try {
-        print('👤 Cargando datos del usuario desde Supabase...');
-        final supabaseUserService = SupabaseUserService();
-        // Cargar datos en segundo plano
-        supabaseUserService.getUser(userId).then((userData) {
+        print('👤 Cargando datos del usuario desde Firestore...');
+        final firebaseUserService = FirebaseUserService();
+        firebaseUserService.getUser(userId).then((userData) {
           if (userData != null) {
-            print('✅ Datos del usuario cargados desde Supabase');
-            // Los datos se usarán automáticamente cuando se necesiten
+            print('✅ Datos del usuario cargados desde Firestore');
           } else {
-            print('⚠️ No se encontraron datos del usuario en Supabase');
+            print('⚠️ No se encontraron datos del usuario en Firestore');
           }
         }).catchError((e) {
           print('⚠️ Error cargando datos del usuario: $e');

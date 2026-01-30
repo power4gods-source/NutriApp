@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
-import '../services/supabase_recipe_service.dart';
+import '../services/firebase_recipe_service.dart';
 import '../utils/nutrition_parser.dart';
 import '../widgets/search_dialog.dart';
 import '../main.dart';
@@ -446,8 +446,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
             if (finalUserId != null) {
               // Sincronizar con Firebase manteniendo en privadas y agregando a públicas
               try {
-                final supabaseRecipeService = SupabaseRecipeService();
-                await supabaseRecipeService.publishPrivateRecipe(recipe, finalUserId);
+                final firebaseRecipeService = FirebaseRecipeService();
+                await firebaseRecipeService.publishPrivateRecipe(recipe, finalUserId);
                 print('✅ Receta sincronizada con Firebase después de publicar desde backend');
               } catch (e) {
                 print('⚠️ Error sincronizando con Firebase después de publicar: $e');
@@ -466,9 +466,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
     if (!success) {
       // Usar finalUserId que ya fue obtenido anteriormente
       if (finalUserId != null) {
-        // Usar SupabaseRecipeService directamente
-        final supabaseRecipeService = SupabaseRecipeService();
-        success = await supabaseRecipeService.publishPrivateRecipe(recipe, finalUserId);
+        // Usar FirebaseRecipeService directamente
+        final firebaseRecipeService = FirebaseRecipeService();
+        success = await firebaseRecipeService.publishPrivateRecipe(recipe, finalUserId);
       }
     }
     

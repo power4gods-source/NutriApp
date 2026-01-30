@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'auth_service.dart';
-import 'supabase_sync_service.dart';
-import 'supabase_recipe_service.dart';
-import 'supabase_user_service.dart';
+import 'firebase_sync_service.dart';
+import 'firebase_recipe_service.dart';
+import 'firebase_user_service.dart';
 import '../config/app_config.dart';
 
 class RecipeService {
-  final SupabaseSyncService _supabaseService = SupabaseSyncService();
-  final SupabaseRecipeService _supabaseRecipeService = SupabaseRecipeService();
-  final SupabaseUserService _supabaseUserService = SupabaseUserService();
+  final FirebaseSyncService _firebaseService = FirebaseSyncService();
+  final FirebaseRecipeService _firebaseRecipeService = FirebaseRecipeService();
+  final FirebaseUserService _firebaseUserService = FirebaseUserService();
   
   /// Obtiene la URL del backend configurada
   Future<String> get baseUrl async => await AppConfig.getBackendUrl();
@@ -94,7 +94,7 @@ class RecipeService {
   Future<List<dynamic>> getGeneralRecipes() async {
     // 1. Intentar desde Firebase PRIMERO (para modo sin backend)
     try {
-      final data = await _supabaseService.downloadJsonFile('recipes.json');
+      final data = await _firebaseService.downloadJsonFile('recipes.json');
       if (data != null) {
         List<dynamic> recipes = [];
         if (data is List) {
@@ -139,7 +139,7 @@ class RecipeService {
 
     // 3. Intentar desde Firebase (segunda vez, por si falló antes)
     try {
-      final data = await _supabaseService.downloadJsonFile('recipes.json');
+      final data = await _firebaseService.downloadJsonFile('recipes.json');
       if (data != null) {
         List<dynamic> recipes = [];
         if (data is List) {
@@ -208,7 +208,7 @@ class RecipeService {
     
     // 2. Intentar desde Firebase como fallback
     try {
-      final data = await _supabaseService.downloadJsonFile('recipes_public.json');
+      final data = await _firebaseService.downloadJsonFile('recipes_public.json');
       if (data != null) {
         List<dynamic> recipes = [];
         if (data is Map && data['recipes'] != null) {
@@ -341,7 +341,7 @@ class RecipeService {
     
     // 2. Intentar desde Firebase - cargar desde users/{userId}.json (lista específica del usuario)
     try {
-      final userData = await _supabaseUserService.getUserData(userId);
+      final userData = await _firebaseUserService.getUserData(userId);
       if (userData != null && userData['private_recipes'] != null) {
         final userRecipes = (userData['private_recipes'] as List).cast<dynamic>();
         // Guardar en cache
@@ -350,7 +350,7 @@ class RecipeService {
         return userRecipes;
       }
       // Fallback: intentar desde recipes_private.json (compatibilidad)
-      final data = await _supabaseService.downloadJsonFile('recipes_private.json');
+      final data = await _firebaseService.downloadJsonFile('recipes_private.json');
       if (data != null) {
         List<dynamic> allRecipes = [];
         if (data is Map && data['recipes'] != null) {
@@ -576,7 +576,7 @@ class RecipeService {
         await prefs.setString('favorites_$userId', jsonEncode(favoriteIds));
         
         // Sincronizar con Firebase
-        await _supabaseUserService.syncUserFavorites(userId, favoriteIds);
+        await _firebaseUserService.syncUserFavorites(userId, favoriteIds);
       }
       return true;
     } catch (e) {
@@ -627,7 +627,7 @@ class RecipeService {
         await prefs.setString('favorites_$userId', jsonEncode(favoriteIds));
         
         // Sincronizar con Firebase
-        await _supabaseUserService.syncUserFavorites(userId, favoriteIds);
+        await _firebaseUserService.syncUserFavorites(userId, favoriteIds);
         print('✅ Favorito eliminado localmente: $recipeId');
       } else {
         print('⚠️ Favorito no encontrado en lista local: $recipeId');

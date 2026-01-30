@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
-import '../services/supabase_user_service.dart';
+import '../services/firebase_user_service.dart';
 import '../config/app_config.dart';
 import '../utils/ingredient_suggestions.dart';
 import '../utils/ingredient_normalizer.dart';
@@ -53,7 +53,7 @@ class IngredientsTab extends StatefulWidget {
 
 class _IngredientsTabState extends State<IngredientsTab> {
   final AuthService _authService = AuthService();
-  final SupabaseUserService _supabaseUserService = SupabaseUserService();
+  final FirebaseUserService _firebaseUserService = FirebaseUserService();
   final TextEditingController _ingredientController = TextEditingController();
   final Map<String, TextEditingController> _editingControllers = {};
   final Map<String, TextEditingController> _quantityControllers = {};
@@ -126,7 +126,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
             // Sincronizar con Supabase
             final userId = _authService.userId;
             if (userId != null) {
-              _supabaseUserService.syncUserIngredients(userId, ingredientsList).catchError((e) {
+              _firebaseUserService.syncUserIngredients(userId, ingredientsList).catchError((e) {
                 print('⚠️ Error sincronizando ingredientes con Supabase: $e');
               });
             }
@@ -141,7 +141,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
       final userId = _authService.userId;
       if (userId != null) {
         try {
-          final userData = await _supabaseUserService.getUser(userId);
+          final userData = await _firebaseUserService.getUser(userId);
           if (userData != null && userData['ingredients'] != null) {
             final ingredientsList = userData['ingredients'] as List;
             setState(() {
@@ -239,7 +239,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
             // Sincronizar con Supabase
             final userId = _authService.userId;
             if (userId != null) {
-              _supabaseUserService.syncUserIngredients(userId, ingredientsJson).catchError((e) {
+              _firebaseUserService.syncUserIngredients(userId, ingredientsJson).catchError((e) {
                 print('⚠️ Error sincronizando con Firebase: $e');
               });
             }
@@ -266,7 +266,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
       if (userId != null) {
         // Guardar en Firebase
         try {
-          await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
+          await _firebaseUserService.syncUserIngredients(userId, ingredientsJson);
           print('✅ Ingrediente guardado en Firebase');
         } catch (e) {
           print('⚠️ Error guardando en Supabase: $e');
@@ -370,7 +370,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
             // Sincronizar con Supabase
             final userId = _authService.userId;
             if (userId != null) {
-              _supabaseUserService.syncUserIngredients(userId, ingredientsJson).catchError((e) {
+              _firebaseUserService.syncUserIngredients(userId, ingredientsJson).catchError((e) {
                 print('⚠️ Error sincronizando con Firebase: $e');
               });
             }
@@ -387,7 +387,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
       if (userId != null) {
         // Guardar en Firebase
         try {
-          await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
+          await _firebaseUserService.syncUserIngredients(userId, ingredientsJson);
         } catch (e) {
           print('⚠️ Error guardando en Supabase: $e');
         }
@@ -485,7 +485,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
             // Sincronizar con Supabase
             final userId = _authService.userId;
             if (userId != null) {
-              _supabaseUserService.syncUserIngredients(userId, ingredientsJson).catchError((e) {
+              _firebaseUserService.syncUserIngredients(userId, ingredientsJson).catchError((e) {
                 print('⚠️ Error sincronizando con Firebase: $e');
               });
             }
@@ -502,7 +502,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
       if (userId != null) {
         // Guardar en Firebase
         try {
-          await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
+          await _firebaseUserService.syncUserIngredients(userId, ingredientsJson);
         } catch (e) {
           print('⚠️ Error guardando en Supabase: $e');
         }

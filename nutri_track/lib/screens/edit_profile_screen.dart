@@ -4,10 +4,9 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
-import '../config/supabase_config.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -100,32 +99,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
-  Future<String?> _uploadImageToSupabase(File imageFile) async {
+  Future<String?> _uploadImageToFirebase(File imageFile) async {
     try {
-      final supabase = Supabase.instance.client;
       final userId = _authService.userId ?? '';
       final fileName = 'avatars/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      
-      // Leer el archivo como bytes
-      final bytes = await imageFile.readAsBytes();
-      
-      // Subir a Supabase Storage
-      await supabase.storage
-          .from(SupabaseConfig.storageBucket)
-          .uploadBinary(
-            fileName,
-            bytes,
-            fileOptions: const FileOptions(
-              contentType: 'image/jpeg',
-              upsert: true,
-            ),
-          );
-      
-      // Obtener URL pública
-      final url = supabase.storage
-          .from(SupabaseConfig.storageBucket)
-          .getPublicUrl(fileName);
-      
+      final ref = FirebaseStorage.instance.ref().child(fileName);
+      await ref.putFile(
+        imageFile,
+        SettableMetadata(contentType: 'image/jpeg'),
+      );
+      final url = await ref.getDownloadURL();
       return url;
     } catch (e) {
       print('Error uploading image: $e');
@@ -146,7 +129,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       
       // Subir imagen si se seleccionó una nueva
       if (_selectedImage != null) {
-        final uploadedUrl = await _uploadImageToSupabase(_selectedImage!);
+        final uploadedUrl = await _uploadImageToFirebase(_selectedImage!);
         if (uploadedUrl != null) {
           avatarUrl = uploadedUrl;
         } else {

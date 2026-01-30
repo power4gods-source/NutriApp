@@ -10,7 +10,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 import secrets
 import bcrypt
-from supabase_storage import load_json_with_fallback, save_json_with_sync, load_json_from_supabase, save_json_to_supabase
+from firebase_storage import load_json_with_fallback, save_json_with_sync, load_json_from_firebase, save_json_to_firebase
 import httpx
 from email_service import send_email, is_email_configured
 

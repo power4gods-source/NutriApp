@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
 import '../config/app_config.dart';
 import 'social_auth_google_apple.dart';
-import 'supabase_user_service.dart';
+import 'firebase_user_service.dart';
 
 class AuthService extends ChangeNotifier {
   String? _token;
@@ -17,7 +17,7 @@ class AuthService extends ChangeNotifier {
   String? _role;
   
   static const String _localUsersKey = 'local_users';
-  final SupabaseUserService _supabaseUserService = SupabaseUserService();
+  final FirebaseUserService _firebaseUserService = FirebaseUserService();
   
   /// Obtiene la URL del backend configurada
   Future<String> get baseUrl async => await AppConfig.getBackendUrl();
@@ -140,41 +140,41 @@ class AuthService extends ChangeNotifier {
             'offline': true
           };
         }
-        // Si falla el backend, intentar con Supabase primero, luego local
-        return await _loginSupabase(email, password);
+        // Si falla el backend, intentar con Firestore primero, luego local
+        return await _loginFirebase(email, password);
       }
     } else {
-      // Backend no disponible, intentar Supabase primero, luego local
-      return await _loginSupabase(email, password);
+      // Backend no disponible, intentar Firestore primero, luego local
+      return await _loginFirebase(email, password);
     }
   }
   
-  /// Login desde Supabase (sin backend)
-  Future<Map<String, dynamic>> _loginSupabase(String email, String password) async {
+  /// Login desde Firestore (sin backend)
+  Future<Map<String, dynamic>> _loginFirebase(String email, String password) async {
     try {
       final normalizedEmail = email.toLowerCase().trim();
       final passwordHash = _hashPassword(password);
       
-      // Verificar credenciales en Supabase Storage
+      // Verificar credenciales en Firestore Storage
       // Usamos el hash de la contraseña para mantener compatibilidad
-      final isValid = await _supabaseUserService.verifyUser(normalizedEmail, passwordHash);
+      final isValid = await _firebaseUserService.verifyUser(normalizedEmail, passwordHash);
       
       if (isValid) {
         // Obtener userId
-        final userId = await _supabaseUserService.getUserIdFromEmail(normalizedEmail);
+        final userId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
         if (userId == null) {
-          throw Exception('Usuario no encontrado en Supabase');
+          throw Exception('Usuario no encontrado en Firestore');
         }
         
         // Obtener datos del usuario
-        final userData = await _supabaseUserService.getUser(userId);
+        final userData = await _firebaseUserService.getUser(userId);
         final username = userData?['username'] ?? normalizedEmail.split('@')[0];
         
         // Intentar hacer login en el backend para obtener JWT válido
         String? jwtToken;
         try {
           final url = await baseUrl;
-          print('🔄 Intentando login en backend después de login en Supabase...');
+          print('🔄 Intentando login en backend después de login en Firestore...');
           final loginResponse = await http.post(
             Uri.parse('$url/auth/login'),
             headers: {'Content-Type': 'application/json'},
@@ -229,8 +229,8 @@ class AuthService extends ChangeNotifier {
         final role = normalizedEmail == 'power4gods@gmail.com' ? 'admin' : 'user';
         await _saveAuthData(token, userId, normalizedEmail, username, role: role);
         
-        // Cargar datos del usuario desde Supabase
-        await _loadUserDataFromSupabase(userId);
+        // Cargar datos del usuario desde Firestore
+        await _loadUserDataFromFirestore(userId);
         
         return {
           'success': true,
@@ -240,26 +240,26 @@ class AuthService extends ChangeNotifier {
             'username': username,
             'access_token': token,
           },
-          'supabase': true,
+          'firestore': true,
           'jwt_token': jwtToken != null,  // Indicar si se obtuvo JWT válido
         };
       } else {
-        // Si no es válido en Supabase, intentar login local
+        // Si no es válido en Firestore, intentar login local
         return await _loginLocal(email, password);
       }
     } catch (e) {
-      print('Error en login Supabase: $e');
+      print('Error en login Firestore: $e');
       // Fallback a login local
       return await _loginLocal(email, password);
     }
   }
   
-  /// Carga datos del usuario desde Supabase
-  Future<void> _loadUserDataFromSupabase(String userId) async {
+  /// Carga datos del usuario desde Firestore
+  Future<void> _loadUserDataFromFirestore(String userId) async {
     try {
-      final userData = await _supabaseUserService.getUser(userId);
+      final userData = await _firebaseUserService.getUser(userId);
       if (userData != null) {
-        print('✅ Datos del usuario cargados desde Supabase');
+        print('✅ Datos del usuario cargados desde Firestore');
         // Guardar datos localmente para acceso rápido
         final prefs = await SharedPreferences.getInstance();
         
@@ -293,10 +293,10 @@ class AuthService extends ChangeNotifier {
           print('✅ Recetas privadas cargadas: ${(userData['private_recipes'] as List).length}');
         }
         
-        print('✅ Datos del usuario cargados desde Supabase');
+        print('✅ Datos del usuario cargados desde Firestore');
       }
     } catch (e) {
-      print('Error cargando datos del usuario desde Supabase: $e');
+      print('Error cargando datos del usuario desde Firestore: $e');
     }
   }
 
@@ -386,21 +386,21 @@ class AuthService extends ChangeNotifier {
             print('⚠️ ADVERTENCIA: Token guardado no coincide con el recibido');
           }
           
-          // Registrar también en Supabase (en segundo plano, no bloquea)
+          // Registrar también en Firestore (en segundo plano, no bloquea)
           final passwordHash = _hashPassword(password);
-          _supabaseUserService.registerUser(
+          _firebaseUserService.registerUser(
             userId: userId,
             email: email,
             passwordHash: passwordHash,
             username: username ?? userName,
           ).then((success) {
             if (success) {
-              print('✅ Usuario también registrado en Supabase Storage');
+              print('✅ Usuario también registrado en Firestore Storage');
             } else {
-              print('⚠️ No se pudo registrar en Supabase Storage (el backend ya lo tiene)');
+              print('⚠️ No se pudo registrar en Firestore Storage (el backend ya lo tiene)');
             }
           }).catchError((e) {
-            print('⚠️ Error al registrar en Supabase (no crítico, el backend ya lo tiene): $e');
+            print('⚠️ Error al registrar en Firestore (no crítico, el backend ya lo tiene): $e');
           });
           
           print('✅ Usuario registrado correctamente, token guardado y recargado');
@@ -414,23 +414,23 @@ class AuthService extends ChangeNotifier {
         }
       } catch (e) {
         print('❌ Error al registrar en backend: $e');
-        print('🔄 Intentando registro en Supabase como fallback...');
-        // Si falla el backend, intentar registro en Supabase directamente
-        return await _registerSupabase(email, password, username: username);
+        print('🔄 Intentando registro en Firestore como fallback...');
+        // Si falla el backend, intentar registro en Firestore directamente
+        return await _registerFirebase(email, password, username: username);
       }
     } else {
-      // Backend no disponible, registrar directamente en Supabase
-      return await _registerSupabase(email, password, username: username);
+      // Backend no disponible, registrar directamente en Firestore
+      return await _registerFirebase(email, password, username: username);
     }
   }
   
-  /// Registro en Supabase (sin backend)
-  Future<Map<String, dynamic>> _registerSupabase(String email, String password, {String? username}) async {
+  /// Registro en Firestore (sin backend)
+  Future<Map<String, dynamic>> _registerFirebase(String email, String password, {String? username}) async {
     try {
       final normalizedEmail = email.toLowerCase().trim();
       
-      // Verificar si el usuario ya existe en Supabase
-      final existingUserId = await _supabaseUserService.getUserIdFromEmail(normalizedEmail);
+      // Verificar si el usuario ya existe en Firestore
+      final existingUserId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
       if (existingUserId != null) {
         return {
           'success': false,
@@ -450,11 +450,11 @@ class AuthService extends ChangeNotifier {
       final userId = _generateUserId(normalizedEmail);
       final passwordHash = _hashPassword(password);
       
-      // Registrar en Supabase (con timeout extendido para operaciones críticas)
-      bool supabaseSuccess = false;
+      // Registrar en Firestore (con timeout extendido para operaciones críticas)
+      bool firebaseSuccess = false;
       try {
-        print('🔄 Registrando en Supabase con timeout extendido (60s)...');
-        supabaseSuccess = await _supabaseUserService.registerUser(
+        print('🔄 Registrando en Firestore con timeout extendido (60s)...');
+        firebaseSuccess = await _firebaseUserService.registerUser(
           userId: userId,
           email: normalizedEmail,
           passwordHash: passwordHash,
@@ -462,23 +462,23 @@ class AuthService extends ChangeNotifier {
         ).timeout(
           const Duration(seconds: 60),
           onTimeout: () {
-            print('⚠️ Timeout al registrar en Supabase (60s)');
+            print('⚠️ Timeout al registrar en Firestore (60s)');
             return false;
           },
         );
         
-        if (supabaseSuccess) {
-          print('✅ Usuario registrado exitosamente en Supabase');
+        if (firebaseSuccess) {
+          print('✅ Usuario registrado exitosamente en Firestore');
         } else {
-          print('⚠️ Fallo al registrar en Supabase, pero continuando con registro local y backend');
+          print('⚠️ Fallo al registrar en Firestore, pero continuando con registro local y backend');
         }
       } catch (e) {
-        print('❌ Error al registrar en Supabase: $e');
-        supabaseSuccess = false;
+        print('❌ Error al registrar en Firestore: $e');
+        firebaseSuccess = false;
       }
       
-      // Continuar con el registro local y backend incluso si Supabase falla
-      // Esto asegura que el usuario pueda usar la app aunque Supabase tenga problemas
+      // Continuar con el registro local y backend incluso si Firestore falla
+      // Esto asegura que el usuario pueda usar la app aunque Firestore tenga problemas
       
       // Guardar también localmente para acceso rápido
       final prefs = await SharedPreferences.getInstance();
@@ -494,7 +494,7 @@ class AuthService extends ChangeNotifier {
         'user_id': userId,
         'username': username ?? normalizedEmail.split('@')[0],
         'created_at': DateTime.now().toIso8601String(),
-        'supabase_synced': true,
+        'firestore_synced': true,
       };
       await prefs.setString(_localUsersKey, jsonEncode(users));
       
@@ -611,12 +611,12 @@ class AuthService extends ChangeNotifier {
           'username': username ?? normalizedEmail.split('@')[0],
           'access_token': token,
         },
-        'supabase': true,
+        'firestore': true,
         'jwt_token': backendToken != null,  // Indicar si se obtuvo token JWT válido
         'offline_mode': backendToken == null, // Indicar que está en modo offline
       };
     } catch (e) {
-      print('Error en registro Supabase: $e');
+      print('Error en registro Firestore: $e');
       // Fallback a registro local
       return await _registerLocal(email, password, username: username);
     }
@@ -673,10 +673,10 @@ class AuthService extends ChangeNotifier {
       
       // Verificar que el usuario existe en Firebase
       final normalizedEmail = email.toLowerCase().trim();
-      final userId = await _supabaseUserService.getUserIdFromEmail(normalizedEmail);
+      final userId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
       
       if (userId == null) {
-        print('❌ Usuario no encontrado en Supabase');
+        print('❌ Usuario no encontrado en Firestore');
         return false;
       }
       

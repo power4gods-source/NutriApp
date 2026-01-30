@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'supabase_sync_service.dart';
+import 'firebase_sync_service.dart';
 
 /// Servicio que gestiona las fuentes de datos con fallback automático
-/// Prioridad: Backend Local > Supabase > Datos Locales (SharedPreferences)
+/// Prioridad: Backend Local > Firestore > Datos Locales (SharedPreferences)
 class DataSourceService {
   static const String baseUrl = 'http://localhost:8000';
-  final SupabaseSyncService _supabaseService = SupabaseSyncService();
+  final FirebaseSyncService _firebaseService = FirebaseSyncService();
   
   // Cache de datos locales
   Map<String, dynamic>? _localCache;
@@ -49,9 +49,9 @@ class DataSourceService {
       }
     }
     
-    // 2. Intentar desde Supabase
+    // 2. Intentar desde Firestore
     try {
-      final data = await _supabaseService.downloadJsonFile(fileName);
+      final data = await _firebaseService.downloadJsonFile(fileName);
       if (data != null) {
         // Convertir a Map si es necesario
         Map<String, dynamic>? dataMap;
@@ -67,7 +67,7 @@ class DataSourceService {
         }
       }
     } catch (e) {
-      print('Error obteniendo desde Supabase: $e');
+      print('Error obteniendo desde Firestore: $e');
     }
     
     // 3. Usar datos locales (cache)
@@ -156,13 +156,13 @@ class DataSourceService {
     }
   }
   
-  /// Sincroniza todos los datos desde Supabase y los guarda localmente
-  Future<Map<String, bool>> syncAllFromSupabase() async {
+  /// Sincroniza todos los datos desde Firestore y los guarda localmente
+  Future<Map<String, bool>> syncAllFromFirestore() async {
     final results = <String, bool>{};
     
-    for (final fileName in SupabaseSyncService.jsonFiles) {
+    for (final fileName in FirebaseSyncService.jsonFiles) {
       try {
-        final data = await _supabaseService.downloadJsonFile(fileName);
+        final data = await _firebaseService.downloadJsonFile(fileName);
         if (data != null) {
           // Convertir a Map si es necesario
           Map<String, dynamic>? dataMap;

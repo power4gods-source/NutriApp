@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
-import '../services/supabase_user_service.dart';
+import '../services/firebase_user_service.dart';
 import '../services/tracking_service.dart';
 import '../utils/ingredient_suggestions.dart';
 import '../utils/plural_helper.dart';
@@ -226,7 +226,7 @@ class _IngredientsTabContent extends StatefulWidget {
 
 class _IngredientsTabContentState extends State<_IngredientsTabContent> {
   final AuthService _authService = AuthService();
-  final SupabaseUserService _supabaseUserService = SupabaseUserService();
+  final FirebaseUserService _firebaseUserService = FirebaseUserService();
   final TrackingService _trackingService = TrackingService();
   final TextEditingController _ingredientController = TextEditingController();
   final Map<String, TextEditingController> _editingControllers = {};
@@ -447,7 +447,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
         final userId = _authService.userId;
         if (userId != null) {
           final ingredientsJson = _ingredients.map((ing) => ing.toJson()).toList();
-          await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
+          await _firebaseUserService.syncUserIngredients(userId, ingredientsJson);
         }
         
         if (mounted) {
@@ -543,7 +543,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
               final userId = _authService.userId;
               if (userId != null) {
                 final ingredientsJson = updatedIngredients.map((ing) => ing.toJson()).toList();
-                await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
+                await _firebaseUserService.syncUserIngredients(userId, ingredientsJson);
               }
               
               ScaffoldMessenger.of(context).showSnackBar(
@@ -626,7 +626,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
         // Sync to Supabase storage + local state
         final userId = _authService.userId;
         if (userId != null) {
-          await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
+          await _firebaseUserService.syncUserIngredients(userId, ingredientsJson);
         }
 
         setState(() {
@@ -701,7 +701,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
         final userId = _authService.userId;
         if (userId != null) {
           final ingredientsJson = _ingredients.map((ing) => ing.toJson()).toList();
-          await _supabaseUserService.syncUserIngredients(userId, ingredientsJson);
+          await _firebaseUserService.syncUserIngredients(userId, ingredientsJson);
         }
         
         if (mounted) {

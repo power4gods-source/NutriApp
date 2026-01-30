@@ -45,6 +45,13 @@ Thumbs.db
 # JWT Secret Key (should not be committed)
 jwt_secret_key.txt
 
+# Firebase / Google service account (never commit)
+service-account*.json
+FIREBASE_SERVICE_ACCOUNT_JSON.json
+**/*-firebase-adminsdk-*.json
+*-firebase-adminsdk-*.json
+firebase-tools-instant-win.exe
+
 # Logs
 *.log
 
