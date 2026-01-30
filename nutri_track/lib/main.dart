@@ -15,6 +15,7 @@ import 'screens/recipe_finder_screen.dart';
 import 'screens/recipes_screen.dart';
 import 'screens/tracking_screen.dart';
 import 'screens/friends_screen.dart';
+import 'screens/coming_soon_screen.dart';
 
 void main() async {
   // OBLIGATORIO: Inicializar Flutter binding antes de Firebase
@@ -228,7 +229,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     const TrackingScreen(),       // Index 1: Seguimiento
     const HomeScreen(),           // Index 2: Inicio
     const FriendsScreen(),        // Index 3: Amigos
-    const Placeholder(),          // Index 4: Compartir (placeholder)
+    const ComingSoonScreen(title: 'Compartir', subtitle: 'Comparte recetas y fotos. Disponible en una próxima actualización.'),  // Index 4: Compartir
   ];
 
   void setCurrentIndex(int index) {

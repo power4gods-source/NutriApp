@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../config/app_config.dart';
 import 'supabase_user_service.dart';
 
@@ -861,6 +863,159 @@ class AuthService extends ChangeNotifier {
     final random = Random().nextInt(1000000);
     final tokenData = '$userId:$email:$timestamp:$random';
     return base64Encode(utf8.encode(tokenData));
+  }
+
+  /// Login con Google (id_token enviado al backend)
+  Future<Map<String, dynamic>> loginWithGoogle() async {
+    try {
+      final googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+      final account = await googleSignIn.signIn();
+      if (account == null) {
+        return {'success': false, 'error': 'Inicio de sesión cancelado'};
+      }
+      final auth = await account.authentication;
+      final idToken = auth.idToken;
+      if (idToken == null || idToken.isEmpty) {
+        return {'success': false, 'error': 'No se pudo obtener el token de Google'};
+      }
+      final url = await baseUrl;
+      final response = await http.post(
+        Uri.parse('$url/auth/google'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'id_token': idToken}),
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        await _saveAuthData(
+          data['access_token'],
+          data['user_id'],
+          data['email'],
+          data['username']?.toString(),
+          role: data['role'] ?? 'user',
+        );
+        return {'success': true, 'data': data};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'error': err['detail'] ?? 'Error al iniciar sesión con Google'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  /// Login con Apple (identity_token enviado al backend)
+  Future<Map<String, dynamic>> loginWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      final identityToken = credential.identityToken;
+      if (identityToken == null || identityToken.isEmpty) {
+        return {'success': false, 'error': 'No se pudo obtener el token de Apple'};
+      }
+      final url = await baseUrl;
+      final body = <String, dynamic>{
+        'identity_token': identityToken,
+        'user_apple_id': credential.userIdentifier,
+        'email': credential.email,
+        'full_name': credential.givenName != null || credential.familyName != null
+            ? '${credential.givenName ?? ''} ${credential.familyName ?? ''}'.trim()
+            : null,
+      };
+      final response = await http.post(
+        Uri.parse('$url/auth/apple'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        await _saveAuthData(
+          data['access_token'],
+          data['user_id'],
+          data['email'],
+          data['username']?.toString(),
+          role: data['role'] ?? 'user',
+        );
+        return {'success': true, 'data': data};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'error': err['detail'] ?? 'Error al iniciar sesión con Apple'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  /// Solicitar restablecimiento de contraseña (envío de email corporativo NutriTrack)
+  Future<Map<String, dynamic>> forgotPassword(String email) async {
+    try {
+      final url = await baseUrl;
+      final response = await http.post(
+        Uri.parse('$url/auth/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email.trim().toLowerCase()}),
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Si el correo está registrado, recibirás un enlace para restablecer la contraseña.'};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'error': err['detail'] ?? 'Error al enviar el correo'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  /// Restablecer contraseña con el token recibido por email
+  Future<Map<String, dynamic>> resetPassword(String token, String newPassword) async {
+    try {
+      final url = await baseUrl;
+      final response = await http.post(
+        Uri.parse('$url/auth/reset-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'token': token, 'new_password': newPassword}),
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        await _saveAuthData(
+          data['access_token'],
+          data['user_id'],
+          data['email'],
+          data['username']?.toString(),
+          role: data['role'] ?? 'user',
+        );
+        return {'success': true, 'data': data};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'error': err['detail'] ?? 'Token inválido o expirado'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  /// Cambiar contraseña (usuario autenticado)
+  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+    try {
+      final url = await baseUrl;
+      final headers = await getAuthHeaders();
+      final response = await http.post(
+        Uri.parse('$url/profile/password'),
+        headers: headers,
+        body: jsonEncode({
+          'current_password': currentPassword,
+          'new_password': newPassword,
+        }),
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': 'Contraseña actualizada correctamente'};
+      }
+      final err = jsonDecode(response.body);
+      return {'success': false, 'error': err['detail'] ?? 'Error al cambiar la contraseña'};
+    } catch (e) {
+      return {'success': false, 'error': e.toString()};
+    }
   }
 }
 

@@ -45,6 +45,15 @@ flutter pub get
 flutter run
 ```
 
+## 📱 Publicación en Play Store y App Store
+
+La app está preparada para **Android e iOS**. Las funcionalidades no disponibles se muestran con **"Pronto..."** en la interfaz.
+
+- **Android:** `android:label="NutriTrack"`, `minSdk 21`, `targetSdk 34`. Para Play Store: crear keystore y configurar firma release en `nutri_track/android/app/build.gradle.kts`.
+- **iOS:** `CFBundleDisplayName = NutriTrack`, descripciones de privacidad para cámara/galería en `Info.plist`. Para App Store: certificados y provisioning en Xcode.
+
+**Plan de releases:** Ver [PLAN_DE_RELEASES.md](PLAN_DE_RELEASES.md) para el roadmap (login Google/Apple, recuperación de contraseña, donaciones, límite de generación de recetas, emails, etc.).
+
 ## 📱 Compilar APK para Android
 
 ```bash
@@ -53,6 +62,15 @@ flutter build apk --release
 ```
 
 El APK estará en: `nutri_track/build/app/outputs/flutter-apk/app-release.apk`
+
+## 📱 Compilar para iOS
+
+```bash
+cd nutri_track
+flutter build ios --release
+```
+
+Abrir `ios/Runner.xcworkspace` en Xcode para configurar firma y subir a App Store Connect.
 
 ## 🔐 Credenciales de Prueba
 

@@ -21,20 +21,18 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Application ID único: cambiar a tu dominio para Play Store (ej. com.tudominio.nutritrack)
         applicationId = "com.mycompany.nutrirecipeapp"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 21  // Android 5.0+ para máxima compatibilidad
+        targetSdk = 34  // Requerido por Play Store 2024+
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Para Play Store: crear keystore y configurar signingConfigs.release
+            // Ver: https://docs.flutter.dev/deployment/android#signing-the-app
             signingConfig = signingConfigs.getByName("debug")
         }
     }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../widgets/pronto_badge.dart';
 import 'login_screen.dart';
 import 'notifications_screen.dart';
+import 'change_password_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -33,9 +35,8 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.person,
             title: 'Perfil',
             subtitle: 'Editar información personal',
-            onTap: () {
-              // Navigate to edit profile
-            },
+            onTap: () => _showProntoSnack(context),
+            showPronto: true,
           ),
           _buildSettingsTile(
             context,
@@ -43,8 +44,12 @@ class SettingsScreen extends StatelessWidget {
             title: 'Contraseña',
             subtitle: 'Cambiar contraseña',
             onTap: () {
-              // Navigate to change password
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+              );
             },
+            showPronto: false,
           ),
           _buildSettingsTile(
             context,
@@ -57,6 +62,19 @@ class SettingsScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const NotificationsScreen()),
               );
             },
+          ),
+          
+          const Divider(),
+          
+          // Soporte / Donaciones
+          _buildSectionHeader('Soporte'),
+          _buildSettingsTile(
+            context,
+            icon: Icons.volunteer_activism,
+            title: 'Donar a la app',
+            subtitle: 'Apoyar el desarrollo de NutriTrack',
+            onTap: () => _showProntoSnack(context),
+            showPronto: true,
           ),
           
           const Divider(),
@@ -89,9 +107,8 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.help,
             title: 'Ayuda',
             subtitle: 'Centro de ayuda',
-            onTap: () {
-              // Navigate to help
-            },
+            onTap: () => _showProntoSnack(context),
+            showPronto: true,
           ),
           
           const Divider(),
@@ -104,9 +121,8 @@ class SettingsScreen extends StatelessWidget {
             title: 'Eliminar cuenta',
             subtitle: 'Eliminar permanentemente tu cuenta',
             textColor: Colors.red,
-            onTap: () {
-              _showDeleteAccountDialog(context, authService);
-            },
+            onTap: () => _showProntoSnack(context, msg: 'Pronto...'),
+            showPronto: true,
           ),
           
           const SizedBox(height: 24),
@@ -165,6 +181,7 @@ class SettingsScreen extends StatelessWidget {
     required String subtitle,
     required VoidCallback onTap,
     Color? textColor,
+    bool showPronto = false,
   }) {
     return ListTile(
       leading: Icon(icon, color: textColor ?? const Color(0xFF4CAF50)),
@@ -176,8 +193,25 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
       subtitle: Text(subtitle),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (showPronto) const ProntoBadge(),
+          if (showPronto) const SizedBox(width: 8),
+          const Icon(Icons.chevron_right),
+        ],
+      ),
       onTap: onTap,
+    );
+  }
+
+  void _showProntoSnack(BuildContext context, {String msg = 'Pronto...'}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.orange.shade700,
+      ),
     );
   }
 
@@ -196,11 +230,8 @@ class SettingsScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () async {
-              // TODO: Implement delete account API call
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Funcionalidad en desarrollo')),
-              );
+              _showProntoSnack(context, msg: 'Pronto...');
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Eliminar'),

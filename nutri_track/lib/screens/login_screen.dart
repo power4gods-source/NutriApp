@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../main.dart';
+import 'forgot_password_screen.dart';
+import 'reset_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -353,18 +355,35 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           
           // Forgot password
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+              );
+            },
             child: const Text(
               'Olvidaste la contraseña?',
               style: TextStyle(color: Colors.grey),
             ),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+              );
+            },
+            child: Text(
+              'Ya tengo el token',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+          ),
           const SizedBox(height: 24),
           
-          // Social login buttons
-          _buildSocialButton('G Continuar con Google', Icons.login),
+          // Social login
+          _buildSocialButton(context, 'G Continuar con Google', Icons.login, isGoogle: true),
           const SizedBox(height: 12),
-          _buildSocialButton('Continuar con Apple', Icons.phone_iphone),
+          _buildSocialButton(context, 'Continuar con Apple', Icons.phone_iphone, isGoogle: false),
         ],
       ),
     );
@@ -481,17 +500,40 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           const SizedBox(height: 24),
           
           // Social login buttons
-          _buildSocialButton('G Continuar con Google', Icons.login),
+          _buildSocialButton(context, 'G Continuar con Google', Icons.login, isGoogle: true),
           const SizedBox(height: 12),
-          _buildSocialButton('Continuar con Apple', Icons.phone_iphone),
+          _buildSocialButton(context, 'Continuar con Apple', Icons.phone_iphone, isGoogle: false),
         ],
       ),
     );
   }
 
-  Widget _buildSocialButton(String text, IconData icon) {
+  Future<void> _handleSocialLogin(BuildContext context, bool isGoogle) async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    setState(() => _isLoading = true);
+    final result = isGoogle
+        ? await authService.loginWithGoogle()
+        : await authService.loginWithApple();
+    setState(() => _isLoading = false);
+    if (!mounted) return;
+    if (result['success'] == true) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        (route) => false,
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['error'] ?? 'Error al iniciar sesión'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Widget _buildSocialButton(BuildContext context, String text, IconData icon, {required bool isGoogle}) {
     return OutlinedButton(
-      onPressed: () {},
+      onPressed: _isLoading ? null : () => _handleSocialLogin(context, isGoogle),
       style: OutlinedButton.styleFrom(
         side: const BorderSide(color: Color(0xFF4CAF50)),
         padding: const EdgeInsets.symmetric(vertical: 12),

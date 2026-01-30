@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../widgets/pronto_badge.dart';
 import 'login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'favorites_screen.dart';
@@ -134,21 +135,24 @@ class ProfileScreen extends StatelessWidget {
                   'Más info',
                   Icons.info,
                   const Color(0xFF4CAF50),
-                  () {},
+                  () => _showPronto(context),
+                  showPronto: true,
                 ),
                 _buildMenuItem(
                   context,
                   'Términos y condiciones',
                   Icons.shield,
                   const Color(0xFF4CAF50),
-                  () {},
+                  () => _showPronto(context),
+                  showPronto: true,
                 ),
                 _buildMenuItem(
                   context,
                   'Invitar amigos',
                   Icons.share,
                   const Color(0xFF4CAF50),
-                  () {},
+                  () => _showPronto(context),
+                  showPronto: true,
                 ),
               ],
             ),
@@ -212,8 +216,9 @@ class ProfileScreen extends StatelessWidget {
     String title,
     IconData icon,
     Color iconColor,
-    VoidCallback onTap,
-  ) {
+    VoidCallback onTap, {
+    bool showPronto = false,
+  }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
       decoration: BoxDecoration(
@@ -230,8 +235,25 @@ class ProfileScreen extends StatelessWidget {
       child: ListTile(
         leading: Icon(icon, color: iconColor),
         title: Text(title),
-        trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (showPronto) const ProntoBadge(),
+            if (showPronto) const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
         onTap: onTap,
+      ),
+    );
+  }
+
+  void _showPronto(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Pronto...'),
+        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.orange.shade700,
       ),
     );
   }

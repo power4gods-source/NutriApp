@@ -4,12 +4,15 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import List, Optional
 import json
+import os
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import secrets
 import bcrypt
 from supabase_storage import load_json_with_fallback, save_json_with_sync, load_json_from_supabase, save_json_to_supabase
+import httpx
+from email_service import send_email, is_email_configured
 
 app = FastAPI()
 
@@ -67,6 +70,7 @@ NUTRITION_STATS_FILE = "nutrition_stats.json"  # Nutrition statistics
 USER_GOALS_FILE = "user_goals.json"  # User goals
 FOLLOWERS_FILE = "followers.json"  # User following/followers relationships
 CHATS_FILE = "chats.json"  # Direct messages between connections
+PASSWORD_RESET_TOKENS_FILE = "password_reset_tokens.json"  # Tokens for forgot password (local only)
 
 # Authentication settings
 # SECRET_KEY debe ser persistente para que los tokens JWT sigan siendo válidos después de reinicios
@@ -390,6 +394,25 @@ def save_chats(chats: dict):
     """Save chats to Supabase Storage and local file"""
     save_json_with_sync(CHATS_FILE, chats, CHATS_FILE)
 
+
+def load_password_reset_tokens():
+    """Load password reset tokens (local file only, not Supabase)"""
+    try:
+        with open(PASSWORD_RESET_TOKENS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except Exception:
+        return {}
+
+
+def save_password_reset_tokens(tokens: dict):
+    """Save password reset tokens to local file"""
+    with open(PASSWORD_RESET_TOKENS_FILE, "w", encoding="utf-8") as f:
+        json.dump(tokens, f, indent=2)
+
+
 @app.get("/")
 def read_root():
     return {"message": "Hello from Nutritrack backend!"}
@@ -414,6 +437,27 @@ class Token(BaseModel):
 class PasswordUpdate(BaseModel):
     current_password: str
     new_password: str = Field(..., min_length=6, description="New password must be at least 6 characters")
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=6, description="New password must be at least 6 characters")
+
+
+class GoogleAuthRequest(BaseModel):
+    id_token: str = Field(..., description="Google ID token from the client")
+
+
+class AppleAuthRequest(BaseModel):
+    identity_token: str = Field(..., description="Apple identity_token (JWT)")
+    user_apple_id: Optional[str] = Field(None, description="Apple user ID (only on first sign-in)")
+    email: Optional[EmailStr] = Field(None, description="Email from Apple (only on first sign-in)")
+    full_name: Optional[str] = Field(None, description="Full name from Apple (only on first sign-in)")
+
 
 # Profile models
 class ProfileCreate(BaseModel):
@@ -624,6 +668,254 @@ def login(user_data: UserLogin):
 def get_current_user_info(current_user: dict = Depends(get_current_user)):
     """Get current authenticated user information"""
     return current_user  # Ya incluye user_id, email y role
+
+
+# Reset password base URL for email link (configurable; app deep link or web)
+RESET_PASSWORD_BASE_URL = os.getenv("RESET_PASSWORD_BASE_URL", "https://nutritrack.app/reset-password")
+
+
+def _ensure_profile_for_user(user_id: str, email: str, username: str):
+    """Crea o actualiza el perfil del usuario (para login Google/Apple)."""
+    profiles = load_profiles()
+    if user_id not in profiles:
+        profiles[user_id] = {
+            "user_id": user_id,
+            "email": email.lower(),
+            "username": username,
+            "display_name": username,
+            "bio": "",
+            "avatar_url": "",
+            "dietary_preferences": [],
+            "favorite_cuisines": [],
+            "favorite_recipes": [],
+            "ingredients": [],
+            "followers_count": 0,
+            "following_count": 0,
+            "connections_count": 0,
+            "notification_settings": {
+                "email_notifications": True,
+                "push_notifications": True,
+                "recipe_updates": True,
+                "new_followers": True,
+                "comments_on_recipes": True,
+                "likes_on_recipes": True,
+            },
+            "created_at": datetime.now().isoformat(),
+            "updated_at": None,
+        }
+        followers_data = load_followers()
+        if user_id not in followers_data:
+            followers_data[user_id] = {"following": [], "followers": [], "connections": []}
+            save_followers(followers_data)
+        save_profiles(profiles)
+
+
+@app.post("/auth/forgot-password")
+def forgot_password(req: ForgotPasswordRequest):
+    """Envía un correo con enlace para restablecer contraseña (desde NutriTrack corporativo)."""
+    import secrets as sec
+    users = load_users()
+    email_lower = req.email.lower().strip()
+    user_id = None
+    for uid, info in users.items():
+        if info.get("email") == email_lower:
+            user_id = uid
+            break
+    if not user_id:
+        # No revelar si el email existe o no
+        return {"message": "Si el correo está registrado, recibirás un enlace para restablecer la contraseña."}
+    tokens = load_password_reset_tokens()
+    token_value = sec.token_urlsafe(32)
+    tokens[token_value] = {
+        "user_id": user_id,
+        "email": email_lower,
+        "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat(),
+    }
+    save_password_reset_tokens(tokens)
+    reset_link = f"{RESET_PASSWORD_BASE_URL}?token={token_value}"
+    subject = "Restablece tu contraseña - NutriTrack"
+    body_html = f"""
+    <p>Hola,</p>
+    <p>Has solicitado restablecer la contraseña de tu cuenta NutriTrack.</p>
+    <p><a href="{reset_link}" style="background:#4CAF50;color:white;padding:12px 24px;text-decoration:none;border-radius:8px;">Restablecer contraseña</a></p>
+    <p>Este enlace caduca en 1 hora. Si no solicitaste este cambio, ignora este correo.</p>
+    <p>— Equipo NutriTrack</p>
+    """
+    if not is_email_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Servicio de correo no configurado. Contacta con soporte.",
+        )
+    ok = send_email(to_email=email_lower, subject=subject, body_html=body_html)
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="No se pudo enviar el correo. Inténtalo más tarde.",
+        )
+    return {"message": "Si el correo está registrado, recibirás un enlace para restablecer la contraseña."}
+
+
+@app.post("/auth/reset-password", response_model=Token)
+def reset_password(req: ResetPasswordRequest):
+    """Restablece la contraseña usando el token enviado por email."""
+    tokens = load_password_reset_tokens()
+    if req.token not in tokens:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token inválido o expirado.")
+    data = tokens[req.token]
+    try:
+        expires_str = data["expires_at"].replace("Z", "").split("+")[0]
+        expires = datetime.fromisoformat(expires_str)
+    except Exception:
+        expires = datetime.utcnow() - timedelta(seconds=1)
+    if datetime.utcnow() > expires:
+        del tokens[req.token]
+        save_password_reset_tokens(tokens)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token expirado.")
+    user_id = data["user_id"]
+    users = load_users()
+    if user_id not in users:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado.")
+    users[user_id]["hashed_password"] = get_password_hash(req.new_password)
+    save_users(users)
+    del tokens[req.token]
+    save_password_reset_tokens(tokens)
+    access_token = create_access_token(data={"sub": user_id})
+    role = users[user_id].get("role", "user")
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": user_id,
+        "email": users[user_id].get("email", ""),
+        "role": role,
+    }
+
+
+def _verify_google_id_token(id_token: str) -> dict:
+    """Verifica el id_token de Google y devuelve la info del usuario (email, sub)."""
+    try:
+        r = httpx.get(
+            "https://oauth2.googleapis.com/tokeninfo",
+            params={"id_token": id_token},
+            timeout=10.0,
+        )
+        if r.status_code != 200:
+            raise ValueError("Invalid token")
+        data = r.json()
+        if "email" not in data or "sub" not in data:
+            raise ValueError("Missing email or sub")
+        return {"email": data["email"].lower(), "sub": data["sub"]}
+    except Exception as e:
+        print(f"Google token verification failed: {e}")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
+
+
+def _verify_apple_identity_token(identity_token: str) -> dict:
+    """Verifica el identity_token de Apple (JWT) y devuelve sub y email si están en el token."""
+    try:
+        import jwt as pyjwt
+        from jwt import PyJWKClient
+        client = PyJWKClient("https://appleid.apple.com/auth/keys")
+        signing_key = client.get_signing_key_from_jwt(identity_token)
+        opts = {"algorithms": ["RS256"], "issuer": "https://appleid.apple.com"}
+        apple_client_id = os.getenv("APPLE_CLIENT_ID")
+        if apple_client_id:
+            opts["audience"] = apple_client_id
+        payload = pyjwt.decode(identity_token, signing_key.key, **opts)
+        return {
+            "sub": payload.get("sub"),
+            "email": (payload.get("email") or "").lower() if payload.get("email") else None,
+        }
+    except Exception as e:
+        print(f"Apple token verification failed: {e}")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Apple token")
+
+
+@app.post("/auth/google", response_model=Token)
+def auth_google(req: GoogleAuthRequest):
+    """Login o registro con Google (id_token)."""
+    info = _verify_google_id_token(req.id_token)
+    email = info["email"]
+    google_sub = info["sub"]
+    users = load_users()
+    user_id = email.replace("@", "_at_").replace(".", "_")
+    username = email.split("@")[0]
+    if user_id not in users:
+        users[user_id] = {
+            "email": email,
+            "hashed_password": "",  # sin contraseña; solo login social
+            "username": username,
+            "role": "admin" if email == "power4gods@gmail.com" else "user",
+            "created_at": datetime.now().isoformat(),
+            "auth_provider": "google",
+            "auth_provider_id": google_sub,
+        }
+        save_users(users)
+        _ensure_profile_for_user(user_id, email, username)
+    else:
+        users[user_id]["auth_provider"] = "google"
+        users[user_id]["auth_provider_id"] = google_sub
+        save_users(users)
+    access_token = create_access_token(data={"sub": user_id})
+    role = users[user_id].get("role", "user")
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": user_id,
+        "email": users[user_id].get("email", ""),
+        "username": users[user_id].get("username"),
+        "role": role,
+    }
+
+
+@app.post("/auth/apple", response_model=Token)
+def auth_apple(req: AppleAuthRequest):
+    """Login o registro con Apple (identity_token)."""
+    info = _verify_apple_identity_token(req.identity_token)
+    apple_sub = info["sub"]
+    email = info.get("email") or req.email or ""
+    if not email and not apple_sub:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email or Apple ID required")
+    users = load_users()
+    # Buscar por email o por apple_sub guardado
+    user_id = None
+    for uid, u in users.items():
+        if u.get("auth_provider_id") == apple_sub or u.get("email", "").lower() == (email or "").lower():
+            user_id = uid
+            break
+    if not user_id and email:
+        user_id = email.lower().replace("@", "_at_").replace(".", "_")
+    if not user_id:
+        user_id = f"apple_{apple_sub}"
+    username = (req.full_name or email or user_id).split("@")[0] if (req.full_name or email) else user_id
+    if user_id not in users:
+        users[user_id] = {
+            "email": email or f"{apple_sub}@privaterelay.appleid.com",
+            "hashed_password": "",
+            "username": username,
+            "role": "user",
+            "created_at": datetime.now().isoformat(),
+            "auth_provider": "apple",
+            "auth_provider_id": apple_sub,
+        }
+        save_users(users)
+        _ensure_profile_for_user(user_id, users[user_id]["email"], username)
+    else:
+        if email:
+            users[user_id]["email"] = email
+        users[user_id]["auth_provider"] = "apple"
+        users[user_id]["auth_provider_id"] = apple_sub
+        save_users(users)
+    access_token = create_access_token(data={"sub": user_id})
+    role = users[user_id].get("role", "user")
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user_id": user_id,
+        "email": users[user_id].get("email", ""),
+        "username": users[user_id].get("username"),
+        "role": role,
+    }
+
 
 # Profile endpoints
 @app.get("/profile", response_model=ProfileResponse)
@@ -2156,6 +2448,197 @@ def get_connections(current_user: dict = Depends(get_current_user)):
 
     return {"connections": result, "count": len(result)}
 
+
+@app.get("/profiles/{target_user_id}")
+def get_public_profile(target_user_id: str, current_user: dict = Depends(get_current_user)):
+    """Get a public profile view for a user, including follow/connection flags and counts."""
+    user_id = current_user["user_id"]
+    profiles = load_profiles()
+    users = load_users()
+    followers_data = load_followers()
+
+    # Exclude admin
+    target_profile = profiles.get(target_user_id)
+    target_user = users.get(target_user_id, {})
+    target_email = (target_profile or {}).get("email") or target_user.get("email", "")
+    target_role = target_user.get("role", (target_profile or {}).get("role", "user"))
+    if (target_email or "").lower() == "power4gods@gmail.com" or str(target_role).lower() == "admin":
+        raise HTTPException(status_code=404, detail="Profile not found")
+
+    if not target_profile:
+        # Build basic profile from users.json if profile doesn't exist yet
+        if not target_user:
+            raise HTTPException(status_code=404, detail="Profile not found")
+        target_profile = {
+            "user_id": target_user_id,
+            "email": target_user.get("email", ""),
+            "username": target_user.get("username") or target_user.get("email", "").split("@")[0],
+            "display_name": target_user.get("username") or target_user.get("email", "").split("@")[0],
+            "bio": None,
+            "avatar_url": "",
+            "created_at": target_user.get("created_at", datetime.now().isoformat()),
+            "updated_at": datetime.now().isoformat(),
+        }
+
+    # Follow / connection flags
+    following_ids = followers_data.get(user_id, {}).get("following", [])
+    connections_ids = followers_data.get(user_id, {}).get("connections", [])
+
+    is_following = target_user_id in following_ids
+    is_connection = target_user_id in connections_ids
+
+    # Counts
+    followers_count = len(followers_data.get(target_user_id, {}).get("followers", []))
+    following_count = len(followers_data.get(target_user_id, {}).get("following", []))
+    connections_count = len(followers_data.get(target_user_id, {}).get("connections", []))
+
+    public_recipes = load_recipes_public()
+    user_public = [r for r in public_recipes if r.get("user_id") == target_user_id]
+
+    response = target_profile.copy()
+    response.update({
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "connections_count": connections_count,
+        "public_recipes_count": len(user_public),
+        "is_following": is_following,
+        "is_connection": is_connection,
+    })
+    return {"profile": response}
+
+
+@app.get("/recipes/public/user/{target_user_id}")
+def get_public_recipes_by_user(target_user_id: str):
+    """Get public recipes for a specific user (no authentication required)."""
+    recipes = load_recipes_public()
+    filtered = [r for r in recipes if r.get("user_id") == target_user_id]
+    return {"recipes": filtered, "count": len(filtered), "type": "public", "user_id": target_user_id}
+
+
+@app.get("/profile/notifications/feed")
+def get_notifications_feed(current_user: dict = Depends(get_current_user)):
+    """Get notification feed items (follows, chat, shares)."""
+    profiles = load_profiles()
+    user_id = current_user["user_id"]
+    profile = profiles.get(user_id)
+    if not profile:
+        return {"notifications": [], "count": 0}
+    notifications = profile.get("notifications", []) or []
+    # Sort newest first when possible
+    try:
+        notifications = sorted(notifications, key=lambda n: n.get("created_at", ""), reverse=True)
+    except Exception:
+        pass
+    return {"notifications": notifications, "count": len(notifications)}
+
+
+@app.post("/profile/notifications/mark-all-read")
+def mark_all_notifications_read(current_user: dict = Depends(get_current_user)):
+    """Mark all notifications as read for current user."""
+    profiles = load_profiles()
+    user_id = current_user["user_id"]
+    if user_id not in profiles:
+        return {"message": "ok", "updated": 0}
+    notifications = profiles[user_id].get("notifications", []) or []
+    updated = 0
+    for n in notifications:
+        if isinstance(n, dict) and not n.get("read", False):
+            n["read"] = True
+            updated += 1
+    profiles[user_id]["notifications"] = notifications
+    profiles[user_id]["updated_at"] = datetime.now().isoformat()
+    save_profiles(profiles)
+    return {"message": "ok", "updated": updated}
+
+
+@app.get("/chat/inbox")
+def get_chat_inbox(current_user: dict = Depends(get_current_user)):
+    """List conversations for the current user (only with connections), with last message + unread count."""
+    user_id = current_user["user_id"]
+    followers_data = load_followers()
+    connections = set(followers_data.get(user_id, {}).get("connections", []))
+
+    profiles = load_profiles()
+    chats = load_chats()
+
+    items = []
+    for conversation_id, conv in (chats or {}).items():
+        users_in_conv = conv.get("users", [])
+        if user_id not in users_in_conv:
+            continue
+        other_ids = [u for u in users_in_conv if u != user_id]
+        if not other_ids:
+            continue
+        other_user_id = other_ids[0]
+        if other_user_id not in connections:
+            continue
+
+        messages = conv.get("messages", []) or []
+        last = messages[-1] if messages else None
+
+        unread = 0
+        for m in messages:
+            if not isinstance(m, dict):
+                continue
+            read_by = m.get("read_by")
+            if not isinstance(read_by, list):
+                # Older messages might not have read_by; treat as unread for receiver
+                if m.get("to_user_id") == user_id:
+                    unread += 1
+                continue
+            if m.get("to_user_id") == user_id and user_id not in read_by:
+                unread += 1
+
+        p = profiles.get(other_user_id, {})
+        items.append({
+            "conversation_id": conversation_id,
+            "other_user_id": other_user_id,
+            "other_username": p.get("username") or p.get("display_name") or other_user_id,
+            "other_avatar_url": p.get("avatar_url", ""),
+            "last_message": last,
+            "unread_count": unread,
+        })
+
+    # Sort by last_message.created_at desc
+    try:
+        items.sort(key=lambda i: (i.get("last_message") or {}).get("created_at", ""), reverse=True)
+    except Exception:
+        pass
+
+    return {"conversations": items, "count": len(items)}
+
+
+@app.post("/chat/{other_user_id}/read")
+def mark_chat_read(other_user_id: str, current_user: dict = Depends(get_current_user)):
+    """Mark all messages in a conversation as read by current user."""
+    user_id = current_user["user_id"]
+    followers_data = load_followers()
+    if other_user_id not in followers_data.get(user_id, {}).get("connections", []):
+        raise HTTPException(status_code=403, detail="You can only chat with connected users")
+
+    a, b = sorted([user_id, other_user_id])
+    conversation_id = f"{a}__{b}"
+    chats = load_chats()
+    conv = chats.get(conversation_id, {"users": [a, b], "messages": []})
+    messages = conv.get("messages", []) or []
+    updated = 0
+    for m in messages:
+        if not isinstance(m, dict):
+            continue
+        if m.get("to_user_id") != user_id:
+            continue
+        read_by = m.get("read_by")
+        if not isinstance(read_by, list):
+            m["read_by"] = [user_id]
+            updated += 1
+        elif user_id not in read_by:
+            read_by.append(user_id)
+            m["read_by"] = read_by
+            updated += 1
+    conv["messages"] = messages
+    chats[conversation_id] = conv
+    save_chats(chats)
+    return {"message": "ok", "updated": updated}
 
 @app.post("/recipes/share")
 def share_recipe(request: ShareRecipeRequest, current_user: dict = Depends(get_current_user)):

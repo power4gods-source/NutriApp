@@ -5,7 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Nutri Track</string>
+	<string>NutriTrack</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>NutriTrack usa la galería para compartir fotos de recetas.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>NutriTrack usa la cámara para añadir fotos de tus platos.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
