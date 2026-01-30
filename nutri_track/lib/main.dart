@@ -1,10 +1,12 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
 import 'services/firebase_sync_service.dart';
@@ -27,14 +29,23 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    FlutterError.onError = (error) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(error);
-    };
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+    if (!kIsWeb) {
+      FlutterError.onError = (error) {
+        try {
+          FirebaseCrashlytics.instance.recordFlutterFatalError(error);
+        } catch (_) {}
+      };
+      PlatformDispatcher.instance.onError = (error, stack) {
+        try {
+          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+        } catch (_) {}
+        return true;
+      };
+    }
     print('✅ Firebase inicializado (Spark)');
+    try {
+      await FirebaseFirestore.instance.enableNetwork();
+    } catch (_) {}
   } catch (e) {
     print('⚠️ Firebase no inicializado (ejecuta flutterfire configure en nutri_track): $e');
   }

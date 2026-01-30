@@ -444,15 +444,15 @@ class RecipeService {
       }
     }
     
-    // 2. Fallback: Combinar recetas generales y públicas desde Supabase
+    // 2. Fallback: Combinar recetas generales y públicas desde Firestore/cache
     try {
       final generalRecipes = await getGeneralRecipes();
       final publicRecipes = await getPublicRecipes();
       final allRecipes = [...generalRecipes, ...publicRecipes];
-      print('Loaded ${allRecipes.length} recipes from Supabase fallback');
+      print('Loaded ${allRecipes.length} recipes from Firestore/cache fallback');
       return allRecipes;
     } catch (e) {
-      print('Error getting recipes from Supabase fallback: $e');
+      print('Error getting recipes from Firestore fallback: $e');
       return [];
     }
   }

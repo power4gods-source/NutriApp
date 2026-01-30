@@ -144,8 +144,11 @@ class _HomeScreenState extends State<HomeScreen> {
         
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
-          final ingredientsList = data['ingredients'] ?? [];
-          
+          final raw = data['ingredients'];
+          final List<dynamic> ingredientsList = raw is List
+              ? raw
+              : (raw is Map ? raw.values.toList() : <dynamic>[]);
+
           setState(() {
             _userIngredients = ingredientsList.map((ing) {
               if (ing is Map) {

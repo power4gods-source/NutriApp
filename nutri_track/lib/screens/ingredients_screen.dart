@@ -302,8 +302,11 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
       print('Load response body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final ingredientsList = data['ingredients'] ?? [];
+        final data = jsonDecode(response.body) as Map<String, dynamic>?;
+        final raw = data?['ingredients'];
+        final List<dynamic> ingredientsList = raw is List
+            ? raw
+            : (raw is Map ? raw.values.toList() : <dynamic>[]);
         
         print('✅ Ingredientes cargados desde servidor: ${ingredientsList.length} ingredientes');
         print('   Ingredientes: ${ingredientsList.map((ing) => ing is Map ? ing['name'] : ing).toList()}');
@@ -313,10 +316,10 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
         final authService = AuthService();
         final userId = authService.userId;
         if (userId != null) {
-          final ingredientsJson = ingredientsList.map((ing) {
-            if (ing is Map) return ing;
+          final ingredientsJson = ingredientsList.map<Map<String, dynamic>>((ing) {
+            if (ing is Map) return Map<String, dynamic>.from(ing);
             if (ing is String) return {'name': ing, 'quantity': 1.0, 'unit': 'unidades'};
-            return ing;
+            return {'name': ing.toString(), 'quantity': 1.0, 'unit': 'unidades'};
           }).toList();
           await prefs.setString('ingredients_$userId', jsonEncode(ingredientsJson));
         }

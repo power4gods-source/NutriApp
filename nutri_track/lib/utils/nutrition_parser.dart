@@ -55,9 +55,19 @@ class NutritionParser {
   /// Obtiene nutrientes por ración desde una receta
   static Map<String, double> getNutritionPerServing(Map<String, dynamic> recipe) {
     final nutrientsStr = recipe['nutrients'] ?? '';
-    var servings = (recipe['servings'] ?? 4.0) is int
-        ? (recipe['servings'] as int).toDouble()
-        : (recipe['servings'] ?? 4.0).toDouble();
+    final rawServings = recipe['servings'];
+    double servings = 4.0;
+    if (rawServings != null) {
+      if (rawServings is int) {
+        servings = rawServings.toDouble();
+      } else if (rawServings is double) {
+        servings = rawServings;
+      } else if (rawServings is num) {
+        servings = rawServings.toDouble();
+      } else {
+        servings = double.tryParse(rawServings.toString()) ?? 4.0;
+      }
+    }
     if (servings <= 0) servings = 4.0;
     
     final totalNutrition = parseNutrientsString(nutrientsStr);
