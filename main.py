@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import List, Optional
+from typing import List, Optional, Any
 import json
 import os
 from datetime import datetime, timedelta
@@ -508,6 +508,8 @@ class ProfileResponse(BaseModel):
     recipes_count: int = 0
     public_recipes_count: int = 0
     favorite_recipes: List[str] = []
+    ingredients: List[Any] = []
+    shopping_list: List[Any] = []
 
 # Authentication endpoints
 @app.post("/auth/register", response_model=Token)

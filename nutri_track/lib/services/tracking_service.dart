@@ -577,7 +577,7 @@ class TrackingService {
     } catch (e) {
       print('Error updating goals: $e');
       
-      // Intentar guardar solo en Supabase si el backend falla
+      // Fallback: guardar en Firestore si el backend falla
       try {
         final userId = _authService.userId;
         if (userId != null) {

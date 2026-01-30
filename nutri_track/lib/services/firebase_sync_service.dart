@@ -29,6 +29,14 @@ class FirebaseSyncService {
     'chats.json',
   ];
 
+  /// Solo datos generales (recetas, alimentos): para cache al iniciar sin descargar datos de otros usuarios.
+  static final List<String> generalOnlyFiles = [
+    'recipes.json',
+    'recipes_public.json',
+    'foods.json',
+    'ingredient_food_mapping.json',
+  ];
+
   FirebaseFirestore get _firestore => FirebaseFirestore.instance;
 
   /// Sube un archivo JSON a Firestore
@@ -70,6 +78,28 @@ class FirebaseSyncService {
     for (final fileName in jsonFiles) {
       if (localData.containsKey(fileName)) {
         results[fileName] = await uploadJsonFile(fileName, localData[fileName]!);
+      }
+    }
+    return results;
+  }
+
+  /// Descarga solo datos generales (recetas, foods) para cache al iniciar.
+  Future<Map<String, Map<String, dynamic>>> downloadGeneralJsonFiles() async {
+    final results = <String, Map<String, dynamic>>{};
+    for (final fileName in generalOnlyFiles) {
+      final data = await downloadJsonFile(fileName);
+      if (data != null) {
+        if (data is List) {
+          if (fileName == 'recipes.json' || fileName == 'recipes_public.json') {
+            results[fileName] = {'recipes': data};
+          } else {
+            results[fileName] = {fileName.replaceAll('.json', ''): data};
+          }
+        } else if (data is Map<String, dynamic>) {
+          results[fileName] = data;
+        } else if (data is Map) {
+          results[fileName] = Map<String, dynamic>.from(data);
+        }
       }
     }
     return results;

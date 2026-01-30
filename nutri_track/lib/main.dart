@@ -144,32 +144,29 @@ class _AuthWrapperState extends State<AuthWrapper> {
       }
     }
     
-    // 4. Sincronizar datos desde Firestore
+    // 4. Sincronizar solo datos generales (recetas, foods) desde Firestore para cache
     try {
       final firebaseSyncService = FirebaseSyncService();
-      print('☁️ Intentando sincronizar con Firestore...');
-      firebaseSyncService.downloadAllJsonFiles().then((data) {
+      print('☁️ Sincronizando datos generales (recetas, alimentos)...');
+      firebaseSyncService.downloadGeneralJsonFiles().then((data) {
         if (data.isNotEmpty) {
-          print('✅ Datos sincronizados desde Firestore: ${data.length} archivos');
+          print('✅ Datos generales sincronizados: ${data.length} archivos');
+          firebaseSyncService.saveToLocalCache(data);
         }
       }).catchError((e) {
-        print('⚠️ Error sincronizando desde Firestore: $e');
+        print('⚠️ Error sincronizando datos generales: $e');
       });
     } catch (e) {
       print('⚠️ Error al inicializar FirebaseSyncService: $e');
     }
     
-    // 5. Si hay usuario autenticado, cargar sus datos desde Firestore
+    // 5. Si hay usuario autenticado, cargar solo SUS datos desde el backend
     if (_isAuthenticated && userId != null) {
       try {
-        print('👤 Cargando datos del usuario desde Firestore...');
-        final firebaseUserService = FirebaseUserService();
-        firebaseUserService.getUser(userId).then((userData) {
-          if (userData != null) {
-            print('✅ Datos del usuario cargados desde Firestore');
-          } else {
-            print('⚠️ No se encontraron datos del usuario en Firestore');
-          }
+        print('👤 Cargando datos del usuario desde el backend...');
+        final authService = AuthService();
+        authService.refreshUserDataFromBackend().then((_) {
+          print('✅ Datos del usuario actualizados');
         }).catchError((e) {
           print('⚠️ Error cargando datos del usuario: $e');
         });

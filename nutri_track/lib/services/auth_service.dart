@@ -118,6 +118,7 @@ class AuthService extends ChangeNotifier {
             null,
             role: data['role'] ?? (data['email'] == 'power4gods@gmail.com' ? 'admin' : 'user'),
           );
+          await refreshUserDataFromBackend();
           return {'success': true, 'data': data};
         } else {
           final error = jsonDecode(response.body);
@@ -297,6 +298,51 @@ class AuthService extends ChangeNotifier {
       }
     } catch (e) {
       print('Error cargando datos del usuario desde Firestore: $e');
+    }
+  }
+
+  /// Carga datos del usuario desde el backend (fuente de verdad) y los persiste localmente.
+  /// Debe llamarse al abrir la app si hay usuario autenticado, para tener datos actualizados.
+  Future<void> refreshUserDataFromBackend() async {
+    final userId = _userId;
+    if (userId == null) return;
+    try {
+      final headers = await getAuthHeaders();
+      final url = await baseUrl;
+      final response = await http.get(
+        Uri.parse('$url/profile'),
+        headers: headers,
+      ).timeout(const Duration(seconds: 15));
+      if (response.statusCode != 200) return;
+      final profile = jsonDecode(response.body) as Map<String, dynamic>;
+      final prefs = await SharedPreferences.getInstance();
+
+      if (profile['ingredients'] != null) {
+        await prefs.setString('ingredients_$userId', jsonEncode(profile['ingredients']));
+      }
+      if (profile['favorite_recipes'] != null) {
+        await prefs.setString('favorites_$userId', jsonEncode(profile['favorite_recipes']));
+      }
+      if (profile['shopping_list'] != null) {
+        await prefs.setString('shopping_list_$userId', jsonEncode(profile['shopping_list']));
+      }
+
+      try {
+        final goalsResponse = await http.get(
+          Uri.parse('$url/tracking/goals'),
+          headers: headers,
+        ).timeout(const Duration(seconds: 5));
+        if (goalsResponse.statusCode == 200) {
+          final goalsData = jsonDecode(goalsResponse.body);
+          if (goalsData is Map && goalsData['goals'] != null) {
+            await prefs.setString('goals_$userId', jsonEncode(goalsData['goals']));
+          }
+        }
+      } catch (_) {}
+
+      print('✅ Datos del usuario actualizados desde el backend');
+    } catch (e) {
+      print('Error refrescando datos del usuario desde backend: $e');
     }
   }
 
