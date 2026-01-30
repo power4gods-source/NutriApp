@@ -15,18 +15,20 @@ class AuthService extends ChangeNotifier {
   String? _email;
   String? _username;
   String? _role;
-  
+  String? _avatarUrl;
+
   static const String _localUsersKey = 'local_users';
   final FirebaseUserService _firebaseUserService = FirebaseUserService();
-  
+
   /// Obtiene la URL del backend configurada
   Future<String> get baseUrl async => await AppConfig.getBackendUrl();
-  
+
   String? get token => _token;
   String? get userId => _userId;
   String? get email => _email;
   String? get username => _username;
   String? get role => _role;
+  String? get avatarUrl => _avatarUrl;
   bool get isAuthenticated => _token != null;
   bool get isAdmin => _role == 'admin';
 
@@ -41,6 +43,7 @@ class AuthService extends ChangeNotifier {
     _email = prefs.getString('user_email');
     _username = prefs.getString('username');
     _role = prefs.getString('user_role');
+    _avatarUrl = prefs.getString('avatar_url');
     // Si el email es power4gods@gmail.com, asegurar que sea admin
     if (_email == 'power4gods@gmail.com' && _role != 'admin') {
       _role = 'admin';
@@ -53,6 +56,19 @@ class AuthService extends ChangeNotifier {
   // Método público para recargar datos de autenticación
   Future<void> reloadAuthData() async {
     await _loadAuthData();
+  }
+
+  /// Guarda la URL del avatar (p. ej. tras actualizar perfil) para que coincida en home y perfil.
+  Future<void> saveAvatarUrl(String? url) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (url == null || url.isEmpty) {
+      await prefs.remove('avatar_url');
+      _avatarUrl = null;
+    } else {
+      await prefs.setString('avatar_url', url);
+      _avatarUrl = url;
+    }
+    notifyListeners();
   }
 
   Future<void> _saveAuthData(String token, String userId, String email, String? username, {String? role}) async {
@@ -326,6 +342,13 @@ class AuthService extends ChangeNotifier {
       if (profile['shopping_list'] != null) {
         await prefs.setString('shopping_list_$userId', jsonEncode(profile['shopping_list']));
       }
+      if (profile['avatar_url'] != null && profile['avatar_url'].toString().isNotEmpty) {
+        await prefs.setString('avatar_url', profile['avatar_url'].toString());
+      }
+      if (profile['username'] != null) {
+        await prefs.setString('username', profile['username'].toString());
+      }
+      _loadAuthData();
 
       try {
         final goalsResponse = await http.get(
@@ -675,11 +698,13 @@ class AuthService extends ChangeNotifier {
     await prefs.remove('user_email');
     await prefs.remove('username');
     await prefs.remove('user_role');
+    await prefs.remove('avatar_url');
     _token = null;
     _userId = null;
     _email = null;
     _username = null;
     _role = null;
+    _avatarUrl = null;
     notifyListeners();
   }
 

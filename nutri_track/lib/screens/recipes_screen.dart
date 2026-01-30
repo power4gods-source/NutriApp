@@ -22,7 +22,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
   Set<String> _favoriteIds = {};
   bool _isLoading = true;
   String? _expandedRecipeId; // ID de la receta expandida
-  String _selectedFilter = 'general'; // Por defecto mostrar generales
+  String _selectedFilter = 'favorites'; // Por defecto: Favoritas
 
   @override
   void initState() {
@@ -32,11 +32,24 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
+    // Mostrar cache al instante si hay, para que la pestaña no tarde
+    final cached = await _recipeService.getCachedRecipes(_selectedFilter);
+    if (cached.isNotEmpty && mounted) {
+      setState(() {
+        _recipes = cached;
+        _isLoading = false;
+      });
+      // Actualizar favoritos y recetas en segundo plano
+      _loadFavorites().then((_) => _loadRecipes()).then((_) {
+        if (mounted) setState(() {});
+      });
+      return;
+    }
     await Future.wait([
       _loadRecipes(),
       _loadFavorites(),
     ]);
-    setState(() => _isLoading = false);
+    if (mounted) setState(() => _isLoading = false);
   }
 
   /// Invalida el cache de recetas para forzar recarga
@@ -58,6 +71,17 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Future<void> _loadRecipes() async {
     print('📋 _loadRecipes() llamado con filtro: $_selectedFilter');
+    // Cache-first: mostrar cache al instante (excepto favoritos que no tiene cache de lista)
+    if (_selectedFilter != 'favorites') {
+      final cached = await _recipeService.getCachedRecipes(_selectedFilter);
+      if (cached.isNotEmpty && mounted) {
+        setState(() {
+          _recipes = cached;
+          _isLoading = false;
+        });
+      }
+    }
+
     List<dynamic> recipes = [];
     try {
       switch (_selectedFilter) {
@@ -98,6 +122,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
     if (mounted) {
       setState(() {
         _recipes = recipes;
+        _isLoading = false;
         print('Recipes state updated: ${_recipes.length} recipes');
       });
     }
@@ -682,13 +707,13 @@ class _RecipesScreenState extends State<RecipesScreen> {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterChip('Generales', 'general'),
-                        const SizedBox(width: 8),
                         _buildFilterChip('Favoritas', 'favorites'),
                         const SizedBox(width: 8),
-                        _buildFilterChip('Públicas', 'public'),
-                        const SizedBox(width: 8),
                         _buildFilterChip('Privadas', 'private'),
+                        const SizedBox(width: 8),
+                        _buildFilterChip('Publicadas', 'public'),
+                        const SizedBox(width: 8),
+                        _buildFilterChip('Generales', 'general'),
                       ],
                     ),
                   ),
@@ -979,8 +1004,10 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       Builder(
                         builder: (context) {
                           final nutrition = NutritionParser.getNutritionPerServing(recipe);
-                          final caloriesPerServing = nutrition['calories']?.round() ?? 
-                                                     (recipe['calories_per_serving'] ?? 0);
+                          final fromParser = nutrition['calories']?.round();
+                          final fromRecipe = recipe['calories_per_serving'];
+                          final int caloriesPerServing = fromParser ??
+                              (fromRecipe is num ? fromRecipe.round() : (int.tryParse(fromRecipe?.toString() ?? '') ?? 0));
                           if (caloriesPerServing > 0) {
                             return Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -1280,8 +1307,10 @@ class _RecipesScreenState extends State<RecipesScreen> {
                         Builder(
                           builder: (context) {
                             final nutrition = NutritionParser.getNutritionPerServing(recipe);
-                            final caloriesPerServing = nutrition['calories']?.round() ?? 
-                                                       (recipe['calories_per_serving'] ?? 0);
+                            final fromParser = nutrition['calories']?.round();
+                            final fromRecipe = recipe['calories_per_serving'];
+                            final int caloriesPerServing = fromParser ??
+                                (fromRecipe is num ? fromRecipe.round() : (int.tryParse(fromRecipe?.toString() ?? '') ?? 0));
                             if (caloriesPerServing > 0) {
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

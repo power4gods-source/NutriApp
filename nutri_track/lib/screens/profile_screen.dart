@@ -32,18 +32,41 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.all(24.0),
               child: Row(
                 children: [
-                  // Avatar
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFF4CAF50), width: 2),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                  // Avatar (misma imagen que en la homepage)
+                  Builder(
+                    builder: (context) {
+                      final avatarUrl = authService.avatarUrl;
+                      final hasImage = avatarUrl != null && avatarUrl.isNotEmpty;
+                      return Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: const Color(0xFF4CAF50), width: 2),
+                          color: hasImage ? null : const Color(0xFF4CAF50).withValues(alpha: 0.2),
+                          image: hasImage
+                              ? DecorationImage(
+                                  image: NetworkImage(avatarUrl!),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
+                        child: hasImage
+                            ? null
+                            : Center(
+                                child: Text(
+                                  (authService.username ?? 'U').isNotEmpty
+                                      ? (authService.username!.substring(0, 1).toUpperCase())
+                                      : '?',
+                                  style: const TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF4CAF50),
+                                  ),
+                                ),
+                              ),
+                      );
+                    },
                   ),
                   const SizedBox(width: 16),
                   // User Info

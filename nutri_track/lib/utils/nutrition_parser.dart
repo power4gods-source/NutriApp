@@ -52,39 +52,54 @@ class NutritionParser {
     return result;
   }
   
-  /// Obtiene nutrientes por ración desde una receta
+  /// Obtiene nutrientes por ración desde una receta (null-safe; tolera API con nulls).
   static Map<String, double> getNutritionPerServing(Map<String, dynamic> recipe) {
-    final nutrientsStr = recipe['nutrients'] ?? '';
-    final rawServings = recipe['servings'];
-    double servings = 4.0;
-    if (rawServings != null) {
-      if (rawServings is int) {
-        servings = rawServings.toDouble();
-      } else if (rawServings is double) {
-        servings = rawServings;
-      } else if (rawServings is num) {
-        servings = rawServings.toDouble();
-      } else {
-        servings = double.tryParse(rawServings.toString()) ?? 4.0;
+    try {
+      final rawNutrients = recipe['nutrients'];
+      final nutrientsStr = rawNutrients == null
+          ? ''
+          : (rawNutrients is String ? rawNutrients : rawNutrients.toString());
+      final rawServings = recipe['servings'];
+      double servings = 4.0;
+      if (rawServings != null) {
+        if (rawServings is int) {
+          servings = rawServings.toDouble();
+        } else if (rawServings is double) {
+          servings = rawServings;
+        } else if (rawServings is num) {
+          servings = rawServings.toDouble();
+        } else {
+          servings = double.tryParse(rawServings.toString()) ?? 4.0;
+        }
       }
-    }
-    if (servings <= 0) servings = 4.0;
-    
-    final totalNutrition = parseNutrientsString(nutrientsStr);
-    
-    // Si no hay nutrientes parseados, intentar usar calories_per_serving
-    if (totalNutrition['calories'] == 0) {
-      final caloriesPerServing = (recipe['calories_per_serving'] ?? 0).toDouble();
-      if (caloriesPerServing > 0) {
+      if (servings <= 0 || servings.isNaN) servings = 4.0;
+
+      final totalNutrition = parseNutrientsString(nutrientsStr);
+
+      final rawCalories = recipe['calories_per_serving'];
+      final caloriesPerServing = rawCalories == null
+          ? 0.0
+          : (rawCalories is num ? rawCalories.toDouble() : (double.tryParse(rawCalories.toString()) ?? 0.0));
+
+      if (totalNutrition['calories'] == 0 && caloriesPerServing > 0) {
         totalNutrition['calories'] = caloriesPerServing;
+      } else if ((totalNutrition['calories'] ?? 0) > 0) {
+        for (var key in totalNutrition.keys) {
+          final v = totalNutrition[key];
+          if (v != null && v > 0) totalNutrition[key] = v / servings;
+        }
       }
-    } else {
-      // Dividir por número de raciones para obtener por ración
-      for (var key in totalNutrition.keys) {
-        totalNutrition[key] = totalNutrition[key]! / servings;
-      }
+      return totalNutrition;
+    } catch (_) {
+      return {
+        'calories': 0.0,
+        'protein': 0.0,
+        'carbohydrates': 0.0,
+        'fat': 0.0,
+        'fiber': 0.0,
+        'sugar': 0.0,
+        'sodium': 0.0,
+      };
     }
-    
-    return totalNutrition;
   }
 }

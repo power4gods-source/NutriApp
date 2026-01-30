@@ -29,15 +29,16 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // Crashlytics no está soportado en web; solo registrar errores en móvil/desktop
     if (!kIsWeb) {
       FlutterError.onError = (error) {
         try {
-          FirebaseCrashlytics.instance.recordFlutterFatalError(error);
+          if (!kIsWeb) FirebaseCrashlytics.instance.recordFlutterFatalError(error);
         } catch (_) {}
       };
       PlatformDispatcher.instance.onError = (error, stack) {
         try {
-          FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+          if (!kIsWeb) FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
         } catch (_) {}
         return true;
       };

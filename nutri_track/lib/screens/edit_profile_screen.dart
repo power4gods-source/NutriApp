@@ -162,7 +162,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (response.statusCode == 200) {
         // Actualizar username en users.json también
         await _updateUsernameInUsers(_usernameController.text.trim());
-        
+        // Guardar avatar para que home y perfil muestren la misma imagen
+        if (avatarUrl != null) await _authService.saveAvatarUrl(avatarUrl);
         // Recargar datos de autenticación
         await _authService.reloadAuthData();
         

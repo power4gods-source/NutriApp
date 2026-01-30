@@ -38,6 +38,16 @@ class RecipeService {
     }
   }
 
+  /// Devuelve solo recetas desde cache (rápido). La cache persiste entre sesiones
+  /// (SharedPreferences) desde la primera vez que se cargaron datos; se usa al reabrir la app.
+  Future<List<dynamic>> getCachedRecipes(String filter) async {
+    final cacheKey = filter == 'general' ? 'recipes_general' :
+        filter == 'public' ? 'recipes_public' :
+        filter == 'private' ? 'recipes_private' : null;
+    if (cacheKey == null) return [];
+    return _getRecipesFromCache(cacheKey);
+  }
+
   // Obtiene recetas desde cache local (también busca en cache de Firebase)
   Future<List<dynamic>> _getRecipesFromCache(String cacheKey) async {
     try {

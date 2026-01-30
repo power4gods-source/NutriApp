@@ -318,23 +318,31 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: Builder(
-          builder: (context) => IconButton(
-            icon: CircleAvatar(
-              radius: 18,
-              backgroundColor: const Color(0xFF4CAF50),
-              child: Text(
-                firstLetter,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
+          builder: (context) {
+            final avatarUrl = _authService.avatarUrl;
+            return IconButton(
+              icon: CircleAvatar(
+                radius: 18,
+                backgroundColor: const Color(0xFF4CAF50),
+                backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
+                    ? NetworkImage(avatarUrl)
+                    : null,
+                child: (avatarUrl == null || avatarUrl.isEmpty)
+                    ? Text(
+                        firstLetter,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      )
+                    : null,
               ),
-            ),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            );
+          },
         ),
         title: const Text(
           'NUTRITRACK',
@@ -357,18 +365,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
-                    // Sección de Alimentación, Registrar Comida y Lista Compra
+                    // Alimentación y Carro de la compra
                     _buildTopActionsSection(),
                     const SizedBox(height: 8),
-                    // Tu progreso
+                    // Tu próximo plato (buscador)
+                    _buildRecipeSearchSection(),
+                    const SizedBox(height: 8),
+                    // Mi consumo (progreso)
                     _buildProgressCard(),
                     const SizedBox(height: 16),
                     // Tendencias
                     _buildTrendingSection(),
                     const SizedBox(height: 16),
-                    // Buscador de Recetas
-                    _buildRecipeSearchSection(),
-                    const SizedBox(height: 24),
                     // Recetas rápidas
                     _buildQuickRecipesSection(),
                     const SizedBox(height: 24),
@@ -452,9 +460,9 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            // Tres círculos: Diaria (grande), Media Semanal y Mensual (pequeños)
+            // Diario grande a la izquierda; a la derecha en horizontal: semanal y mensual (círculo, kcal, etiqueta)
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildProgressCircle(
                   label: 'Diario (kcal)',
@@ -463,29 +471,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.orange,
                   isLarge: true,
                 ),
-                Column(
-                  children: [
-                    _buildProgressCircle(
-                      label: 'Media Semanal',
-                      value: (_weeklyStats['avg_daily_calories'] ?? 0).toDouble(),
-                      goal: goal,
-                      color: Colors.blue,
-                      isLarge: false,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildProgressCircle(
-                      label: 'Media Mensual',
-                      value: (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
-                      goal: goal,
-                      color: Colors.purple,
-                      isLarge: false,
-                    ),
-                  ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildProgressCircleWithKcalBelow(
+                        value: (_weeklyStats['avg_daily_calories'] ?? 0).toDouble(),
+                        goal: goal,
+                        color: Colors.blue,
+                        label: 'Media Semanal',
+                      ),
+                      _buildProgressCircleWithKcalBelow(
+                        value: (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
+                        goal: goal,
+                        color: Colors.purple,
+                        label: 'Media Mensual',
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 8), // Reducido de 12 a 8
-            // Macronutrientes
+            const SizedBox(height: 8),
+            // Macronutrientes consumidos en el día (como antes)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -683,14 +692,15 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isLarge = false,
   }) {
     final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
-    
-    final size = isLarge ? 220.0 : 105.0; // Más grande (como captura)
-    final strokeWidth = isLarge ? 18.0 : 12.0;
-    final valueFontSize = isLarge ? 40.0 : 22.0;
-    final goalFontSize = isLarge ? 18.0 : 12.0;
-    final labelFontSize = isLarge ? 20.0 : 12.0;
-    
+    // Círculo diario más grande: circunferencia >= todo el texto dentro
+    final size = isLarge ? 240.0 : 105.0;
+    final strokeWidth = isLarge ? 20.0 : 12.0;
+    final valueFontSize = isLarge ? 36.0 : 22.0;
+    final goalFontSize = isLarge ? 20.0 : 12.0;
+    final labelFontSize = isLarge ? 18.0 : 12.0;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
           width: size,
@@ -716,7 +726,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Text(
-                    '/ ${goal.toInt()}',
+                    '/${goal.toInt()} kcal',
                     style: TextStyle(
                       fontSize: goalFontSize,
                       color: Colors.grey[600],
@@ -733,6 +743,53 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: labelFontSize,
             fontWeight: isLarge ? FontWeight.bold : FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  /// Círculo de progreso con "X/Y kcal" y etiqueta debajo, todo centrado (semanal/mensual).
+  Widget _buildProgressCircleWithKcalBelow({
+    required double value,
+    required double goal,
+    required Color color,
+    required String label,
+  }) {
+    final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
+    const double size = 105.0;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: size,
+          height: size,
+          child: CircularProgressIndicator(
+            value: progress,
+            strokeWidth: 12,
+            backgroundColor: Colors.grey[200],
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          '${value.toInt()}/${goal.toInt()} kcal',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: color,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
             color: Colors.grey[700],
           ),
           textAlign: TextAlign.center,
@@ -788,7 +845,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Buscador de Recetas',
+                      'Tu próximo plato...',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

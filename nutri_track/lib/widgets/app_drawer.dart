@@ -6,7 +6,6 @@ import '../screens/recipes_screen.dart';
 import '../screens/favorites_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/settings_screen.dart';
-import '../screens/sync_screen.dart';
 import '../screens/login_screen.dart';
 import '../main.dart';
 
@@ -38,17 +37,7 @@ class AppDrawer extends StatelessWidget {
               email,
               style: const TextStyle(fontSize: 14),
             ),
-            currentAccountPicture: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Text(
-                username[0].toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF4CAF50),
-                ),
-              ),
-            ),
+            currentAccountPicture: _buildAvatar(authService.avatarUrl, username),
           ),
           
           // Menu items
@@ -124,20 +113,6 @@ class AppDrawer extends StatelessWidget {
                     );
                   },
                 ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.cloud_sync,
-                  title: 'Sincronizar con Firestore',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const SyncScreen(),
-                      ),
-                    );
-                  },
-                ),
                 
                 const Divider(),
                 
@@ -188,6 +163,24 @@ class AppDrawer extends StatelessWidget {
         ),
       ),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildAvatar(String? avatarUrl, String username) {
+    final hasImage = avatarUrl != null && avatarUrl.isNotEmpty;
+    return CircleAvatar(
+      backgroundColor: Colors.white,
+      backgroundImage: hasImage ? NetworkImage(avatarUrl!) : null,
+      child: hasImage
+          ? null
+          : Text(
+              username.isNotEmpty ? username[0].toUpperCase() : '?',
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF4CAF50),
+              ),
+            ),
     );
   }
 }
