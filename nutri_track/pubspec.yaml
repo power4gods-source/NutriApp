@@ -38,9 +38,9 @@ dependencies:
   # Image Picker
   image_picker: ^1.0.7
   
-  # Auth: Google & Apple Sign-In
-  google_sign_in: ^6.2.2
-  sign_in_with_apple: ^6.1.3
+  # Auth: Google & Apple (opcional). Para activar: descomenta y ejecuta flutter pub get en nutri_track
+  # google_sign_in: ^6.2.2
+  # sign_in_with_apple: ^6.1.3
 
 dev_dependencies:
   flutter_test:

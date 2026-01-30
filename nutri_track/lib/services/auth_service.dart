@@ -5,9 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../config/app_config.dart';
+import 'social_auth_google_apple.dart';
 import 'supabase_user_service.dart';
 
 class AuthService extends ChangeNotifier {
@@ -865,88 +864,26 @@ class AuthService extends ChangeNotifier {
     return base64Encode(utf8.encode(tokenData));
   }
 
-  /// Login con Google (id_token enviado al backend)
-  Future<Map<String, dynamic>> loginWithGoogle() async {
-    try {
-      final googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
-      final account = await googleSignIn.signIn();
-      if (account == null) {
-        return {'success': false, 'error': 'Inicio de sesión cancelado'};
-      }
-      final auth = await account.authentication;
-      final idToken = auth.idToken;
-      if (idToken == null || idToken.isEmpty) {
-        return {'success': false, 'error': 'No se pudo obtener el token de Google'};
-      }
-      final url = await baseUrl;
-      final response = await http.post(
-        Uri.parse('$url/auth/google'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'id_token': idToken}),
-      ).timeout(const Duration(seconds: 15));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        await _saveAuthData(
-          data['access_token'],
-          data['user_id'],
-          data['email'],
-          data['username']?.toString(),
-          role: data['role'] ?? 'user',
-        );
-        return {'success': true, 'data': data};
-      }
-      final err = jsonDecode(response.body);
-      return {'success': false, 'error': err['detail'] ?? 'Error al iniciar sesión con Google'};
-    } catch (e) {
-      return {'success': false, 'error': e.toString()};
+  /// Guardar sesión desde la respuesta del backend (para login Google/Apple).
+  Future<void> saveAuthDataFromMap(Map<String, dynamic> data) async {
+    final token = data['access_token'] as String?;
+    final userId = data['user_id'] as String?;
+    final email = data['email'] as String?;
+    final username = data['username']?.toString();
+    final role = data['role'] as String?;
+    if (token != null && userId != null && email != null) {
+      await _saveAuthData(token, userId, email, username, role: role);
     }
   }
 
-  /// Login con Apple (identity_token enviado al backend)
+  /// Login con Google. Implementación en social_auth_google_apple.dart
+  Future<Map<String, dynamic>> loginWithGoogle() async {
+    return SocialAuthGoogleApple.loginWithGoogle(this);
+  }
+
+  /// Login con Apple. Implementación en social_auth_google_apple.dart
   Future<Map<String, dynamic>> loginWithApple() async {
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-      final identityToken = credential.identityToken;
-      if (identityToken == null || identityToken.isEmpty) {
-        return {'success': false, 'error': 'No se pudo obtener el token de Apple'};
-      }
-      final url = await baseUrl;
-      final body = <String, dynamic>{
-        'identity_token': identityToken,
-        'user_apple_id': credential.userIdentifier,
-        'email': credential.email,
-        'full_name': credential.givenName != null || credential.familyName != null
-            ? '${credential.givenName ?? ''} ${credential.familyName ?? ''}'.trim()
-            : null,
-      };
-      final response = await http.post(
-        Uri.parse('$url/auth/apple'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      ).timeout(const Duration(seconds: 15));
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        await _saveAuthData(
-          data['access_token'],
-          data['user_id'],
-          data['email'],
-          data['username']?.toString(),
-          role: data['role'] ?? 'user',
-        );
-        return {'success': true, 'data': data};
-      }
-      final err = jsonDecode(response.body);
-      return {'success': false, 'error': err['detail'] ?? 'Error al iniciar sesión con Apple'};
-    } catch (e) {
-      return {'success': false, 'error': e.toString()};
-    }
+    return SocialAuthGoogleApple.loginWithApple(this);
   }
 
   /// Solicitar restablecimiento de contraseña (envío de email corporativo NutriTrack)

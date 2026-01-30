@@ -26,7 +26,17 @@ El backend envía correos desde una cuenta corporativa NutriTrack. Configura est
 
 ---
 
-## 2. Login con Google
+## 2. Activar login con Google y Apple en la app Flutter
+
+Por defecto la app compila **sin** los paquetes `google_sign_in` y `sign_in_with_apple` (stub). Para que los botones "Continuar con Google" y "Continuar con Apple" funcionen:
+
+1. En `nutri_track/pubspec.yaml`, descomenta: `google_sign_in: ^6.2.2` y `sign_in_with_apple: ^6.1.3`.
+2. Ejecuta en la carpeta nutri_track: `flutter pub get`.
+3. Copia el contenido de `lib/services/social_auth_google_apple_REAL.dart.example` en `lib/services/social_auth_google_apple.dart` (sobrescribe).
+
+---
+
+## 3. Login con Google (detalles)
 
 - **Backend:** No requiere variables extra; el backend valida el `id_token` con `https://oauth2.googleapis.com/tokeninfo`.
 - **Flutter (Android):** Por defecto `google_sign_in` usa el SHA-1 del keystore. Para producción, añade el SHA-1 de tu keystore de release en [Google Cloud Console](https://console.cloud.google.com/) (APIs & Services → Credentials) en la credencial de tipo “Android”.
@@ -34,7 +44,7 @@ El backend envía correos desde una cuenta corporativa NutriTrack. Configura est
 
 ---
 
-## 3. Login con Apple
+## 4. Login con Apple
 
 - **Backend (opcional):** Si quieres validar el `aud` del JWT de Apple, define:
   - `APPLE_CLIENT_ID`: Bundle ID de tu app iOS (ej. `com.tudominio.nutritrack`).
@@ -45,7 +55,7 @@ El backend envía correos desde una cuenta corporativa NutriTrack. Configura est
 
 ---
 
-## 4. Resumen de endpoints
+## 5. Resumen de endpoints
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|

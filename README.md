@@ -39,11 +39,18 @@ El backend está preparado para desplegarse en servicios como:
 
 ### App Flutter
 
+**Importante:** Las dependencias Flutter están en la carpeta `nutri_track`. Siempre ejecuta `flutter pub get` **desde esa carpeta**:
+
 ```bash
 cd nutri_track
 flutter pub get
 flutter run
 ```
+
+Si ves el error *"Target of URI doesn't exist: package:google_sign_in/google_sign_in.dart"* (o similar), el IDE no ha resuelto las dependencias. Solución:
+1. Abre una terminal en la raíz del repo y ejecuta: `cd nutri_track` y luego `flutter pub get`.
+2. O ejecuta el script: `nutri_track\run_pub_get.bat` (Windows) o `./nutri_track/run_pub_get.ps1` (PowerShell).
+3. Reinicia el IDE o abre la carpeta `nutri_track` como raíz del proyecto para que Flutter reconozca el `pubspec.yaml`.
 
 ## 📱 Publicación en Play Store y App Store
 
