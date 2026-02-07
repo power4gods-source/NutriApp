@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic> _dailyStats = {};
   Map<String, dynamic> _weeklyStats = {};
   Map<String, dynamic> _monthlyStats = {};
+  Map<String, dynamic> _goals = {};
   List<dynamic> _trendingRecipes = [];
   List<dynamic> _quickRecipes = [];
   List<dynamic> _allQuickRecipes = []; // Todas las recetas rápidas disponibles
@@ -86,11 +87,21 @@ class _HomeScreenState extends State<HomeScreen> {
       _loadDailyStats(),
       _loadWeeklyStats(),
       _loadMonthlyStats(),
+      _loadGoals(),
       _loadUserIngredients(),
       _loadTrendingRecipes(),
       _loadQuickRecipes(),
     ]);
     setState(() => _isLoading = false);
+  }
+
+  Future<void> _loadGoals() async {
+    try {
+      final goals = await _trackingService.getGoals();
+      setState(() => _goals = goals);
+    } catch (e) {
+      print('Error loading goals: $e');
+    }
   }
 
   Future<void> _loadDailyStats() async {
@@ -371,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Tu próximo plato (buscador)
                     _buildRecipeSearchSection(),
                     const SizedBox(height: 8),
-                    // Mi consumo (progreso)
+                    // Tu día (calorías, medias, macros - mismo diseño que Index.tsx)
                     _buildProgressCard(),
                     const SizedBox(height: 16),
                     // Tendencias
@@ -387,68 +398,92 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Sección "Tu día" - diseño inspirado en Index.tsx, enlazada con los mismos datos de TrackingScreen
   Widget _buildProgressCard() {
     final consumed = (_dailyStats['consumed_calories'] ?? 0).toDouble();
-    final goal = (_dailyStats['goal_calories'] ?? 2000).toDouble();
+    final goal = (_dailyStats['goal_calories'] ?? (_goals['daily_goals']?['calories'] ?? 2000)).toDouble();
+    final weeklyAvg = (_weeklyStats['avg_daily_calories'] ?? 0).toDouble();
+    final monthlyAvg = (_monthlyStats['avg_daily_calories'] ?? 0).toDouble();
 
     final nutrition = _dailyStats['nutrition'] ?? {};
     final protein = (nutrition['protein'] ?? 0).toDouble();
     final carbs = (nutrition['carbohydrates'] ?? 0).toDouble();
     final fat = (nutrition['fat'] ?? 0).toDouble();
 
+    final goalsMap = _goals['daily_goals'] ?? {};
+    final proteinGoal = (goalsMap['protein'] ?? 120).toDouble();
+    final carbsGoal = (goalsMap['carbohydrates'] ?? 250).toDouble();
+    final fatGoal = (goalsMap['fat'] ?? 65).toDouble();
+
+    final today = DateTime.now();
+    final dateLabel = 'Hoy, ${today.day} ${_getMonthName(today.month)}';
+
     return InkWell(
       onTap: _navigateToTracking,
+      borderRadius: BorderRadius.circular(24),
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Header: Tu día + fecha + Registrar
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Tu progreso',
+                  'Tu día',
                   style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
                     color: Colors.black87,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    dateLabel,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[700],
+                    ),
                   ),
                 ),
                 InkWell(
                   onTap: _navigateToAddConsumption,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.12),
+                      color: const Color(0xFF4CAF50).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.orange, width: 1.4),
+                      border: Border.all(color: const Color(0xFF4CAF50), width: 1.2),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.local_fire_department,
-                            color: Colors.orange, size: 16),
-                        SizedBox(width: 6),
+                      children: [
+                        Icon(Icons.add, color: Color(0xFF4CAF50), size: 16),
+                        SizedBox(width: 4),
                         Text(
                           'Registrar',
                           style: TextStyle(
                             fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF4CAF50),
                           ),
                         ),
                       ],
@@ -457,111 +492,55 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 16),
-
-            // Progreso: como img2 — círculo diario llena toda la mitad izquierda; semanal/mensual a la derecha; poco hueco hasta nutrientes
+            // Calorías: círculo principal + medias semanal/mensual
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final side = (constraints.maxWidth < constraints.maxHeight
-                              ? constraints.maxWidth
-                              : constraints.maxHeight)
-                          .clamp(200.0, 320.0);
-                      final stroke = (side * 0.06).clamp(14.0, 22.0);
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: side,
-                            height: side,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                CircularProgressIndicator(
-                                  value: goal > 0
-                                      ? (consumed / goal).clamp(0.0, 1.0)
-                                      : 0,
-                                  strokeWidth: stroke,
-                                  backgroundColor:
-                                      Colors.grey.withValues(alpha: 0.18),
-                                  valueColor: const AlwaysStoppedAnimation(
-                                      Colors.orange),
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      consumed.toInt().toString(),
-                                      style: const TextStyle(
-                                        fontSize: 36,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.orange,
-                                      ),
-                                    ),
-                                    Text(
-                                      '/${goal.toInt()}',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Diario (kcal)',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                  child: _buildCalorieCircle(consumed: consumed, goal: goal),
                 ),
-                const SizedBox(width: 6),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildSmallProgress(
-                      value:
-                          (_weeklyStats['avg_daily_calories'] ?? 0).toDouble(),
-                      goal: goal,
-                      color: Colors.lightBlueAccent,
-                      label: 'Media Semanal',
-                    ),
-                    const SizedBox(height: 6),
-                    _buildSmallProgress(
-                      value:
-                          (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
-                      goal: goal,
-                      color: Colors.purpleAccent,
-                      label: 'Media Mensual',
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    children: [
+                      _buildAverageCard(
+                        label: 'Media semanal',
+                        value: weeklyAvg,
+                        color: const Color(0xFF4CAF50),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildAverageCard(
+                        label: 'Media mensual',
+                        value: monthlyAvg,
+                        color: const Color(0xFFE57373),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 20),
 
-            // Macronutrientes
+            // Macronutrientes (mismo diseño que Index.tsx)
+            Text(
+              'Macronutrientes',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[700],
+              ),
+            ),
+            const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildMacroIndicator('Proteína', protein, Colors.purple),
-                _buildMacroIndicator('Carbos', carbs, Colors.orange),
-                _buildMacroIndicator('Grasas', fat, Colors.red),
+                Expanded(child: _buildMacroCard('Proteínas', protein, proteinGoal, const Color(0xFF4CAF50), Icons.fitness_center)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildMacroCard('Carbos', carbs, carbsGoal, const Color(0xFFE57373), Icons.grain)),
+                const SizedBox(width: 8),
+                Expanded(child: _buildMacroCard('Grasas', fat, fatGoal, const Color(0xFF81C784), Icons.water_drop)),
               ],
             ),
           ],
@@ -569,100 +548,151 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-  Widget _buildSmallProgress({
-    required double value,
-    required double goal,
-    required Color color,
-    required String label,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 92,
-          height: 92,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CircularProgressIndicator(
-                value: goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0,
-                strokeWidth: 6,
-                backgroundColor: Colors.grey.withValues(alpha: 0.18),
-                valueColor: AlwaysStoppedAnimation(color),
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    value.toInt().toString(),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-                  ),
-                  Text(
-                    '/${goal.toInt()}',
-                    style: TextStyle(
-                      fontSize: 9,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
-          ),
-        ),
-      ],
-    );
+
+  String _getMonthName(int month) {
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return months[(month - 1).clamp(0, 11)];
   }
 
-
-
-  Widget _buildMacroIndicator(String label, double value, Color color) {
-    return Column(
-      children: [
-        SizedBox(
-          width: 60,
-          height: 60,
-          child: Stack(
-            alignment: Alignment.center,
+  Widget _buildCalorieCircle({required double consumed, required double goal}) {
+    final progress = goal > 0 ? (consumed / goal).clamp(0.0, 1.0) : 0.0;
+    return SizedBox(
+      width: 140,
+      height: 140,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          CircularProgressIndicator(
+            value: progress,
+            strokeWidth: 12,
+            backgroundColor: Colors.grey.withValues(alpha: 0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              progress > 1.0 ? const Color(0xFFE57373) : const Color(0xFF4CAF50),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(
-                value: 0.5, // Valor fijo para visualización
-                strokeWidth: 8,
-                backgroundColor: Colors.grey[200],
-                valueColor: AlwaysStoppedAnimation<Color>(color),
+              Text(
+                consumed.toInt().toString(),
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF4CAF50),
+                ),
               ),
               Text(
-                value.toInt().toString(),
+                '/${goal.toInt()} kcal',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+                  fontSize: 12,
+                  color: Colors.grey[600],
                 ),
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAverageCard({
+    required String label,
+    required double value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.15),
+            color.withValues(alpha: 0.05),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.trending_up, size: 14, color: color),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            value.toInt().toString(),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          Text(
+            'kcal/día',
+            style: TextStyle(
+              fontSize: 11,
+              color: Colors.grey[600],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMacroCard(String name, double current, double goal, Color color, IconData icon) {
+    final progress = goal > 0 ? (current / goal).clamp(0.0, 1.0) : 0.0;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(height: 6),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${current.toInt()}/${goal.toInt()}',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

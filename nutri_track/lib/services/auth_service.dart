@@ -120,7 +120,7 @@ class AuthService extends ChangeNotifier {
               Uri.parse('$url/auth/login'),
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode({
-                'email': email,
+                'login': email,  // login acepta email o nombre de usuario
                 'password': password,
               }),
             )
@@ -197,7 +197,7 @@ class AuthService extends ChangeNotifier {
             Uri.parse('$url/auth/login'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
-              'email': normalizedEmail,
+              'login': normalizedEmail,
               'password': password,
             }),
           ).timeout(const Duration(seconds: 5));
@@ -627,7 +627,7 @@ class AuthService extends ChangeNotifier {
                   Uri.parse('$url/auth/login'),
                   headers: {'Content-Type': 'application/json'},
                   body: jsonEncode({
-                    'email': normalizedEmail,
+                    'login': normalizedEmail,
                     'password': password,
                   }),
                 ).timeout(const Duration(seconds: 60));
@@ -875,7 +875,7 @@ class AuthService extends ChangeNotifier {
           Uri.parse('$url/auth/login'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            'email': normalizedEmail,
+            'login': normalizedEmail,
             'password': password,
           }),
         ).timeout(const Duration(seconds: 5));
