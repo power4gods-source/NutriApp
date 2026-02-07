@@ -18,6 +18,15 @@ import 'add_consumption_screen.dart';
 import 'recipes_screen.dart';
 import 'recipe_finder_screen.dart';
 
+/// Tema NutriEco (Index.tsx): primary, eco-sage, eco-terracotta, eco-peach, eco-cream
+class AppTheme {
+  static const Color primary = Color(0xFF2D6A4F);
+  static const Color ecoSage = Color(0xFF84A98C);
+  static const Color ecoTerracotta = Color(0xFFBC6C25);
+  static const Color ecoPeach = Color(0xFFF4A261);
+  static const Color ecoCream = Color(0xFFFAF8F5);
+}
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -322,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final firstLetter = username.isNotEmpty ? username[0].toUpperCase() : '?';
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9F5), // Verde muy ligero con toques grisáceos
+      backgroundColor: AppTheme.ecoCream,
       drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -334,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
             return IconButton(
               icon: CircleAvatar(
                 radius: 18,
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppTheme.primary,
                 backgroundImage: (avatarUrl != null && avatarUrl.isNotEmpty)
                     ? NetworkImage(avatarUrl)
                     : null,
@@ -358,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text(
           'NUTRITRACK',
           style: TextStyle(
-            color: Color(0xFF4CAF50),
+            color: AppTheme.primary,
             fontWeight: FontWeight.bold,
             fontSize: 24,
             letterSpacing: 1.5,
@@ -375,13 +384,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 8),
-                    // Alimentación y Carro de la compra
-                    _buildTopActionsSection(),
-                    const SizedBox(height: 8),
-                    // Tu próximo plato (buscador)
-                    _buildRecipeSearchSection(),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
+                    // Acciones rápidas (iconos sin título - Index.tsx QuickActions)
+                    _buildQuickActionsRow(),
+                    const SizedBox(height: 16),
                     // Tu día (calorías, medias, macros - mismo diseño que Index.tsx)
                     _buildProgressCard(),
                     const SizedBox(height: 16),
@@ -427,6 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),
@@ -438,7 +445,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Tu día + fecha + Registrar
+            // Header: Tu día + fecha (igual que Index.tsx)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -451,7 +458,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.grey.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -464,57 +471,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                InkWell(
-                  onTap: _navigateToAddConsumption,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50).withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFF4CAF50), width: 1.2),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add, color: Color(0xFF4CAF50), size: 16),
-                        SizedBox(width: 4),
-                        Text(
-                          'Registrar',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF4CAF50),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 20),
 
-            // Calorías: círculo principal + medias semanal/mensual
+            // Calorías: círculo principal a la izquierda, tarjetas semanal/mensual a la derecha (Index.tsx)
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Expanded(
-                  child: _buildCalorieCircle(consumed: consumed, goal: goal),
-                ),
-                const SizedBox(width: 12),
+                _buildCalorieCircle(consumed: consumed, goal: goal),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     children: [
                       _buildAverageCard(
                         label: 'Media semanal',
                         value: weeklyAvg,
-                        color: const Color(0xFF4CAF50),
+                        color: AppTheme.primary,
+                        gradientEnd: AppTheme.ecoSage,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       _buildAverageCard(
                         label: 'Media mensual',
                         value: monthlyAvg,
-                        color: const Color(0xFFE57373),
+                        color: AppTheme.ecoTerracotta,
+                        gradientEnd: AppTheme.ecoCream,
                       ),
                     ],
                   ),
@@ -536,11 +517,11 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Expanded(child: _buildMacroCard('Proteínas', protein, proteinGoal, const Color(0xFF4CAF50), Icons.fitness_center)),
+                Expanded(child: _buildMacroCard('Proteínas', protein, proteinGoal, AppTheme.primary, Icons.fitness_center)),
                 const SizedBox(width: 8),
-                Expanded(child: _buildMacroCard('Carbos', carbs, carbsGoal, const Color(0xFFE57373), Icons.grain)),
+                Expanded(child: _buildMacroCard('Carbos', carbs, carbsGoal, AppTheme.ecoTerracotta, Icons.grain)),
                 const SizedBox(width: 8),
-                Expanded(child: _buildMacroCard('Grasas', fat, fatGoal, const Color(0xFF81C784), Icons.water_drop)),
+                Expanded(child: _buildMacroCard('Grasas', fat, fatGoal, AppTheme.ecoSage, Icons.water_drop)),
               ],
             ),
           ],
@@ -554,37 +535,44 @@ class _HomeScreenState extends State<HomeScreen> {
     return months[(month - 1).clamp(0, 11)];
   }
 
+  /// Círculo de progreso diario con texto dentro (igual que CalorieCircle de Index.tsx)
   Widget _buildCalorieCircle({required double consumed, required double goal}) {
+    const double circleSize = 200;
     final progress = goal > 0 ? (consumed / goal).clamp(0.0, 1.0) : 0.0;
     return SizedBox(
-      width: 140,
-      height: 140,
+      width: circleSize,
+      height: circleSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          CircularProgressIndicator(
-            value: progress,
-            strokeWidth: 12,
-            backgroundColor: Colors.grey.withValues(alpha: 0.2),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              progress > 1.0 ? const Color(0xFFE57373) : const Color(0xFF4CAF50),
+          SizedBox(
+            width: circleSize,
+            height: circleSize,
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 14,
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                progress > 1.0 ? AppTheme.ecoTerracotta : AppTheme.primary,
+              ),
             ),
           ),
           Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
                 consumed.toInt().toString(),
                 style: const TextStyle(
-                  fontSize: 28,
+                  fontSize: 38,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF4CAF50),
+                  color: AppTheme.primary,
                 ),
               ),
               Text(
                 '/${goal.toInt()} kcal',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 14,
                   color: Colors.grey[600],
                 ),
               ),
@@ -599,7 +587,9 @@ class _HomeScreenState extends State<HomeScreen> {
     required String label,
     required double value,
     required Color color,
+    Color? gradientEnd,
   }) {
+    final endColor = gradientEnd ?? color;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -608,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
           end: Alignment.bottomRight,
           colors: [
             color.withValues(alpha: 0.15),
-            color.withValues(alpha: 0.05),
+            endColor.withValues(alpha: 0.08),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -645,6 +635,7 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 11,
               color: Colors.grey[600],
             ),
+          ),
         ],
       ),
     );
@@ -696,38 +687,45 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTopActionsSection() {
+  /// Acciones rápidas: 4 iconos (Index.tsx QuickActions) sin título
+  Widget _buildQuickActionsRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Alimentación - Más pequeña con icono a la izquierda y flecha a la derecha
-          Expanded(
-            flex: 2, // Hacer más pequeña (2/3 del espacio)
-            child: _buildActionCard(
-              icon: Icons.restaurant,
-              title: 'Alimentación',
-              subtitle: '',
-              color: const Color(0xFF4CAF50),
-              onTap: _navigateToIngredients,
-              horizontalLayout: true, // Icono al lado del texto
-              showArrow: true, // Mostrar flecha a la derecha
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Lista Compra - Mismo tamaño que Alimentación, solo icono del carrito
-          Expanded(
-            flex: 1, // 1/3 del espacio
-            child: _buildActionCard(
-              icon: Icons.shopping_cart,
-              title: '',
-              subtitle: '',
-              color: Colors.blue,
-              onTap: _navigateToShoppingList,
-              iconOnly: true, // Solo icono, sin texto
-            ),
-          ),
+          _buildQuickActionIcon(Icons.restaurant, AppTheme.primary, _navigateToIngredients),
+          _buildQuickActionIcon(Icons.add_circle_outline, AppTheme.primary, _navigateToAddConsumption),
+          _buildQuickActionIcon(Icons.search, AppTheme.primary, () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const RecipeFinderScreen()));
+          }),
+          _buildQuickActionIcon(Icons.shopping_cart_outlined, AppTheme.primary, _navigateToShoppingList),
         ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionIcon(IconData icon, Color color, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Icon(icon, color: color, size: 28),
+        ),
       ),
     );
   }
@@ -979,12 +977,12 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+                  color: AppTheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
                   Icons.search,
-                  color: Color(0xFF4CAF50),
+                  color: AppTheme.primary,
                   size: 24,
                 ),
               ),
@@ -1017,7 +1015,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const Icon(
                 Icons.arrow_forward_ios,
-                color: Color(0xFF4CAF50),
+                color: AppTheme.primary,
                 size: 16,
               ),
             ],
@@ -1053,7 +1051,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Text(
                   'Ver todo >',
                   style: TextStyle(
-                    color: Color(0xFF4CAF50),
+                    color: AppTheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1111,7 +1109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: const Text(
                   'Ver todo >',
                   style: TextStyle(
-                    color: Color(0xFF4CAF50),
+                    color: AppTheme.primary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -1133,7 +1131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.all(16.0),
                   child: Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                      valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primary),
                     ),
                   ),
                 );

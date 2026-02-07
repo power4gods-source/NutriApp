@@ -120,7 +120,7 @@ class AuthService extends ChangeNotifier {
               Uri.parse('$url/auth/login'),
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode({
-                'login': email,  // login acepta email o nombre de usuario
+                'email': email,  // backend acepta 'email' o 'login'; permite email o username
                 'password': password,
               }),
             )
