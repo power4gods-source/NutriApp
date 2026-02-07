@@ -390,8 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProgressCard() {
     final consumed = (_dailyStats['consumed_calories'] ?? 0).toDouble();
     final goal = (_dailyStats['goal_calories'] ?? 2000).toDouble();
-    final progress = goal > 0 ? (consumed / goal).clamp(0.0, 1.0) : 0.0;
-    
+
     final nutrition = _dailyStats['nutrition'] ?? {};
     final protein = (nutrition['protein'] ?? 0).toDouble();
     final carbs = (nutrition['carbohydrates'] ?? 0).toDouble();
@@ -401,7 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: _navigateToTracking,
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 16),
-        padding: const EdgeInsets.all(16), // Reducido de 20 a 16
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -416,14 +415,14 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Título con botón de registrar consumo a la derecha
+            // Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Mi consumo',
+                  'Tu progreso',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -431,24 +430,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 InkWell(
                   onTap: _navigateToAddConsumption,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.1),
+                      color: Colors.orange.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.orange, width: 1.5),
+                      border: Border.all(color: Colors.orange, width: 1.4),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.local_fire_department, 
-                          color: Colors.orange, 
-                          size: 18,
-                        ),
-                        const SizedBox(width: 6),
-                        const Text(
+                      children: const [
+                        Icon(Icons.local_fire_department,
+                            color: Colors.orange, size: 16),
+                        SizedBox(width: 6),
+                        Text(
                           'Registrar',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
                             color: Colors.orange,
                           ),
@@ -459,42 +457,105 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            // Diario grande a la izquierda; a la derecha en horizontal: semanal y mensual (círculo, kcal, etiqueta)
+
+            const SizedBox(height: 16),
+
+            // Progreso: como img2 — círculo diario llena toda la mitad izquierda; semanal/mensual a la derecha; poco hueco hasta nutrientes
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildProgressCircle(
-                  label: 'Diario (kcal)',
-                  value: consumed,
-                  goal: goal,
-                  color: Colors.orange,
-                  isLarge: true,
-                ),
-                const SizedBox(width: 16),
                 Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildProgressCircleWithKcalBelow(
-                        value: (_weeklyStats['avg_daily_calories'] ?? 0).toDouble(),
-                        goal: goal,
-                        color: Colors.blue,
-                        label: 'Media Semanal',
-                      ),
-                      _buildProgressCircleWithKcalBelow(
-                        value: (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
-                        goal: goal,
-                        color: Colors.purple,
-                        label: 'Media Mensual',
-                      ),
-                    ],
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final side = (constraints.maxWidth < constraints.maxHeight
+                              ? constraints.maxWidth
+                              : constraints.maxHeight)
+                          .clamp(200.0, 320.0);
+                      final stroke = (side * 0.06).clamp(14.0, 22.0);
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: side,
+                            height: side,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                CircularProgressIndicator(
+                                  value: goal > 0
+                                      ? (consumed / goal).clamp(0.0, 1.0)
+                                      : 0,
+                                  strokeWidth: stroke,
+                                  backgroundColor:
+                                      Colors.grey.withValues(alpha: 0.18),
+                                  valueColor: const AlwaysStoppedAnimation(
+                                      Colors.orange),
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      consumed.toInt().toString(),
+                                      style: const TextStyle(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                    Text(
+                                      '/${goal.toInt()}',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Diario (kcal)',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
+                ),
+                const SizedBox(width: 6),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildSmallProgress(
+                      value:
+                          (_weeklyStats['avg_daily_calories'] ?? 0).toDouble(),
+                      goal: goal,
+                      color: Colors.lightBlueAccent,
+                      label: 'Media Semanal',
+                    ),
+                    const SizedBox(height: 6),
+                    _buildSmallProgress(
+                      value:
+                          (_monthlyStats['avg_daily_calories'] ?? 0).toDouble(),
+                      goal: goal,
+                      color: Colors.purpleAccent,
+                      label: 'Media Mensual',
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            // Macronutrientes consumidos en el día (como antes)
+
+            const SizedBox(height: 6),
+
+            // Macronutrientes
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -508,6 +569,64 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+  Widget _buildSmallProgress({
+    required double value,
+    required double goal,
+    required Color color,
+    required String label,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 92,
+          height: 92,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CircularProgressIndicator(
+                value: goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0,
+                strokeWidth: 6,
+                backgroundColor: Colors.grey.withValues(alpha: 0.18),
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    value.toInt().toString(),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: color,
+                    ),
+                  ),
+                  Text(
+                    '/${goal.toInt()}',
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+      ],
+    );
+  }
+
+
 
   Widget _buildMacroIndicator(String label, double value, Color color) {
     return Column(
@@ -693,14 +812,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
     // Círculo diario más grande: circunferencia >= todo el texto dentro
-    final size = isLarge ? 240.0 : 105.0;
-    final strokeWidth = isLarge ? 20.0 : 12.0;
-    final valueFontSize = isLarge ? 36.0 : 22.0;
-    final goalFontSize = isLarge ? 20.0 : 12.0;
-    final labelFontSize = isLarge ? 18.0 : 12.0;
+    final size = isLarge ? 200.0 : 100.0;
+    final strokeWidth = isLarge ? 14.0 : 10.0;
+    final valueFontSize = isLarge ? 34.0 : 20.0;
+    final goalFontSize = isLarge ? 16.0 : 12.0;
+    final labelFontSize = isLarge ? 16.0 : 12.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: isLarge ? CrossAxisAlignment.start : CrossAxisAlignment.center,
       children: [
         SizedBox(
           width: size,
@@ -745,7 +865,7 @@ class _HomeScreenState extends State<HomeScreen> {
             fontWeight: isLarge ? FontWeight.bold : FontWeight.w600,
             color: Colors.grey[700],
           ),
-          textAlign: TextAlign.center,
+          textAlign: isLarge ? TextAlign.left : TextAlign.center,
         ),
       ],
     );
@@ -759,7 +879,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String label,
   }) {
     final progress = goal > 0 ? (value / goal).clamp(0.0, 1.0) : 0.0;
-    const double size = 105.0;
+    const double size = 88.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -769,8 +889,8 @@ class _HomeScreenState extends State<HomeScreen> {
           height: size,
           child: CircularProgressIndicator(
             value: progress,
-            strokeWidth: 12,
-            backgroundColor: Colors.grey[200],
+            strokeWidth: 8,
+            backgroundColor: Colors.grey.withValues(alpha: 0.2),
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),

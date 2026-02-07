@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../utils/password_validator.dart';
 import '../main.dart';
 import 'forgot_password_screen.dart';
 import 'reset_password_screen.dart';
@@ -156,11 +157,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         } else {
           final errorMessage = result['error'] ?? 'Error al registrar usuario';
           print('❌ Error en registro: $errorMessage');
+          final isEmailTaken = errorMessage.toString().toLowerCase().contains('ya está registrado') ||
+              errorMessage.toString().toLowerCase().contains('already registered');
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(errorMessage),
+              content: Text(errorMessage.toString()),
               backgroundColor: Colors.red,
               duration: const Duration(seconds: 5),
+              action: isEmailTaken
+                  ? SnackBarAction(
+                      label: 'Iniciar sesión',
+                      textColor: Colors.white,
+                      onPressed: () => _tabController.animateTo(0),
+                    )
+                  : null,
             ),
           );
         }
@@ -255,11 +265,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           ),
           const SizedBox(height: 32),
           
-          // Email/Username field
+          // Email o nombre de usuario
           TextFormField(
             controller: _loginEmailController,
             decoration: InputDecoration(
-              labelText: 'Email / Username',
+              labelText: 'Email o nombre de usuario',
+              hintText: 'Correo o usuario',
               filled: true,
               fillColor: Colors.grey[50],
               border: OutlineInputBorder(
@@ -277,10 +288,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF4CAF50)),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
-            keyboardType: TextInputType.emailAddress,
+            keyboardType: TextInputType.text,
+            textCapitalization: TextCapitalization.none,
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
+              if (value == null || value.trim().isEmpty) {
+                return 'Introduce tu correo o nombre de usuario';
               }
               return null;
             },
@@ -451,6 +463,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             obscureText: _obscurePassword,
             decoration: InputDecoration(
               labelText: 'Contraseña',
+              hintText: 'Mín. 8 chars, 1 mayúscula, 1 especial',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(color: Color(0xFF4CAF50)),
@@ -466,15 +479,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 },
               ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a password';
-              }
-              if (value.length < 6) {
-                return 'Password must be at least 6 characters';
-              }
-              return null;
-            },
+            validator: (value) => PasswordValidator.validate(value),
           ),
           const SizedBox(height: 24),
           

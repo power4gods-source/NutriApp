@@ -481,7 +481,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                         'Buscador de Recetas',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 20,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
                         textAlign: TextAlign.center,
@@ -509,7 +509,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                         const Text(
-                          'Select Ingredients',
+                          'Ingredientes',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -517,7 +517,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Choose ingredients you have or want to use',
+                          'Elige los ingredientes que quieres combinar',
                           style: TextStyle(color: Colors.grey[600]),
                         ),
                         const SizedBox(height: 24),
@@ -636,7 +636,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                         
                         // Selected ingredients (scrollable)
                         const Text(
-                          'Ingredientes Seleccionados:',
+                          'Seleccionados:',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,

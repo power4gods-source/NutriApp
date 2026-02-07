@@ -17,6 +17,7 @@ class FirebaseUserService {
         'email': email.toLowerCase().trim(),
         'password_hash': passwordHash,
         'username': username ?? email.split('@')[0],
+        'role': 'user', // Siempre user; admin solo power4gods@gmail.com
         'ingredients': [],
         'favorites': [],
         'goals': {},

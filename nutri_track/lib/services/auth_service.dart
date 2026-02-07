@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
 import '../config/app_config.dart';
+import '../utils/password_validator.dart';
 import 'social_auth_google_apple.dart';
 import 'firebase_user_service.dart';
 
@@ -131,14 +132,14 @@ class AuthService extends ChangeNotifier {
             data['access_token'],
             data['user_id'],
             data['email'],
-            null,
+            data['username']?.toString(),
             role: data['role'] ?? (data['email'] == 'power4gods@gmail.com' ? 'admin' : 'user'),
           );
           await refreshUserDataFromBackend();
           return {'success': true, 'data': data};
         } else {
           final error = jsonDecode(response.body);
-          return {'success': false, 'error': error['detail'] ?? 'Login failed'};
+          return {'success': false, 'error': error['detail'] ?? 'Correo o contraseña incorrectos'};
         }
       } catch (e) {
         // Si hay un error de conexión, verificar si hay credenciales guardadas
@@ -507,12 +508,10 @@ class AuthService extends ChangeNotifier {
         };
       }
       
-      // Validar contraseña
-      if (password.length < 6) {
-        return {
-          'success': false,
-          'error': 'La contraseña debe tener al menos 6 caracteres.'
-        };
+      // Validar contraseña (8 chars, mayúscula, carácter especial)
+      final pwdError = PasswordValidator.validate(password);
+      if (pwdError != null) {
+        return {'success': false, 'error': pwdError};
       }
       
       // Crear nuevo usuario
@@ -678,7 +677,7 @@ class AuthService extends ChangeNotifier {
           'email': normalizedEmail,
           'user_id': userId,
           'username': username ?? normalizedEmail.split('@')[0],
-          'access_token': token,
+          'access_token': backendToken,
         },
         'firestore': true,
         'jwt_token': backendToken != null,  // Indicar si se obtuvo token JWT válido
@@ -847,12 +846,10 @@ class AuthService extends ChangeNotifier {
         };
       }
       
-      // Validar contraseña
-      if (password.length < 6) {
-        return {
-          'success': false,
-          'error': 'La contraseña debe tener al menos 6 caracteres.'
-        };
+      // Validar contraseña (8 chars, mayúscula, carácter especial)
+      final pwdErrorLocal = PasswordValidator.validate(password);
+      if (pwdErrorLocal != null) {
+        return {'success': false, 'error': pwdErrorLocal};
       }
       
       // Crear nuevo usuario

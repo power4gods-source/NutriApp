@@ -39,7 +39,8 @@ class RecipeService {
   }
 
   /// Devuelve solo recetas desde cache (rápido). La cache persiste entre sesiones
-  /// (SharedPreferences) desde la primera vez que se cargaron datos; se usa al reabrir la app.
+  /// (SharedPreferences) desde la primera carga: un usuario nuevo la llena al abrir
+  /// la app y, mientras la tenga instalada, las siguientes aperturas usan cache primero.
   Future<List<dynamic>> getCachedRecipes(String filter) async {
     final cacheKey = filter == 'general' ? 'recipes_general' :
         filter == 'public' ? 'recipes_public' :

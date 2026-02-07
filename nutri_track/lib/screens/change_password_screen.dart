@@ -98,10 +98,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       onPressed: () => setState(() => _obscureNew = !_obscureNew),
                     ),
                   ),
-                  validator: (v) {
-                    if (v == null || v.length < 6) return 'Mínimo 6 caracteres';
-                    return null;
-                  },
+                  validator: (v) => PasswordValidator.validate(v),
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
