@@ -265,7 +265,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           ),
           const SizedBox(height: 32),
           
-          // Email o nombre de usuario
+          // Email o nombre de usuario (acepta ambos)
           TextFormField(
             controller: _loginEmailController,
             decoration: InputDecoration(
@@ -290,6 +290,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             ),
             keyboardType: TextInputType.text,
             textCapitalization: TextCapitalization.none,
+            autocorrect: false,
+            autofillHints: const [AutofillHints.username],
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Introduce tu correo o nombre de usuario';
