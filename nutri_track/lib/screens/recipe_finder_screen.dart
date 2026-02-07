@@ -478,7 +478,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                     ),
                     const Expanded(
                       child: Text(
-                        'Buscador de Recetas',
+                        'Tu próximo plato...',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 28,
@@ -802,7 +802,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                     ),
                                   )
                                 : const Text(
-                                    'Mostrar Recetas',
+                                    'Ver resultados',
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,

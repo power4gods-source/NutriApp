@@ -965,7 +965,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Tu próximo plato...',
+                      'Buscador de Recetas',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

@@ -6,6 +6,8 @@ import '../services/auth_service.dart';
 import '../config/app_config.dart';
 import '../main.dart';
 import 'chat_screen.dart';
+import 'user_profile_screen.dart';
+import 'chats_list_screen.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -262,17 +264,17 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
   }
 
   Widget _buildProfileCard(Map<String, dynamic> profile) {
-    final username = profile['username'] ?? 
-                     profile['display_name'] ?? 
-                     profile['email']?.split('@')[0] ?? 
-                     'Usuario';
+    final username = profile['username'] ??
+        profile['display_name'] ??
+        profile['email']?.split('@')[0] ??
+        'Usuario';
     final userId = profile['user_id'] ?? '';
     final avatarUrl = profile['avatar_url'] ?? '';
     final followersCount = profile['followers_count'] ?? 0;
     final publicRecipesCount = profile['public_recipes_count'] ?? 0;
     final isFollowing = profile['is_following'] ?? false;
     final isConnection = _connectionIds.contains(userId);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -329,55 +331,64 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (isConnection)
-                  OutlinedButton(
+                  const SizedBox(height: 10),
+                  // Ver perfil - visible para todos
+                  TextButton.icon(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ChatScreen(
-                            otherUserId: userId,
-                            otherUsername: username.toString(),
+                          builder: (_) => UserProfileScreen(
+                            targetUserId: userId,
+                            targetUsername: username.toString(),
+                            avatarUrl: avatarUrl.toString().isNotEmpty ? avatarUrl.toString() : null,
                           ),
                         ),
-                      );
+                      ).then((_) => _loadData());
                     },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF4CAF50),
-                      side: const BorderSide(color: Color(0xFF4CAF50)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                    ),
-                    child: const Text('Chatear', style: TextStyle(fontWeight: FontWeight.w600)),
+                    icon: const Icon(Icons.person_outline, size: 18, color: Color(0xFF4CAF50)),
+                    label: const Text('Ver perfil', style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.w600)),
                   ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () => _toggleFollow(userId, isFollowing),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isFollowing ? Colors.grey[300] : const Color(0xFF4CAF50),
-                    foregroundColor: isFollowing ? Colors.black87 : Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                ],
+              ),
+            ),
+            // Acciones: si es conexión solo icono de chat; si no, botón Seguir/Siguiendo
+            if (isConnection)
+              IconButton(
+                icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4CAF50), size: 28),
+                tooltip: 'Chatear',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatScreen(
+                        otherUserId: userId,
+                        otherUsername: username.toString(),
+                      ),
                     ),
-                    elevation: isFollowing ? 0 : 2,
+                  );
+                },
+              )
+            else
+              ElevatedButton(
+                onPressed: () => _toggleFollow(userId, isFollowing),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isFollowing ? Colors.grey[300] : const Color(0xFF4CAF50),
+                  foregroundColor: isFollowing ? Colors.black87 : Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    isFollowing ? 'Siguiendo' : 'Seguir',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  elevation: isFollowing ? 0 : 2,
+                ),
+                child: Text(
+                  isFollowing ? 'Siguiendo' : 'Seguir',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ],
-            ),
+              ),
           ],
         ),
       ),
@@ -488,9 +499,11 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : TabBarView(
-              controller: _tabController,
+          : Stack(
               children: [
+                TabBarView(
+                  controller: _tabController,
+                  children: [
                 // Tab: Amigos (Following)
                 _followingProfiles.isEmpty
                     ? Center(
@@ -576,6 +589,24 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                           },
                         ),
                       ),
+                  ],
+                ),
+                // FAB para abrir lista de chats
+                Positioned(
+                  right: 16,
+                  bottom: 16,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ChatsListScreen()),
+                      ).then((_) => _loadData());
+                    },
+                    backgroundColor: const Color(0xFF4CAF50),
+                    tooltip: 'Conversaciones',
+                    child: const Icon(Icons.chat_bubble, color: Colors.white),
+                  ),
+                ),
               ],
             ),
     );

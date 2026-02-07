@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
+import '../utils/password_validator.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -22,11 +23,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
   
-  File? _selectedImage;
+  Uint8List? _selectedImageBytes;
   String? _currentAvatarUrl;
+  String? _previousAvatarUrl; // Para revertir la foto
   bool _isLoading = true;
   bool _isSaving = false;
   bool _showPasswordFields = false;
+  bool _obscureCurrent = true;
+  bool _obscureNew = true;
+  bool _obscureConfirm = true;
   
   @override
   void initState() {
@@ -59,13 +64,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         setState(() {
           _usernameController.text = data['username'] ?? _authService.username ?? '';
           _currentAvatarUrl = data['avatar_url'];
+          _previousAvatarUrl = data['avatar_url'];
         });
       }
     } catch (e) {
       print('Error loading profile: $e');
-      // Usar datos locales como fallback
       setState(() {
         _usernameController.text = _authService.username ?? '';
+        _currentAvatarUrl = _authService.avatarUrl;
+        _previousAvatarUrl = _authService.avatarUrl;
       });
     } finally {
       setState(() => _isLoading = false);
@@ -81,11 +88,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         maxHeight: 800,
         imageQuality: 85,
       );
-      
-      if (image != null) {
+
+      if (image != null && mounted) {
+        final bytes = await image.readAsBytes();
         setState(() {
-          _selectedImage = File(image.path);
+          _previousAvatarUrl ??= _currentAvatarUrl;
+          _selectedImageBytes = bytes;
         });
+        await _uploadAndSaveAvatar(bytes);
       }
     } catch (e) {
       if (mounted) {
@@ -98,14 +108,96 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     }
   }
+
+  /// Sube la imagen y guarda automáticamente en el perfil
+  Future<void> _uploadAndSaveAvatar(Uint8List imageBytes) async {
+    setState(() => _isSaving = true);
+    try {
+      final uploadedUrl = await _uploadImageToFirebase(imageBytes);
+      if (uploadedUrl != null && mounted) {
+        await _saveAvatarToProfile(uploadedUrl);
+        setState(() {
+          _currentAvatarUrl = uploadedUrl;
+          _selectedImageBytes = null;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Foto de perfil actualizada'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else if (mounted) {
+        setState(() => _selectedImageBytes = null);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error al subir la imagen'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _selectedImageBytes = null);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  Future<void> _saveAvatarToProfile(String avatarUrl) async {
+    final headers = await _authService.getAuthHeaders();
+    final url = await AppConfig.getBackendUrl();
+    await http.put(
+      Uri.parse('$url/profile'),
+      headers: {...headers, 'Content-Type': 'application/json'},
+      body: jsonEncode({'avatar_url': avatarUrl}),
+    ).timeout(const Duration(seconds: 10));
+    await _authService.saveAvatarUrl(avatarUrl);
+    await _authService.reloadAuthData();
+  }
+
+  /// Restaura la foto anterior
+  Future<void> _revertAvatar() async {
+    if (_previousAvatarUrl == null && _selectedImageBytes == null) return;
+    setState(() => _isSaving = true);
+    try {
+      final urlToRestore = _previousAvatarUrl ?? '';
+      await _saveAvatarToProfile(urlToRestore);
+      if (mounted) {
+        setState(() {
+          _currentAvatarUrl = urlToRestore;
+          _selectedImageBytes = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Foto restaurada'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al revertir: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
   
-  Future<String?> _uploadImageToFirebase(File imageFile) async {
+  Future<String?> _uploadImageToFirebase(Uint8List imageBytes) async {
     try {
       final userId = _authService.userId ?? '';
       final fileName = 'avatars/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
       final ref = FirebaseStorage.instance.ref().child(fileName);
-      await ref.putFile(
-        imageFile,
+      await ref.putData(
+        imageBytes,
         SettableMetadata(contentType: 'image/jpeg'),
       );
       final url = await ref.getDownloadURL();
@@ -116,89 +208,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
-  Future<void> _updateProfile() async {
+  Future<void> _saveUsername() async {
     if (_isSaving) return;
-    
+    final newUsername = _usernameController.text.trim();
     setState(() => _isSaving = true);
-    
     try {
       final headers = await _authService.getAuthHeaders();
       final url = await AppConfig.getBackendUrl();
-      
-      String? avatarUrl = _currentAvatarUrl;
-      
-      // Subir imagen si se seleccionó una nueva
-      if (_selectedImage != null) {
-        final uploadedUrl = await _uploadImageToFirebase(_selectedImage!);
-        if (uploadedUrl != null) {
-          avatarUrl = uploadedUrl;
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Error al subir la imagen'),
-                backgroundColor: Colors.orange,
-              ),
-            );
-          }
-        }
-      }
-      
-      // Actualizar perfil
-      final profileUpdate = {
-        'username': _usernameController.text.trim(),
-        if (avatarUrl != null) 'avatar_url': avatarUrl,
-      };
-      
       final response = await http.put(
         Uri.parse('$url/profile'),
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(profileUpdate),
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: jsonEncode({'username': newUsername}),
       ).timeout(const Duration(seconds: 10));
-      
       if (response.statusCode == 200) {
-        // Actualizar username en users.json también
-        await _updateUsernameInUsers(_usernameController.text.trim());
-        // Guardar avatar para que home y perfil muestren la misma imagen
-        if (avatarUrl != null) await _authService.saveAvatarUrl(avatarUrl);
-        // Recargar datos de autenticación
+        await _updateUsernameInUsers(newUsername);
         await _authService.reloadAuthData();
-        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Perfil actualizado correctamente'),
-              backgroundColor: Colors.green,
-            ),
+            const SnackBar(content: Text('Nombre actualizado'), backgroundColor: Colors.green),
           );
-          Navigator.pop(context);
         }
       } else {
         final error = jsonDecode(response.body);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error: ${error['detail'] ?? 'Error al actualizar perfil'}'),
+              content: Text('Error: ${error['detail'] ?? 'Error'}'),
               backgroundColor: Colors.red,
             ),
           );
         }
       }
     } catch (e) {
-      print('Error updating profile: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
-      setState(() => _isSaving = false);
+      if (mounted) setState(() => _isSaving = false);
     }
   }
   
@@ -227,16 +275,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
   
   Future<void> _changePassword() async {
-    if (_newPasswordController.text.length < 6) {
+    final pwdError = PasswordValidator.validate(_newPasswordController.text);
+    if (pwdError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('La nueva contraseña debe tener al menos 6 caracteres'),
-          backgroundColor: Colors.orange,
-        ),
+        SnackBar(content: Text(pwdError), backgroundColor: Colors.orange),
       );
       return;
     }
-    
+
     if (_newPasswordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -307,8 +353,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
   
   ImageProvider? _getAvatarImage() {
-    if (_selectedImage != null) {
-      return FileImage(_selectedImage!);
+    if (_selectedImageBytes != null) {
+      return MemoryImage(_selectedImageBytes!);
     } else if (_currentAvatarUrl != null && _currentAvatarUrl!.isNotEmpty) {
       return NetworkImage(_currentAvatarUrl!);
     }
@@ -374,11 +420,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
     }
     
+    final canRevertAvatar = _selectedImageBytes != null ||
+        (_currentAvatarUrl != null &&
+            _previousAvatarUrl != null &&
+            _currentAvatarUrl != _previousAvatarUrl);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar perfil'),
         backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
+        actions: [
+          if (canRevertAvatar)
+            IconButton(
+              icon: const Icon(Icons.undo, color: Colors.white),
+              tooltip: 'Revertir foto',
+              onPressed: _isSaving ? null : _revertAvatar,
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -389,15 +448,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildAvatarSection(),
             const SizedBox(height: 32),
             
-            // Username
+            // Username - se guarda automáticamente al terminar de editar
             TextField(
               controller: _usernameController,
+              onEditingComplete: _saveUsername,
               decoration: InputDecoration(
                 labelText: 'Nombre de usuario',
                 prefixIcon: const Icon(Icons.person),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
+                hintText: 'Se guarda automáticamente',
               ),
             ),
             const SizedBox(height: 24),
@@ -432,44 +493,56 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
             ),
             
-            // Campos de contraseña
+            // Campos de contraseña - se guarda al pulsar Cambiar contraseña
             if (_showPasswordFields) ...[
               const SizedBox(height: 16),
               TextField(
                 controller: _currentPasswordController,
+                obscureText: _obscureCurrent,
                 decoration: InputDecoration(
                   labelText: 'Contraseña actual',
                   prefixIcon: const Icon(Icons.lock),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureCurrent ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscureCurrent = !_obscureCurrent),
+                  ),
                 ),
-                obscureText: true,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _newPasswordController,
+                obscureText: _obscureNew,
                 decoration: InputDecoration(
                   labelText: 'Nueva contraseña',
                   prefixIcon: const Icon(Icons.lock_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  helperText: 'Mínimo 6 caracteres',
+                  helperText: 'Mín. 8 chars, 1 mayúscula, 1 especial',
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureNew ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscureNew = !_obscureNew),
+                  ),
                 ),
-                obscureText: true,
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _confirmPasswordController,
+                obscureText: _obscureConfirm,
                 decoration: InputDecoration(
                   labelText: 'Confirmar nueva contraseña',
                   prefixIcon: const Icon(Icons.lock_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                  ),
                 ),
-                obscureText: true,
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
@@ -486,38 +559,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
             ],
-            
-            const SizedBox(height: 32),
-            
-            // Botón guardar
-            ElevatedButton(
-              onPressed: _isSaving ? null : _updateProfile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                disabledBackgroundColor: Colors.grey[300],
-              ),
-              child: _isSaving
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  : const Text(
-                      'Guardar cambios',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
           ],
         ),
       ),
