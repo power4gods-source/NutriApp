@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_theme.dart';
 import '../services/recipe_service.dart';
 import '../services/tracking_service.dart';
 import 'recipe_results_screen.dart';
@@ -459,8 +460,8 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF4CAF50),
-              const Color(0xFF4CAF50).withOpacity(0.7),
+              AppTheme.primary,
+              AppTheme.primary.withOpacity(0.7),
             ],
           ),
         ),
@@ -499,7 +500,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Padding(
@@ -785,7 +786,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                           child: ElevatedButton(
                             onPressed: _isSearching ? null : _searchRecipes,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4CAF50),
+                              backgroundColor: AppTheme.primary,
                               foregroundColor: Colors.white,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(

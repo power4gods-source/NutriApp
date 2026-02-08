@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/app_theme.dart';
 import '../services/auth_service.dart';
-import '../screens/profile_screen.dart';
+import '../screens/edit_profile_screen.dart';
 import '../screens/recipes_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/settings_screen.dart';
@@ -26,7 +27,7 @@ class AppDrawer extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
             decoration: const BoxDecoration(
-              color: Color(0xFF4CAF50),
+              color: AppTheme.primary,
             ),
             child: Column(
               children: [
@@ -79,7 +80,7 @@ class AppDrawer extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const ProfileScreen(),
+                        builder: (_) => const EditProfileScreen(),
                       ),
                     );
                   },
@@ -135,7 +136,7 @@ class AppDrawer extends StatelessWidget {
                   context,
                   icon: Icons.logout,
                   title: 'Cerrar sesión',
-                  textColor: Colors.red,
+                  textColor: AppTheme.vividRed,
                   onTap: () async {
                     Navigator.pop(context);
                     await authService.logout();
@@ -167,7 +168,7 @@ class AppDrawer extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: textColor ?? const Color(0xFF4CAF50),
+        color: textColor ?? AppTheme.primary,
       ),
       title: Text(
         title,
@@ -184,7 +185,7 @@ class AppDrawer extends StatelessWidget {
     final hasImage = avatarUrl != null && avatarUrl.isNotEmpty;
     return CircleAvatar(
       radius: 40,
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.surface,
       backgroundImage: hasImage ? NetworkImage(avatarUrl!) : null,
       child: hasImage
           ? null
@@ -193,7 +194,7 @@ class AppDrawer extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF4CAF50),
+                color: AppTheme.primary,
               ),
             ),
     );

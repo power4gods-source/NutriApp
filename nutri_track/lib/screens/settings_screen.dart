@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/app_theme.dart';
 import '../services/auth_service.dart';
 import '../widgets/pronto_badge.dart';
 import 'login_screen.dart';
 import 'change_password_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool _isDeleting = false;
 
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         title: const Text(
           'Ajustes',
@@ -51,7 +59,7 @@ class SettingsScreen extends StatelessWidget {
             context,
             icon: Icons.volunteer_activism,
             title: 'Donar a la app',
-            subtitle: 'Apoyar el desarrollo de NutriTrack',
+            subtitle: 'Apoyar el desarrollo de CooKind',
             onTap: () => _showProntoSnack(context),
             showPronto: true,
           ),
@@ -69,8 +77,8 @@ class SettingsScreen extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('NutriTrack'),
-                  content: const Text('Aplicación de recetas y nutrición\nVersión 1.0.0'),
+                  title: const Text('CooKind'),
+                  content: const Text('CooKind - Aplicación de recetas y nutrición\nVersión 1.0.0'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -93,14 +101,14 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.shield,
             title: 'Términos y condiciones',
             subtitle: 'Legales y uso de la app',
-            onTap: () => _showProntoSnack(context),
-            showPronto: true,
+            onTap: () => _showTermsAndConditions(context),
+            showPronto: false,
           ),
           _buildSettingsTile(
             context,
             icon: Icons.share,
             title: 'Invitar amigos',
-            subtitle: 'Comparte NutriTrack',
+            subtitle: 'Comparte CooKind',
             onTap: () => _showProntoSnack(context),
             showPronto: true,
           ),
@@ -114,9 +122,9 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.delete_forever,
             title: 'Eliminar cuenta',
             subtitle: 'Eliminar permanentemente tu cuenta',
-            textColor: Colors.red,
-            onTap: () => _showProntoSnack(context, msg: 'Pronto...'),
-            showPronto: true,
+            textColor: AppTheme.vividRed,
+            onTap: () => _showDeleteAccountDialog(context, authService),
+            showPronto: false,
           ),
           
           const SizedBox(height: 24),
@@ -137,7 +145,7 @@ class SettingsScreen extends StatelessWidget {
               icon: const Icon(Icons.logout),
               label: const Text('Cerrar sesión'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -178,7 +186,7 @@ class SettingsScreen extends StatelessWidget {
     bool showPronto = false,
   }) {
     return ListTile(
-      leading: Icon(icon, color: textColor ?? const Color(0xFF4CAF50)),
+      leading: Icon(icon, color: textColor ?? AppTheme.primary),
       title: Text(
         title,
         style: TextStyle(
@@ -244,8 +252,8 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               _buildQaItem(
-                '¿Qué es NutriTrack?',
-                'NutriTrack es una aplicación para gestionar tu nutrición: recetas, seguimiento de calorías, ingredientes favoritos y lista de la compra.',
+                '¿Qué es CooKind?',
+                'CooKind es una aplicación para gestionar tu nutrición: recetas, seguimiento de calorías, ingredientes favoritos y lista de la compra.',
               ),
               _buildQaItem(
                 '¿Cómo añado consumo?',
@@ -286,14 +294,14 @@ class SettingsScreen extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Gracias. Recibiremos tu mensaje pronto.'),
-                        backgroundColor: Color(0xFF4CAF50),
+                        backgroundColor: AppTheme.primary,
                       ),
                     );
                   },
                   icon: const Icon(Icons.send),
                   label: const Text('Enviar'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -304,6 +312,152 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showTermsAndConditions(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          backgroundColor: AppTheme.scaffoldBackground,
+          appBar: AppBar(
+            backgroundColor: AppTheme.surface,
+            elevation: 0,
+            title: const Text(
+              'Términos y Condiciones',
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'TÉRMINOS Y CONDICIONES DE USO',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Última actualización: 8 de febrero de 2026',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 20),
+                _buildTermsSection(
+                  'Cláusula de Exención de Responsabilidad Total',
+                  'El Usuario reconoce y acepta que el uso de la App se realiza bajo su propia cuenta y riesgo. CooKind no garantiza la idoneidad, seguridad o exactitud de las recetas, consejos nutricionales o interacciones entre usuarios.',
+                ),
+                _buildTermsSubsection(
+                  '1.1. Inexistencia de Relación Contractual Médica',
+                  'La App no es una herramienta médica ni de diagnóstico. El usuario es el único responsable de consultar con un profesional antes de realizar cambios en su dieta. Cualquier daño físico, intoxicación, reacción alérgica o patología derivada de seguir recetas de la App es responsabilidad exclusiva del usuario y del creador de dicha receta, quedando el Titular de la App exento de cualquier indemnización.',
+                ),
+                _buildTermsSubsection(
+                  '1.2. Responsabilidad de Contenidos (Cláusula de Indemnidad)',
+                  'El usuario es el único propietario y responsable de los datos, fotos y comentarios que publique. Al usar la App, el usuario se obliga a mantener indemne al Titular de la App ante cualquier reclamación de terceros (incluyendo infracciones de derechos de autor, honor o intimidad).\n\nCooKind no supervisa los contenidos antes de su publicación.\n\nEl usuario acepta que, ante una denuncia judicial, CooKind colaborará con las autoridades facilitando los datos de registro (email e IP) del infractor.',
+                ),
+                _buildTermsSubsection(
+                  '1.3. Renuncia a Acciones Legales',
+                  'Mediante la aceptación de estos términos, el usuario renuncia expresamente a interponer cualquier demanda, querella o reclamación civil, penal o administrativa contra CooKind o el Titular de la App por conceptos de:\n• Errores en la información nutricional.\n• Fallos técnicos o pérdida de datos de su historial alimenticio.\n• Comportamiento inapropiado de otros usuarios en el chat.',
+                ),
+                _buildTermsSection(
+                  '2. POLÍTICA DE PRIVACIDAD',
+                  'Esta política regula el tratamiento de datos personales conforme al Reglamento (UE) 2016/679 (RGPD) y la LOPDGDD 3/2018.',
+                ),
+                _buildTermsSubsection(
+                  '2.1. Responsable del Tratamiento',
+                  'Titular: CooKind\nContacto: power4gods@gmail.com',
+                ),
+                _buildTermsSubsection(
+                  '2.2. Datos Recogidos y Finalidad',
+                  'Datos Obligatorios (Email): Gestionar el alta, acceso y recuperación de cuenta. Base legal: Ejecución del contrato.\n\nDatos Voluntarios (Nombre, apellidos, teléfono, dirección, fotos): Facilitar la interacción social y personalización del perfil. Estos datos solo se tratan porque el usuario decide introducirlos y publicarlos.\n\nDatos de Alimentación: Datos introducidos por el usuario para su propio control. Aviso: El usuario es el responsable de no introducir datos de salud sensibles si no desea que sean tratados bajo la seguridad estándar de la App.',
+                ),
+                _buildTermsSubsection(
+                  '2.3. Conservación y Cesión',
+                  'Plazo: Los datos se conservarán mientras se mantenga la relación contractual o hasta que el usuario ejerza su derecho de supresión.\n\nCesiones: No se venden datos a terceros. No obstante, por imperativo legal, los datos podrían ser cedidos a Fuerzas y Cuerpos de Seguridad del Estado o Tribunales en caso de investigación.\n\nDatos Bancarios: Se hace constar que la App no recoge, ni almacena ni trata ningún dato bancario ni de tarjetas de crédito.',
+                ),
+                _buildTermsSubsection(
+                  '2.4. Derechos del Usuario (ARCO+)',
+                  'El usuario puede ejercer sus derechos de acceso, rectificación, supresión, limitación, oposición y portabilidad enviando un correo a power4gods@gmail.com adjuntando copia de su DNI o documento equivalente.',
+                ),
+                _buildTermsSubsection(
+                  '2.5. Medidas de Seguridad',
+                  'El Titular implementa medidas técnicas estándar para evitar el robo de datos, pero el usuario acepta que la seguridad en internet no es inexpugnable. El usuario es responsable de mantener una contraseña robusta.',
+                ),
+                _buildTermsSection(
+                  '3. CLÁUSULA DE JURISDICCIÓN',
+                  'Cualquier controversia que surja de la interpretación o ejecución de este contrato se someterá a la legislación española. Las partes renuncian a cualquier otro fuero y se someten a los Juzgados y Tribunales de Valencia, España.',
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTermsSection(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[800],
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTermsSubsection(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16, left: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[700],
+              height: 1.5,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -335,25 +489,69 @@ class SettingsScreen extends StatelessWidget {
   void _showDeleteAccountDialog(BuildContext context, AuthService authService) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar cuenta'),
-        content: const Text(
-          '¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              _showProntoSnack(context, msg: 'Pronto...');
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Eliminar'),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text('Eliminar cuenta'),
+            content: const Text(
+              '¿Estás seguro de que quieres eliminar tu cuenta?\n\n'
+              'Se eliminarán permanentemente todos tus datos: email, contraseña, perfil, '
+              'recetas favoritas, historial de consumo, ingredientes, lista de la compra, '
+              'recetas privadas y demás información asociada.\n\n'
+              'Esta acción no se puede deshacer.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: _isDeleting ? null : () => Navigator.pop(dialogContext),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: _isDeleting ? null : () async {
+                  setDialogState(() => _isDeleting = true);
+                  final result = await authService.deleteAccount();
+                  if (!context.mounted) return;
+                  Navigator.pop(dialogContext);
+                  if (result['success'] == true) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Cuenta eliminada correctamente'),
+                          backgroundColor: AppTheme.primary,
+                        ),
+                      );
+                      final navigator = Navigator.of(context);
+                      if (navigator.mounted) {
+                        navigator.pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          (route) => false,
+                        );
+                      }
+                    }
+                  } else {
+                    if (context.mounted) {
+                      setState(() => _isDeleting = false);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(result['error'] ?? 'Error al eliminar la cuenta'),
+                          backgroundColor: AppTheme.vividRed,
+                        ),
+                      );
+                    }
+                  }
+                },
+                style: TextButton.styleFrom(foregroundColor: AppTheme.vividRed),
+                child: _isDeleting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Sí, seguro'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../services/auth_service.dart';
 import '../services/tracking_service.dart';
 import '../config/app_config.dart';
+import '../config/app_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'add_consumption_screen.dart';
 import '../main.dart';
@@ -30,12 +31,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
   Map<String, dynamic> _goals = {};
   Map<String, dynamic> _profile = {};
   bool _isLoading = true;
-  
-  // Tema Index.tsx
-  static const Color _primary = Color(0xFF2D6A4F);
-  static const Color _ecoSage = Color(0xFF84A98C);
-  static const Color _ecoTerracotta = Color(0xFFBC6C25);
-  static const Color _ecoCream = Color(0xFFFAF8F5);
   
   // Datos diarios para gráficos semanales y mensuales
   List<Map<String, dynamic>> _weeklyDailyData = []; // Datos por día de la semana
@@ -332,9 +327,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
@@ -363,7 +358,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.local_fire_department, color: Color(0xFF4CAF50)),
+            icon: const Icon(Icons.local_fire_department, color: AppTheme.primary),
             tooltip: 'Agregar consumo',
             onPressed: () async {
               final result = await Navigator.push(
@@ -387,12 +382,11 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   _buildPeriodSelector(),
                   const SizedBox(height: 20),
                   
-                  // Día: solo círculo kcal (sin medias semanal/mensual)
+                  // Día / Semana / Mes: cada uno combina calorías + macronutrientes en la misma tarjeta
                   if (_selectedPeriod == 'day') ...[
                     _buildDailyCalorieCard(),
                     const SizedBox(height: 20),
                   ],
-                  // Semana y Mes: solo gráfico (sin círculo)
                   if (_selectedPeriod == 'week') ...[
                     _buildWeeklyChart(),
                     const SizedBox(height: 20),
@@ -401,9 +395,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     _buildMonthlyChartWidget(),
                     const SizedBox(height: 20),
                   ],
-                  // Macronutrientes + Peso (estilo Index.tsx)
-                  _buildMacronutrientsSection(),
-                  const SizedBox(height: 20),
                   
                   // Consumption list
                   _buildConsumptionList(),
@@ -416,7 +407,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   Widget _buildPeriodSelector() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      color: Colors.white,
+      color: AppTheme.cardBackground,
       child: Row(
         children: [
           Expanded(
@@ -447,7 +438,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? _primary : Colors.grey[100],
+          color: isSelected ? AppTheme.primary : Colors.grey[100],
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -468,7 +459,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     );
   }
 
-  /// Día: solo círculo kcal/día (sin medias semanal/mensual)
+  /// Día: Mi día (círculo kcal) + Macronutrientes en la misma tarjeta
   Widget _buildDailyCalorieCard() {
     final goal = _goalCalories;
     final consumed = _consumedCalories;
@@ -477,7 +468,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         boxShadow: [
@@ -485,6 +476,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -515,6 +507,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
           ),
           const SizedBox(height: 20),
           Center(child: _buildCalorieCircle(consumed, goal, progress)),
+          const SizedBox(height: 24),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+          _buildMacronutrientsContent(),
         ],
       ),
     );
@@ -537,7 +533,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
               strokeWidth: 14,
               backgroundColor: Colors.grey.withValues(alpha: 0.2),
               valueColor: AlwaysStoppedAnimation<Color>(
-                progress > 1.0 ? _ecoTerracotta : _primary,
+                progress > 1.0 ? AppTheme.ecoTerracotta : AppTheme.primary,
               ),
             ),
           ),
@@ -561,8 +557,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
     return months[(month - 1).clamp(0, 11)];
   }
 
-  /// Macronutrientes estilo Index.tsx: Proteínas, Carbos, Grasas + Peso actual
-  Widget _buildMacronutrientsSection() {
+  /// Contenido de Macronutrientes (para incluir dentro de otras tarjetas)
+  Widget _buildMacronutrientsContent() {
     final nutrition = _currentStats['nutrition'] ?? _currentStats['avg_daily_nutrition'] ?? {};
     final goals = _goals['daily_goals'] ?? {};
     final protein = (nutrition['protein'] ?? 0.0).toDouble();
@@ -573,53 +569,41 @@ class _TrackingScreenState extends State<TrackingScreen> {
     final fatGoal = (goals['fat'] ?? 65.0).toDouble();
     final weightKg = (_profile['weight_kg'] ?? 0.0).toDouble();
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Macronutrientes',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[700]),
-              ),
-              TextButton.icon(
-                onPressed: () => _showGoalsAndWeightDialog(),
-                icon: const Icon(Icons.edit, size: 14),
-                label: const Text('Editar'),
-                style: TextButton.styleFrom(foregroundColor: _primary),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(child: _buildMacroCard('Proteínas', protein, proteinGoal, _primary, Icons.fitness_center)),
-              const SizedBox(width: 8),
-              Expanded(child: _buildMacroCard('Carbos', carbs, carbsGoal, _ecoTerracotta, Icons.grain)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(child: _buildMacroCard('Grasas', fat, fatGoal, _ecoSage, Icons.water_drop)),
-              const SizedBox(width: 8),
-              Expanded(child: _buildWeightCard(weightKg)),
-            ],
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Macronutrientes',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[700]),
+            ),
+            TextButton.icon(
+              onPressed: () => _showGoalsAndWeightDialog(),
+              icon: const Icon(Icons.edit, size: 14),
+              label: const Text('Editar'),
+              style: TextButton.styleFrom(foregroundColor: AppTheme.primary),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _buildMacroCard('Proteínas', protein, proteinGoal, AppTheme.primary, Icons.fitness_center)),
+            const SizedBox(width: 8),
+            Expanded(child: _buildMacroCard('Carbos', carbs, carbsGoal, AppTheme.ecoTerracotta, Icons.grain)),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(child: _buildMacroCard('Grasas', fat, fatGoal, AppTheme.ecoSage, Icons.water_drop)),
+            const SizedBox(width: 8),
+            Expanded(child: _buildWeightCard(weightKg)),
+          ],
+        ),
+      ],
     );
   }
 
@@ -768,11 +752,11 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 await _loadProfile();
                 if (mounted) setState(() {});
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Objetivos actualizados'), backgroundColor: Color(0xFF4CAF50)),
+                  const SnackBar(content: Text('Objetivos actualizados'), backgroundColor: AppTheme.primary),
                 );
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: _primary, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
             child: const Text('Guardar'),
           ),
         ],
@@ -790,7 +774,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -855,7 +839,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: remaining > 0 ? Colors.grey[700] : Colors.orange,
+                      color: remaining > 0 ? Colors.grey[700] : AppTheme.vividOrange,
                     ),
                   ),
                   Text(
@@ -877,7 +861,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
               minHeight: 8,
               backgroundColor: Colors.grey[200],
               valueColor: AlwaysStoppedAnimation<Color>(
-                percentage > 1.0 ? Colors.orange : const Color(0xFF4CAF50),
+                percentage > 1.0 ? AppTheme.vividOrange : AppTheme.accent,
               ),
             ),
           ),
@@ -899,7 +883,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -990,7 +974,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                           barRods: [
                             BarChartRodData(
                               toY: consumed,
-                              color: consumed > goal ? Colors.orange : const Color(0xFF4CAF50),
+                              color: consumed > goal ? AppTheme.vividOrange : AppTheme.accent,
                               width: goalBarWidth, // Mismo tamaño que barras de meta/media
                               borderRadius: const BorderRadius.vertical(
                                 top: Radius.circular(4),
@@ -1055,7 +1039,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.cardBackground,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(child: CircularProgressIndicator()),
@@ -1081,7 +1065,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         barRods: [
           BarChartRodData(
             toY: calories,
-            color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
+            color: calories > goal ? AppTheme.vividOrange : AppTheme.accent,
             width: barWidth,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
           ),
@@ -1104,7 +1088,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1217,6 +1201,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 24),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+          _buildMacronutrientsContent(),
         ],
       ),
     );
@@ -1229,7 +1217,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.cardBackground,
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(child: CircularProgressIndicator()),
@@ -1257,7 +1245,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         barRods: [
           BarChartRodData(
             toY: calories,
-            color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
+            color: calories > goal ? AppTheme.vividOrange : AppTheme.accent,
             width: dailyBarWidth,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
           ),
@@ -1280,7 +1268,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1446,6 +1434,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
               ),
             ),
           ),
+          const SizedBox(height: 24),
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+          _buildMacronutrientsContent(),
         ],
       ),
     );
@@ -1492,7 +1484,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1529,7 +1521,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
           const SizedBox(height: 16),
           _buildNutritionItemWithProgress('Proteínas', protein, proteinGoal, 'g', Colors.blue),
           const SizedBox(height: 12),
-          _buildNutritionItemWithProgress('Carbohidratos', carbs, carbsGoal, 'g', Colors.orange),
+          _buildNutritionItemWithProgress('Carbohidratos', carbs, carbsGoal, 'g', AppTheme.vividOrange),
           const SizedBox(height: 12),
           _buildNutritionItemWithProgress('Grasas', fat, fatGoal, 'g', Colors.purple),
           const SizedBox(height: 12),
@@ -1578,20 +1570,20 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Objetivo de calorías actualizado'),
-                    backgroundColor: Color(0xFF4CAF50),
+                    backgroundColor: AppTheme.primary,
                   ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Error al actualizar objetivo'),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppTheme.vividRed,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
               foregroundColor: Colors.white,
             ),
             child: const Text('Guardar'),
@@ -1685,20 +1677,20 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Objetivos actualizados'),
-                    backgroundColor: Color(0xFF4CAF50),
+                    backgroundColor: AppTheme.primary,
                   ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Error al actualizar objetivos'),
-                    backgroundColor: Colors.red,
+                    backgroundColor: AppTheme.vividRed,
                   ),
                 );
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
               foregroundColor: Colors.white,
             ),
             child: const Text('Guardar'),
@@ -1755,7 +1747,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: percentage > 1.0 ? Colors.orange : Colors.grey[600],
+                color: percentage > 1.0 ? AppTheme.vividOrange : Colors.grey[600],
               ),
             ),
           ],
@@ -1768,7 +1760,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
             minHeight: 6,
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(
-              percentage > 1.0 ? Colors.orange : color,
+              percentage > 1.0 ? AppTheme.vividOrange : color,
             ),
           ),
         ),
@@ -1784,7 +1776,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(40),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.cardBackground,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -1816,7 +1808,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -2040,7 +2032,7 @@ class _GoalLinesPainter extends CustomPainter {
     
     // Dibujar línea de la media (naranja, punteada)
     final avgPaint = Paint()
-      ..color = Colors.orange
+      ..color = AppTheme.vividOrange
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke;
     

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/app_theme.dart';
 import '../services/auth_service.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -48,10 +49,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Recuperar contraseña'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: AppTheme.surface,
+        foregroundColor: AppTheme.primary,
         elevation: 0,
       ),
       body: SafeArea(
@@ -64,7 +66,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               children: [
                 const SizedBox(height: 16),
                 Text(
-                  'Introduce el email con el que te registraste. Te enviaremos un enlace desde NutriTrack para restablecer tu contraseña.',
+                  'Introduce el email con el que te registraste. Te enviaremos un enlace desde CooKind para restablecer tu contraseña.',
                   style: TextStyle(color: Colors.grey[700], fontSize: 14),
                 ),
                 const SizedBox(height: 24),
@@ -74,9 +76,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   decoration: InputDecoration(
                     labelText: 'Email',
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: AppTheme.surface,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.email_outlined, color: Color(0xFF4CAF50)),
+                    prefixIcon: const Icon(Icons.email_outlined, color: AppTheme.primary),
                   ),
                   validator: (v) {
                     if (v == null || v.trim().isEmpty) return 'Introduce tu email';
@@ -88,7 +90,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _sendLink,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

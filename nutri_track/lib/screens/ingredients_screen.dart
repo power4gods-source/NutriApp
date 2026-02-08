@@ -10,6 +10,7 @@ import '../utils/ingredient_suggestions.dart';
 import '../utils/plural_helper.dart';
 import '../utils/ingredient_normalizer.dart';
 import '../config/app_config.dart';
+import '../config/app_theme.dart';
 import 'ai_menu_screen.dart';
 import 'ai_recipe_generator_screen.dart';
 import 'ingredients_tab.dart';
@@ -29,9 +30,9 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
@@ -57,7 +58,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
           // Meal type filters section
           Container(
             padding: const EdgeInsets.all(20),
-            color: Colors.white,
+            color: AppTheme.surface,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -110,7 +111,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4CAF50),
+                      backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       elevation: 3,
@@ -432,7 +433,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('✅ Ingrediente agregado y guardado correctamente'),
-              backgroundColor: Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
               duration: Duration(seconds: 2),
             ),
           );
@@ -526,7 +527,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('✅ Ingrediente guardado localmente (sin conexión)'),
-                  backgroundColor: Color(0xFF4CAF50),
+                  backgroundColor: AppTheme.primary,
                   duration: Duration(seconds: 2),
                 ),
               );
@@ -621,7 +622,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('✅ Ingrediente actualizado correctamente'),
-              backgroundColor: Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
             ),
           );
         }
@@ -685,7 +686,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('✅ Ingrediente eliminado correctamente'),
-              backgroundColor: Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
             ),
           );
         }
@@ -899,7 +900,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4CAF50),
+                            backgroundColor: AppTheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 18),
                             elevation: 3,
@@ -1117,7 +1118,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                     _updateIngredient(ingredient.name, newName, quantity, unit);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: AppTheme.primary,
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Guardar'),

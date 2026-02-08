@@ -1,10 +1,13 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../config/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../utils/password_validator.dart';
 import '../main.dart';
 import 'forgot_password_screen.dart';
 import 'reset_password_screen.dart';
+import 'terms_and_conditions_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,6 +29,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _acceptTerms = false;
+  bool _isOver14 = false;
 
   @override
   void initState() {
@@ -102,7 +107,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Future<void> _handleRegister() async {
     if (!_registerFormKey.currentState!.validate()) return;
-    
+    if (!_acceptTerms || !_isOver14) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Debes aceptar los Términos y la Política de Privacidad, y declarar que eres mayor de 14 años.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     
     try {
@@ -115,6 +129,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         username: _registerUsernameController.text.trim().isNotEmpty
             ? _registerUsernameController.text.trim()
             : null,
+        termsVersion: 'T&C v1.2',
       );
       
       print('📥 Resultado del registro: ${result['success']}');
@@ -133,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Usuario registrado correctamente'),
-            backgroundColor: Color(0xFF4CAF50),
+            backgroundColor: AppTheme.primary,
             duration: Duration(seconds: 2),
           ),
         );
@@ -194,7 +209,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -204,11 +219,11 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               const SizedBox(height: 40),
               // Logo
               const Text(
-                'NutriTrack',
+                'CooKind',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF4CAF50),
+                  color: AppTheme.primary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -235,7 +250,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               
               // Tab Content
               SizedBox(
-                height: 500,
+                height: 620,
                 child: TabBarView(
                   controller: _tabController,
                   children: [
@@ -283,9 +298,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                borderSide: const BorderSide(color: AppTheme.primary, width: 2),
               ),
-              prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF4CAF50)),
+              prefixIcon: const Icon(Icons.person_outline, color: AppTheme.primary),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
             keyboardType: TextInputType.text,
@@ -320,9 +335,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                borderSide: const BorderSide(color: AppTheme.primary, width: 2),
               ),
-              prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF4CAF50)),
+              prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.primary),
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -404,90 +419,184 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 
+  void _openTerms() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const TermsAndConditionsScreen()),
+    );
+  }
+
   Widget _buildRegisterForm() {
     return Form(
       key: _registerFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'Crea tu cuenta',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 32),
-          
-          // Username field
-          TextFormField(
-            controller: _registerUsernameController,
-            decoration: InputDecoration(
-              labelText: 'Username',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Crea tu cuenta',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 24),
+            
+            // Username field
+            TextFormField(
+              controller: _registerUsernameController,
+              decoration: InputDecoration(
+                labelText: 'Username',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primary),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          
-          // Email field
-          TextFormField(
-            controller: _registerEmailController,
-            decoration: InputDecoration(
-              labelText: 'Email',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50)),
+            const SizedBox(height: 16),
+            
+            // Email field
+            TextFormField(
+              controller: _registerEmailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primary),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your email';
+                }
+                if (!value.contains('@')) {
+                  return 'Please enter a valid email';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            
+            // Password field
+            TextFormField(
+              controller: _registerPasswordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: 'Contraseña',
+                hintText: 'Mín. 8 chars, 1 mayúscula, 1 especial',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primary),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                  onPressed: () {
+                    setState(() => _obscurePassword = !_obscurePassword);
+                  },
+                ),
+              ),
+              validator: (value) => PasswordValidator.validate(value),
+            ),
+            const SizedBox(height: 20),
+            
+            // Texto legal de protección de datos
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[300]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Información básica sobre protección de datos:',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Responsable: CooKind. Finalidad: Gestionar tu perfil, permitir la creación de recetas y facilitar la interacción social. '
+                    'Legitimación: Consentimiento y ejecución de los Términos de Uso. Destinatarios: No se cederán datos a terceros, salvo obligación legal. '
+                    'Derechos: Acceso, rectificación y supresión, detallados en nuestra Política de Privacidad.',
+                    style: TextStyle(fontSize: 11, color: Colors.grey[700], height: 1.4),
+                  ),
+                ],
               ),
             ),
-            keyboardType: TextInputType.emailAddress,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              }
-              if (!value.contains('@')) {
-                return 'Please enter a valid email';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          
-          // Password field
-          TextFormField(
-            controller: _registerPasswordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              labelText: 'Contraseña',
-              hintText: 'Mín. 8 chars, 1 mayúscula, 1 especial',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                onPressed: () {
-                  setState(() => _obscurePassword = !_obscurePassword);
-                },
-              ),
+            const SizedBox(height: 16),
+            
+            // Checkbox 1: Términos y Política
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Checkbox(
+                  value: _acceptTerms,
+                  onChanged: (v) => setState(() => _acceptTerms = v ?? false),
+                  activeColor: AppTheme.primary,
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _acceptTerms = !_acceptTerms),
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(fontSize: 12, color: Colors.grey[800], height: 1.4),
+                        children: [
+                          const TextSpan(text: 'Acepto los '),
+                          TextSpan(
+                            text: 'Términos y Condiciones',
+                            style: const TextStyle(color: AppTheme.primary, decoration: TextDecoration.underline, fontWeight: FontWeight.w500),
+                            recognizer: TapGestureRecognizer()..onTap = _openTerms,
+                          ),
+                          const TextSpan(text: ' y la '),
+                          TextSpan(
+                            text: 'Política de Privacidad',
+                            style: const TextStyle(color: AppTheme.primary, decoration: TextDecoration.underline, fontWeight: FontWeight.w500),
+                            recognizer: TapGestureRecognizer()..onTap = _openTerms,
+                          ),
+                          const TextSpan(text: '. Entiendo que soy el único responsable de los contenidos que publique y de las consecuencias de salud derivadas del uso de las recetas. (Obligatorio)'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            validator: (value) => PasswordValidator.validate(value),
-          ),
-          const SizedBox(height: 24),
-          
-          // Register button
-          ElevatedButton(
+            
+            // Checkbox 2: Mayor de 14 años
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Checkbox(
+                  value: _isOver14,
+                  onChanged: (v) => setState(() => _isOver14 = v ?? false),
+                  activeColor: AppTheme.primary,
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _isOver14 = !_isOver14),
+                    child: Text(
+                      'Declaro que soy mayor de 14 años. (Obligatorio)',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[800]),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            
+            // Register button
+            ElevatedButton(
             onPressed: _isLoading ? null : _handleRegister,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4CAF50),
@@ -511,7 +620,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           _buildSocialButton(context, 'G Continuar con Google', Icons.login, isGoogle: true),
           const SizedBox(height: 12),
           _buildSocialButton(context, 'Continuar con Apple', Icons.phone_iphone, isGoogle: false),
-        ],
+          const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -543,7 +654,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     return OutlinedButton(
       onPressed: _isLoading ? null : () => _handleSocialLogin(context, isGoogle),
       style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: Color(0xFF4CAF50)),
+        side: const BorderSide(color: AppTheme.primary),
         padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -554,7 +665,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         children: [
           Icon(icon, color: const Color(0xFF4CAF50)),
           const SizedBox(width: 8),
-          Text(text, style: const TextStyle(color: Color(0xFF4CAF50))),
+          Text(text, style: const TextStyle(color: AppTheme.primary)),
         ],
       ),
     );

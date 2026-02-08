@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../config/app_theme.dart';
 import '../services/auth_service.dart';
 
 class AIMenuScreen extends StatefulWidget {
@@ -117,9 +118,9 @@ class _AIMenuScreenState extends State<AIMenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         title: const Text(
           'Menú Generado por IA',

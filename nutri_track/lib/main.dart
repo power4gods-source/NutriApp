@@ -12,6 +12,7 @@ import 'services/auth_service.dart';
 import 'services/firebase_sync_service.dart';
 import 'services/firebase_user_service.dart';
 import 'config/app_config.dart';
+import 'config/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
@@ -59,11 +60,11 @@ void main() async {
     print('⚠️ Error al inicializar locale data: $e');
   }
 
-  runApp(const NutriTrackApp());
+  runApp(const CooKindApp());
 }
 
-class NutriTrackApp extends StatelessWidget {
-  const NutriTrackApp({super.key});
+class CooKindApp extends StatelessWidget {
+  const CooKindApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -72,15 +73,40 @@ class NutriTrackApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthService()),
       ],
       child: MaterialApp(
-        title: 'NutriTrack',
+        title: 'CooKind',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
-          primarySwatch: Colors.teal,
-          primaryColor: const Color(0xFF4CAF50),
+          primaryColor: AppTheme.primary,
+          scaffoldBackgroundColor: AppTheme.scaffoldBackground,
           colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF4CAF50),
-            primary: const Color(0xFF4CAF50),
-            secondary: const Color(0xFF26A69A),
+            seedColor: AppTheme.primary,
+            primary: AppTheme.primary,
+            secondary: AppTheme.ecoSage,
+            surface: AppTheme.surface,
+            brightness: Brightness.light,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: AppTheme.surface,
+            foregroundColor: AppTheme.primary,
+            elevation: 0,
+          ),
+          cardTheme: CardThemeData(
+            color: AppTheme.cardBackground,
+            elevation: 2,
+            shadowColor: AppTheme.primary.withValues(alpha: 0.12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppTheme.cardBorder, width: 1),
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            filled: true,
+            fillColor: AppTheme.cardBackground,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: AppTheme.primary, width: 2),
+            ),
           ),
           useMaterial3: true,
           fontFamily: 'Roboto',
@@ -242,13 +268,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.scaffoldBackground,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surface,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.1),
@@ -266,9 +293,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               });
             },
             type: BottomNavigationBarType.fixed,
-            selectedItemColor: const Color(0xFF4CAF50),
+            selectedItemColor: AppTheme.primary,
             unselectedItemColor: Colors.grey,
-            backgroundColor: Colors.white,
+            backgroundColor: AppTheme.surface,
             elevation: 0,
             selectedFontSize: 12,
             unselectedFontSize: 12,

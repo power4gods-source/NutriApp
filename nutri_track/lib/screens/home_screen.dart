@@ -17,15 +17,7 @@ import 'shopping_list_screen.dart';
 import 'add_consumption_screen.dart';
 import 'recipes_screen.dart';
 import 'recipe_finder_screen.dart';
-
-/// Tema NutriEco (Index.tsx): primary, eco-sage, eco-terracotta, eco-peach, eco-cream
-class AppTheme {
-  static const Color primary = Color(0xFF2D6A4F);
-  static const Color ecoSage = Color(0xFF84A98C);
-  static const Color ecoTerracotta = Color(0xFFBC6C25);
-  static const Color ecoPeach = Color(0xFFF4A261);
-  static const Color ecoCream = Color(0xFFFAF8F5);
-}
+import '../config/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -47,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _quickRecipes = [];
   List<dynamic> _allQuickRecipes = []; // Todas las recetas rápidas disponibles
   List<String> _userIngredients = [];
+  Set<String> _failedImageIds = {};
   bool _isLoading = true;
   bool _isLoadingMoreQuickRecipes = false;
   final ScrollController _quickRecipesScrollController = ScrollController();
@@ -334,10 +327,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final firstLetter = username.isNotEmpty ? username[0].toUpperCase() : '?';
     
     return Scaffold(
-      backgroundColor: AppTheme.ecoCream,
+      backgroundColor: AppTheme.scaffoldBackground,
       drawer: const AppDrawer(),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: Builder(
@@ -368,7 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
         title: const Text(
-          'NUTRITRACK',
+          'COOKIND',
           style: TextStyle(
             color: AppTheme.primary,
             fontWeight: FontWeight.bold,
@@ -434,9 +427,9 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.cardBackground,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+          border: Border.all(color: AppTheme.cardBorder),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),
@@ -490,14 +483,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       _buildAverageCard(
                         label: 'Media semanal',
                         value: weeklyAvg,
-                        color: AppTheme.primary,
+                        color: const Color.fromARGB(255, 18, 63, 44),
                         gradientEnd: AppTheme.ecoSage,
                       ),
                       const SizedBox(height: 12),
                       _buildAverageCard(
                         label: 'Media mensual',
                         value: monthlyAvg,
-                        color: AppTheme.ecoTerracotta,
+                        color: const Color.fromARGB(255, 193, 104, 27),
                         gradientEnd: AppTheme.ecoCream,
                       ),
                     ],
@@ -728,8 +721,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.cardBackground,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.cardBorder, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -772,8 +766,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppTheme.cardBackground,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.cardBorder, width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -836,8 +831,9 @@ class _HomeScreenState extends State<HomeScreen> {
           minHeight: 70, // Misma altura para ambos
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.cardBackground,
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.cardBorder, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -1048,8 +1044,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.cardBackground,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppTheme.cardBorder, width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
@@ -1232,19 +1229,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecipeCard(Map<String, dynamic> recipe, {bool isHorizontal = false}) {
+    final recipeId = (recipe['id'] ?? recipe['title'] ?? '').toString();
     final title = recipe['title'] ?? 'Sin título';
     final time = recipe['time_minutes'] ?? 0;
     final difficulty = recipe['difficulty'] ?? 'Fácil';
     final calories = recipe['calories'] ?? 0;
-    // Obtener calorías por porción (calcular si no existe)
     final caloriesPerServing = recipe['calories_per_serving'] ?? 
-                               (recipe['calories'] != null && recipe['servings'] != null 
-                                 ? (recipe['calories'] / recipe['servings']).round() 
-                                 : 0);
-    final imageUrl = recipe['image_url'] ?? recipe['image'] ?? '';
-    
-    // Parsear información nutricional completa
-    final nutrition = NutritionParser.getNutritionPerServing(recipe);
+        (recipe['calories'] != null && recipe['servings'] != null 
+            ? (recipe['calories'] / recipe['servings']).round() : 0);
+    final imageUrl = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
+    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
 
     return Container(
       width: isHorizontal ? 200 : double.infinity,
@@ -1254,6 +1248,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
+        color: hasValidImage ? null : Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -1266,48 +1261,38 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () => _navigateToRecipe(recipe),
-          child: Stack(
-            children: [
-              // Imagen
-              if (imageUrl.isNotEmpty)
-                Image.network(
-                  imageUrl,
-                  width: double.infinity,
-                  height: isHorizontal ? 200 : 150,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
+          child: hasValidImage
+              ? Stack(
+                  children: [
+                    Image.network(
+                      imageUrl,
                       width: double.infinity,
                       height: isHorizontal ? 200 : 150,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, size: 50, color: Colors.grey),
-                    );
-                  },
-                )
-              else
-                Container(
-                  width: double.infinity,
-                  height: isHorizontal ? 200 : 150,
-                  color: Colors.grey[300],
-                  child: const Icon(Icons.image, size: 50, color: Colors.grey),
-                ),
-              // Overlay
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.7),
-                      ],
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        if (mounted) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) setState(() => _failedImageIds.add(recipeId));
+                          });
+                        }
+                        return const SizedBox.shrink();
+                      },
                     ),
-                  ),
-                ),
-              ),
-              // Contenido
-              Positioned(
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.7),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
                 bottom: 0,
                 left: 0,
                 right: 0,
@@ -1380,7 +1365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: Colors.orange,
+                                color: AppTheme.vividOrange,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -1398,7 +1383,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-              // Heart icon
               Positioned(
                 top: 12,
                 right: 12,
@@ -1411,21 +1395,62 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Icon(
                     Icons.favorite_border,
                     size: 20,
-                    color: Colors.red,
+                    color: AppTheme.vividRed,
                   ),
                 ),
               ),
             ],
-          ),
+          )
+              : Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                              const SizedBox(width: 4),
+                              Text('$time min', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                            ],
+                          ),
+                          Text(difficulty, style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                          if (recipe['servings'] != null && recipe['servings'] > 0)
+                            Text('${recipe['servings']} raciones', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                          if (caloriesPerServing > 0)
+                            Text('$caloriesPerServing kcal', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
         ),
       ),
     );
   }
 
   Widget _buildQuickRecipeCard(Map<String, dynamic> recipe) {
+    final recipeId = (recipe['id'] ?? recipe['title'] ?? '').toString();
     final title = recipe['title'] ?? 'Sin título';
     final time = recipe['time_minutes'] ?? 0;
-    final imageUrl = recipe['image_url'] ?? recipe['image'] ?? '';
+    final imageUrl = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
+    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
     // Obtener calorías por porción
     final caloriesPerServing = recipe['calories_per_serving'] ?? 
                                (recipe['calories'] != null && recipe['servings'] != null 
@@ -1458,8 +1483,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.cardBackground,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.cardBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -1473,34 +1499,27 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
-            // Imagen
-            ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                bottomLeft: Radius.circular(12),
+            if (hasValidImage)
+              ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  bottomLeft: Radius.circular(12),
+                ),
+                child: Image.network(
+                  imageUrl,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    if (mounted) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) setState(() => _failedImageIds.add(recipeId));
+                      });
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
               ),
-              child: imageUrl.isNotEmpty
-                  ? Image.network(
-                      imageUrl,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 100,
-                          height: 100,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image, size: 30, color: Colors.grey),
-                        );
-                      },
-                    )
-                  : Container(
-                      width: 100,
-                      height: 100,
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, size: 30, color: Colors.grey),
-                    ),
-            ),
             // Contenido
             Expanded(
               child: Padding(
@@ -1575,15 +1594,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withValues(alpha: 0.2),
+                              color: AppTheme.vividOrange.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
                               '$caloriesPerServing kcal/ración',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.orange,
+                                color: AppTheme.vividOrange,
                               ),
                             ),
                           ),

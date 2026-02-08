@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
+import '../config/app_theme.dart';
 import 'recipe_detail_screen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -207,9 +208,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         title: Text(
           widget.otherUsername,
@@ -225,6 +226,16 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            color: Colors.amber[50],
+            child: Text(
+              'Este es un espacio entre usuarios. CooKind no supervisa ni se hace responsable de las opiniones o consejos vertidos aquí.',
+              style: TextStyle(fontSize: 11, color: Colors.grey[700]),
+              textAlign: TextAlign.center,
+            ),
+          ),
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())

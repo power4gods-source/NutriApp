@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
+import '../config/app_theme.dart';
 import '../utils/password_validator.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -19,6 +20,9 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final AuthService _authService = AuthService();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
@@ -34,6 +38,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _obscureNew = true;
   bool _obscureConfirm = true;
   Timer? _phoneDebounce;
+  Timer? _firstNameDebounce;
+  Timer? _lastNameDebounce;
+  Timer? _addressDebounce;
   
   @override
   void initState() {
@@ -44,6 +51,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void dispose() {
     _phoneDebounce?.cancel();
+    _firstNameDebounce?.cancel();
+    _lastNameDebounce?.cancel();
+    _addressDebounce?.cancel();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _addressController.dispose();
     _phoneController.dispose();
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
@@ -65,6 +78,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
+          _firstNameController.text = data['first_name']?.toString().trim() ?? '';
+          _lastNameController.text = data['last_name']?.toString().trim() ?? '';
+          _addressController.text = data['address']?.toString().trim() ?? '';
           _phoneController.text = data['phone']?.toString().trim() ?? _authService.phone ?? '';
           _currentAvatarUrl = data['avatar_url'];
           _previousAvatarUrl = data['avatar_url'];
@@ -211,11 +227,68 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
+  void _onFirstNameChanged(String value) {
+    _firstNameDebounce?.cancel();
+    _firstNameDebounce = Timer(const Duration(milliseconds: 800), () {
+      _saveProfileField('first_name', value.trim());
+    });
+  }
+
+  void _onLastNameChanged(String value) {
+    _lastNameDebounce?.cancel();
+    _lastNameDebounce = Timer(const Duration(milliseconds: 800), () {
+      _saveProfileField('last_name', value.trim());
+    });
+  }
+
+  void _onAddressChanged(String value) {
+    _addressDebounce?.cancel();
+    _addressDebounce = Timer(const Duration(milliseconds: 800), () {
+      _saveProfileField('address', value.trim());
+    });
+  }
+
   void _onPhoneChanged(String value) {
     _phoneDebounce?.cancel();
     _phoneDebounce = Timer(const Duration(milliseconds: 800), () {
       _savePhone(value.trim());
     });
+  }
+
+  Future<void> _saveProfileField(String key, String value) async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      final headers = await _authService.getAuthHeaders();
+      final url = await AppConfig.getBackendUrl();
+      final response = await http.put(
+        Uri.parse('$url/profile'),
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: jsonEncode({key: value.isEmpty ? null : value}),
+      ).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Guardado'), backgroundColor: Colors.green),
+          );
+        }
+      } else {
+        final err = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${err['detail'] ?? 'Error'}'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   Future<void> _savePhone(String newPhone) async {
@@ -387,7 +460,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 60,
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppTheme.primary,
                 backgroundImage: _getAvatarImage(),
                 child: _getAvatarImage() == null
                     ? Text(
@@ -431,7 +504,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Editar perfil'),
-          backgroundColor: const Color(0xFF4CAF50),
+          backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -441,7 +514,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar perfil'),
-        backgroundColor: const Color(0xFF4CAF50),
+        backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -452,6 +525,53 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 16),
             _buildAvatarSection(),
             const SizedBox(height: 32),
+            
+            // Nombre, apellidos, dirección (opcionales, auto-guardado)
+            TextField(
+              controller: _firstNameController,
+              keyboardType: TextInputType.name,
+              textCapitalization: TextCapitalization.words,
+              onChanged: _onFirstNameChanged,
+              decoration: InputDecoration(
+                labelText: 'Nombre',
+                prefixIcon: const Icon(Icons.badge),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                hintText: 'Opcional',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _lastNameController,
+              keyboardType: TextInputType.name,
+              textCapitalization: TextCapitalization.words,
+              onChanged: _onLastNameChanged,
+              decoration: InputDecoration(
+                labelText: 'Apellidos',
+                prefixIcon: const Icon(Icons.badge_outlined),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                hintText: 'Opcional',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _addressController,
+              keyboardType: TextInputType.streetAddress,
+              maxLines: 2,
+              onChanged: _onAddressChanged,
+              decoration: InputDecoration(
+                labelText: 'Dirección',
+                prefixIcon: const Icon(Icons.location_on),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                hintText: 'Opcional',
+              ),
+            ),
+            const SizedBox(height: 24),
             
             // Info de usuario (solo lectura: nombre, email)
             _buildInfoRow(Icons.person, 'Nombre de usuario', _authService.username ?? ''),

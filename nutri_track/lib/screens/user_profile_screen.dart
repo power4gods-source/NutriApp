@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
+import '../config/app_theme.dart';
 import 'recipe_detail_screen.dart';
 import 'chat_screen.dart';
 
@@ -28,6 +29,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   Map<String, dynamic>? _profile;
   List<Map<String, dynamic>> _recipes = [];
+  Set<String> _failedImageIds = {};
   bool _loading = true;
   bool _isConnection = false;
 
@@ -103,7 +105,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     if (_loading && _profile == null) {
       return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: AppTheme.surface,
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -121,9 +123,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final recipesCount = _recipes.length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -270,10 +272,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Widget _buildRecipeCard(Map<String, dynamic> recipe) {
+    final recipeId = (recipe['id'] ?? recipe['title'] ?? '').toString();
     final title = (recipe['title'] ?? 'Receta').toString();
     final time = recipe['time_minutes'] ?? '-';
     final difficulty = (recipe['difficulty'] ?? '-').toString();
-    final imageUrl = recipe['image_url']?.toString();
+    final imageUrl = (recipe['image_url']?.toString() ?? '').trim();
+    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
 
     return Card(
       elevation: 2,
@@ -288,28 +292,60 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           );
         },
         borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: 3,
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                child: imageUrl != null && imageUrl.isNotEmpty
-                    ? Image.network(
+        child: hasValidImage
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                      child: Image.network(
                         imageUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _placeholderImage(),
-                      )
-                    : _placeholderImage(),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
+                        errorBuilder: (_, __, ___) {
+                          if (mounted) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) setState(() => _failedImageIds.add(recipeId));
+                            });
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '$time min · $difficulty',
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : Padding(
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       title,
@@ -320,7 +356,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         fontSize: 14,
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 8),
                     Text(
                       '$time min · $difficulty',
                       style: TextStyle(fontSize: 12, color: Colors.grey[600]),
@@ -328,18 +364,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _placeholderImage() {
-    return Container(
-      color: Colors.grey[200],
-      child: const Center(
-        child: Icon(Icons.restaurant_menu, size: 48, color: Colors.grey),
       ),
     );
   }

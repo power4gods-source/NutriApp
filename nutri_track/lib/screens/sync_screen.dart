@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import '../config/app_theme.dart';
 import '../services/firebase_sync_service.dart';
 import 'dart:convert';
 
@@ -240,9 +241,10 @@ class _SyncScreenState extends State<SyncScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Sincronización Firestore'),
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -297,7 +299,7 @@ class _SyncScreenState extends State<SyncScreen> {
               icon: const Icon(Icons.cloud_upload),
               label: const Text('Subir a Firestore'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(

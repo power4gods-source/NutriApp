@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_theme.dart';
 import 'recipe_detail_screen.dart';
 
 class RecipeResultsScreen extends StatefulWidget {
@@ -139,8 +140,8 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              const Color(0xFF4CAF50),
-              const Color(0xFF4CAF50).withOpacity(0.7),
+              AppTheme.primary,
+              AppTheme.primary.withOpacity(0.7),
             ],
           ),
         ),
@@ -177,7 +178,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -216,7 +217,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                                 _sortRecipes();
                               }
                             },
-                            selectedColor: const Color(0xFF4CAF50),
+                            selectedColor: AppTheme.primary,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -230,7 +231,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                                 _sortRecipes();
                               }
                             },
-                            selectedColor: const Color(0xFF4CAF50),
+                            selectedColor: AppTheme.primary,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -244,7 +245,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                                 _sortRecipes();
                               }
                             },
-                            selectedColor: const Color(0xFF4CAF50),
+                            selectedColor: AppTheme.primary,
                           ),
                         ),
                       ],
@@ -260,7 +261,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                 child: Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.surface,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: totalResults == 0

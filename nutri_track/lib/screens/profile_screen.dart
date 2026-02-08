@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../widgets/pronto_badge.dart';
@@ -29,7 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authService = Provider.of<AuthService>(context);
     
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -331,8 +332,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 20),
               _buildQaItem(
-                '¿Qué es NutriTrack?',
-                'NutriTrack es una aplicación para gestionar tu nutrición: recetas, seguimiento de calorías, ingredientes favoritos y lista de la compra.',
+                '¿Qué es CooKind?',
+                'CooKind es una aplicación para gestionar tu nutrición: recetas, seguimiento de calorías, ingredientes favoritos y lista de la compra.',
               ),
               _buildQaItem(
                 '¿Cómo añado consumo?',
@@ -378,7 +379,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Gracias. Recibiremos tu mensaje pronto.'),
-                        backgroundColor: Color(0xFF4CAF50),
+                        backgroundColor: AppTheme.primary,
                       ),
                     );
                   },

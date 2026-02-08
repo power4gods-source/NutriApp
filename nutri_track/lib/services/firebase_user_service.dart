@@ -137,4 +137,16 @@ class FirebaseUserService {
   Future<Map<String, dynamic>?> loadUserData(String userId) async {
     return getUserData(userId);
   }
+
+  /// Elimina todos los datos del usuario de Firestore
+  Future<bool> deleteUser(String userId) async {
+    try {
+      final success = await _syncService.deleteJsonFile('users/$userId.json');
+      if (success) print('✅ Usuario $userId eliminado de Firestore');
+      return success;
+    } catch (e) {
+      print('❌ Error eliminando usuario de Firestore: $e');
+      return false;
+    }
+  }
 }

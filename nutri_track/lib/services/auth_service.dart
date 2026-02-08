@@ -393,7 +393,7 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> register(String email, String password, {String? username}) async {
+  Future<Map<String, dynamic>> register(String email, String password, {String? username, String? termsVersion}) async {
     // Siempre intentar primero con el backend
     final backendAvailable = await isBackendAvailable();
     
@@ -418,6 +418,7 @@ class AuthService extends ChangeNotifier {
                     'email': email,
                     'password': password,
                     if (username != null) 'username': username,
+                    if (termsVersion != null) 'terms_version': termsVersion,
                   }),
                 )
                 .timeout(const Duration(seconds: 60)); // Timeout más largo para Render
@@ -509,16 +510,16 @@ class AuthService extends ChangeNotifier {
         print('❌ Error al registrar en backend: $e');
         print('🔄 Intentando registro en Firestore como fallback...');
         // Si falla el backend, intentar registro en Firestore directamente
-        return await _registerFirebase(email, password, username: username);
+        return await _registerFirebase(email, password, username: username, termsVersion: termsVersion);
       }
     } else {
       // Backend no disponible, registrar directamente en Firestore
-      return await _registerFirebase(email, password, username: username);
+      return await _registerFirebase(email, password, username: username, termsVersion: termsVersion);
     }
   }
   
   /// Registro en Firestore (sin backend)
-  Future<Map<String, dynamic>> _registerFirebase(String email, String password, {String? username}) async {
+  Future<Map<String, dynamic>> _registerFirebase(String email, String password, {String? username, String? termsVersion}) async {
     try {
       final normalizedEmail = email.toLowerCase().trim();
       
@@ -608,6 +609,7 @@ class AuthService extends ChangeNotifier {
                 'email': normalizedEmail,
                 'password': password,
                 if (username != null) 'username': username,
+                if (termsVersion != null) 'terms_version': termsVersion,
               }),
             ).timeout(
               const Duration(seconds: 60),  // Timeout más largo para Render
@@ -721,6 +723,7 @@ class AuthService extends ChangeNotifier {
     await prefs.remove('username');
     await prefs.remove('user_role');
     await prefs.remove('avatar_url');
+    await prefs.remove('user_phone');
     _token = null;
     _userId = null;
     _email = null;
@@ -729,6 +732,85 @@ class AuthService extends ChangeNotifier {
     _avatarUrl = null;
     _phone = null;
     notifyListeners();
+  }
+
+  /// Elimina la cuenta y todos los datos del usuario (backend, Firestore, local)
+  Future<Map<String, dynamic>> deleteAccount() async {
+    final userId = _userId;
+    final email = _email;
+    if (userId == null) {
+      return {'success': false, 'error': 'No hay usuario autenticado'};
+    }
+
+    try {
+      // 1. Intentar eliminar en el backend
+      final backendAvailable = await isBackendAvailable();
+      if (backendAvailable) {
+        try {
+          final url = await baseUrl;
+          final headers = await getAuthHeaders();
+          final response = await http.delete(
+            Uri.parse('$url/profile/account'),
+            headers: headers,
+          ).timeout(const Duration(seconds: 15));
+          if (response.statusCode != 200) {
+            final err = jsonDecode(response.body);
+            return {'success': false, 'error': err['detail'] ?? 'Error al eliminar la cuenta'};
+          }
+        } catch (e) {
+          print('⚠️ Error eliminando en backend: $e');
+          return {'success': false, 'error': 'Error de conexión: $e'};
+        }
+      }
+
+      // 2. Eliminar de Firestore (usuarios registrados solo en Firestore)
+      try {
+        await _firebaseUserService.deleteUser(userId);
+      } catch (e) {
+        print('⚠️ Error eliminando de Firestore (no crítico): $e');
+      }
+
+      // 3. Eliminar de local_users (usuarios locales)
+      final prefs = await SharedPreferences.getInstance();
+      final usersJson = prefs.getString(_localUsersKey);
+      if (usersJson != null && email != null) {
+        final users = jsonDecode(usersJson) as Map<String, dynamic>;
+        final normalizedEmail = email.toLowerCase().trim();
+        if (users.containsKey(normalizedEmail)) {
+          users.remove(normalizedEmail);
+          await prefs.setString(_localUsersKey, jsonEncode(users));
+        }
+      }
+
+      // 4. Limpiar todos los datos locales del usuario
+      await prefs.remove('auth_token');
+      await prefs.remove('user_id');
+      await prefs.remove('user_email');
+      await prefs.remove('username');
+      await prefs.remove('user_role');
+      await prefs.remove('avatar_url');
+      await prefs.remove('user_phone');
+      await prefs.remove('ingredients_$userId');
+      await prefs.remove('favorites_$userId');
+      await prefs.remove('goals_$userId');
+      await prefs.remove('shopping_list_$userId');
+      await prefs.remove('private_recipes_$userId');
+      await prefs.remove('last_sync_$userId');
+
+      _token = null;
+      _userId = null;
+      _email = null;
+      _username = null;
+      _role = null;
+      _avatarUrl = null;
+      _phone = null;
+      notifyListeners();
+
+      return {'success': true, 'message': 'Cuenta eliminada correctamente'};
+    } catch (e) {
+      print('❌ Error en deleteAccount: $e');
+      return {'success': false, 'error': 'Error inesperado: $e'};
+    }
   }
 
   Future<Map<String, String>> getAuthHeaders() async {
@@ -993,7 +1075,7 @@ class AuthService extends ChangeNotifier {
     return SocialAuthGoogleApple.loginWithApple(this);
   }
 
-  /// Solicitar restablecimiento de contraseña (envío de email corporativo NutriTrack)
+  /// Solicitar restablecimiento de contraseña (envío de email corporativo CooKind)
   Future<Map<String, dynamic>> forgotPassword(String email) async {
     try {
       final url = await baseUrl;

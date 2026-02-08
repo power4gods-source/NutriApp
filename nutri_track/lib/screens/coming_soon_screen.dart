@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_theme.dart';
 
 /// Pantalla para funcionalidades en desarrollo: texto "Muy pronto..." y bocadillo de comic para sugerencias.
 class ComingSoonScreen extends StatelessWidget {
@@ -14,7 +15,7 @@ class ComingSoonScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -25,11 +26,11 @@ class ComingSoonScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppTheme.surface,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
+                      color: AppTheme.primary.withValues(alpha: 0.2),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -38,7 +39,7 @@ class ComingSoonScreen extends StatelessWidget {
                 child: Icon(
                   Icons.auto_awesome,
                   size: 64,
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.9),
+                  color: AppTheme.primary.withValues(alpha: 0.9),
                 ),
               ),
               const SizedBox(height: 28),
@@ -60,7 +61,7 @@ class ComingSoonScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      const Color(0xFF4CAF50).withValues(alpha: 0.15),
+                      AppTheme.primary.withValues(alpha: 0.15),
                       const Color(0xFF26A69A).withValues(alpha: 0.15),
                     ],
                     begin: Alignment.topLeft,
@@ -68,7 +69,7 @@ class ComingSoonScreen extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: const Color(0xFF4CAF50).withValues(alpha: 0.4),
+                    color: AppTheme.primary.withValues(alpha: 0.4),
                     width: 1.5,
                   ),
                 ),
@@ -116,10 +117,10 @@ class ComingSoonScreen extends StatelessWidget {
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(ctx).viewInsets.bottom,
         ),
-        child: Container(
+          child: Container(
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -136,7 +137,7 @@ class ComingSoonScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Tu opinión nos ayuda a hacer NutriTrack más vuestra.',
+                'Tu opinión nos ayuda a hacer CooKind más vuestra.',
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -149,13 +150,13 @@ class ComingSoonScreen extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: 'Escribe tu idea o sugerencia...',
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: AppTheme.surface,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                    borderSide: const BorderSide(color: AppTheme.primary, width: 2),
                   ),
                 ),
               ),
@@ -178,7 +179,7 @@ class ComingSoonScreen extends StatelessWidget {
                               content: const Text(
                                 '¡Gracias! Tu sugerencia nos importa mucho.',
                               ),
-                              backgroundColor: const Color(0xFF4CAF50),
+                              backgroundColor: AppTheme.primary,
                               behavior: SnackBarBehavior.floating,
                             ),
                           );
@@ -186,7 +187,7 @@ class ComingSoonScreen extends StatelessWidget {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4CAF50),
+                        backgroundColor: AppTheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -220,7 +221,7 @@ class _ComicSuggestionBubble extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFF1A1A1A), width: 2.5),
           boxShadow: [
@@ -239,12 +240,12 @@ class _ComicSuggestionBubble extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50).withValues(alpha: 0.15),
+                    color: AppTheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Icons.lightbulb_outline,
-                    color: const Color(0xFF4CAF50),
+                    color: AppTheme.primary,
                     size: 28,
                   ),
                 ),
@@ -299,7 +300,7 @@ class _ComicTailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white
+      ..color = AppTheme.surface
       ..style = PaintingStyle.fill;
     final borderPaint = Paint()
       ..color = const Color(0xFF1A1A1A)

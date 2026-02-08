@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../services/auth_service.dart';
 import '../services/tracking_service.dart';
 import '../config/app_config.dart';
+import '../config/app_theme.dart';
 import 'recipe_detail_screen.dart';
 
 class AIRecipeGeneratorScreen extends StatefulWidget {
@@ -429,9 +430,9 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F9F5),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         title: const Text(
           'Generador de Recetas',

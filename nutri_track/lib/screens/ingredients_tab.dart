@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_theme.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
@@ -290,7 +291,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
             content: Text(backendAvailable 
               ? '✅ Ingrediente agregado (guardado en Supabase)' 
               : '✅ Ingrediente agregado (modo offline)'),
-            backgroundColor: const Color(0xFF4CAF50),
+            backgroundColor: AppTheme.primary,
           ),
         );
       }
@@ -541,7 +542,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       body: Column(
         children: [
           // Header with AI button
@@ -674,7 +675,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
                             icon: const Icon(Icons.add_circle_outline),
                             label: const Text('Agregar'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4CAF50),
+                              backgroundColor: AppTheme.primary,
                               foregroundColor: Colors.white,
                               disabledBackgroundColor: Colors.grey[300],
                               disabledForegroundColor: Colors.grey[600],
@@ -708,7 +709,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4CAF50),
+                      backgroundColor: AppTheme.primary,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       elevation: 3,

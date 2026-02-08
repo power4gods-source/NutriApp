@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/app_theme.dart';
 import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
 import '../services/firebase_recipe_service.dart';
@@ -22,6 +23,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
   final AuthService _authService = AuthService();
   List<dynamic> _recipes = [];
   Set<String> _favoriteIds = {};
+  Set<String> _failedImageIds = {}; // IDs de recetas cuya imagen no cargó
   bool _isLoading = true;
   String? _expandedRecipeId;
   String _selectedFilter = 'general';
@@ -194,7 +196,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al cargar recetas: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.vividRed,
           ),
         );
       }
@@ -249,7 +251,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isFavorite ? 'Favorito eliminado' : 'Agregado a favoritos'),
-            backgroundColor: const Color(0xFF4CAF50),
+            backgroundColor: AppTheme.primary,
             duration: const Duration(seconds: 1),
           ),
         );
@@ -259,7 +261,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al ${isFavorite ? 'quitar' : 'agregar'} favorito'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.vividRed,
           ),
         );
       }
@@ -328,7 +330,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('No se pudo encontrar la receta para editar'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.vividRed,
             ),
           );
         }
@@ -339,7 +341,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al editar la receta: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.vividRed,
           ),
         );
       }
@@ -363,7 +365,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppTheme.vividRed,
               foregroundColor: Colors.white,
             ),
             child: const Text('Eliminar'),
@@ -436,9 +438,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
     if (success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Receta eliminada correctamente'),
-            backgroundColor: Color(0xFF4CAF50),
+          SnackBar(
+            content: const Text('✅ Receta eliminada correctamente'),
+            backgroundColor: AppTheme.primary,
           ),
         );
         // Recargar datos
@@ -449,7 +451,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Error al eliminar la receta'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.vividRed,
           ),
         );
       }
@@ -473,7 +475,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
               foregroundColor: Colors.white,
             ),
             child: const Text('Publicar'),
@@ -511,7 +513,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Error: No se pudo identificar al usuario. Por favor, inicia sesión nuevamente.'),
-                backgroundColor: Colors.red,
+                backgroundColor: AppTheme.vividRed,
               ),
             );
           }
@@ -584,9 +586,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
         await _invalidateCache();
         
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Receta publicada correctamente'),
-            backgroundColor: Color(0xFF4CAF50),
+          SnackBar(
+            content: const Text('✅ Receta publicada correctamente'),
+            backgroundColor: AppTheme.primary,
           ),
         );
         // Recargar datos para actualizar la lista
@@ -601,7 +603,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Error al publicar la receta'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.vividRed,
           ),
         );
       }
@@ -625,7 +627,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
+              backgroundColor: AppTheme.vividOrange,
               foregroundColor: Colors.white,
             ),
             child: const Text('Quitar'),
@@ -671,9 +673,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
     if (success) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Receta quitada de públicas correctamente'),
-            backgroundColor: Color(0xFF4CAF50),
+          SnackBar(
+            content: const Text('✅ Receta quitada de públicas correctamente'),
+            backgroundColor: AppTheme.primary,
           ),
         );
         // Recargar datos para actualizar la lista
@@ -688,7 +690,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Error al quitar la receta de públicas'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.vividRed,
           ),
         );
       }
@@ -698,11 +700,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: _expandedRecipeId != null
           ? null // Ocultar AppBar cuando hay receta expandida
           : AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
@@ -935,7 +937,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                 await _loadRecipes();
                               }
                             },
-                            backgroundColor: const Color(0xFF4CAF50),
+                            backgroundColor: AppTheme.primary,
                             child: const Icon(Icons.add, color: Colors.white),
                           ),
                         ),
@@ -964,7 +966,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           await _loadRecipes();
         }
       },
-      selectedColor: const Color(0xFF4CAF50),
+      selectedColor: AppTheme.primary,
       labelStyle: TextStyle(
         color: isSelected ? Colors.white : Colors.black87,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -992,27 +994,28 @@ class _RecipesScreenState extends State<RecipesScreen> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image with favorite button
-            Stack(
+        child: Builder(
+          builder: (context) {
+            final imageUrl = recipe['image_url']?.toString().trim() ?? '';
+            final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  child: recipe['image_url'] != null && recipe['image_url'].toString().isNotEmpty
-                      ? Image.network(
-                          recipe['image_url'],
+                if (hasValidImage) ...[
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                        child: Image.network(
+                          imageUrl,
                           height: 180,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
-                            return Container(
+                            return SizedBox(
                               height: 180,
-                              color: Colors.grey[200],
+                              width: double.infinity,
                               child: Center(
                                 child: CircularProgressIndicator(
                                   value: loadingProgress.expectedTotalBytes != null
@@ -1024,79 +1027,109 @@ class _RecipesScreenState extends State<RecipesScreen> {
                             );
                           },
                           errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 180,
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: Icon(Icons.restaurant, size: 64, color: Colors.grey),
-                              ),
-                            );
+                            if (mounted) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (mounted) setState(() => _failedImageIds.add(recipeId));
+                              });
+                            }
+                            return const SizedBox.shrink();
                           },
-                        )
-                      : Container(
-                          height: 180,
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: Icon(Icons.restaurant, size: 64, color: Colors.grey),
+                        ),
+                      ),
+                      if (_selectedFilter == 'private' || _isMyRecipesMode)
+                        Positioned(
+                          top: 12, left: 12,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              (recipe['is_public'] ?? false) ? Icons.visibility : Icons.visibility_off,
+                              color: (recipe['is_public'] ?? false) ? AppTheme.primary : Colors.grey[600],
+                              size: 22,
+                            ),
                           ),
                         ),
-                ),
-                // Icono ojo: publicada (encendido) o no (apagado) - solo en recetas privadas
-                if (_selectedFilter == 'private' || _isMyRecipesMode)
-                  Positioned(
-                    top: 12,
-                    left: 12,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
+                      Positioned(
+                        top: 12, right: 12,
+                        child: GestureDetector(
+                          onTap: () => _toggleFavorite(recipe),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              color: isFavorite ? AppTheme.vividRed : Colors.grey[600],
+                              size: 24,
+                            ),
+                          ),
+                        ),
                       ),
-                      child: Icon(
-                        (recipe['is_public'] ?? false) ? Icons.visibility : Icons.visibility_off,
-                        color: (recipe['is_public'] ?? false) ? const Color(0xFF4CAF50) : Colors.grey[600],
-                        size: 22,
-                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            recipe['title'] ?? 'Sin título',
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (_selectedFilter == 'private' || _isMyRecipesMode)
+                          GestureDetector(
+                            onTap: () {},
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 8),
+                              child: Icon(
+                                (recipe['is_public'] ?? false) ? Icons.visibility : Icons.visibility_off,
+                                color: (recipe['is_public'] ?? false) ? AppTheme.primary : Colors.grey[600],
+                                size: 22,
+                              ),
+                            ),
+                          ),
+                        GestureDetector(
+                          onTap: () => _toggleFavorite(recipe),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Icon(
+                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              color: isFavorite ? AppTheme.vividRed : Colors.grey[600],
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                // Favorite button
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: GestureDetector(
-                    onTap: () => _toggleFavorite(recipe),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey[600],
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            // Content
-            Padding(
+                ],
+                // Content
+                Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title
-                  Text(
-                    recipe['title'] ?? 'Sin título',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  if (hasValidImage) ...[
+                    Text(
+                      recipe['title'] ?? 'Sin título',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
+                  ],
                   // Time, difficulty, servings, and calories per serving
                   Wrap(
                     spacing: 12,
@@ -1149,13 +1182,13 @@ class _RecipesScreenState extends State<RecipesScreen> {
                             return Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.15),
+                                color: AppTheme.vividOrange.withOpacity(0.2),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
                                 '$caloriesPerServing kcal/ración',
                                 style: const TextStyle(
-                                  color: Colors.orange,
+                                  color: AppTheme.vividOrange,
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -1197,9 +1230,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
+        );
+      },
+    ),
+  ),
+  );
   }
 
   Widget _buildExpandedCard(Map<String, dynamic> recipe) {
@@ -1209,6 +1244,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
     final instructions = recipe['instructions'] as List<dynamic>?;
     final description = recipe['description'] ?? '';
     final ingredientsDetailed = recipe['ingredients_detailed'] as List<dynamic>?;
+    final imageUrl = recipe['image_url']?.toString().trim() ?? '';
+    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
 
     return Card(
       elevation: 8,
@@ -1223,54 +1260,42 @@ class _RecipesScreenState extends State<RecipesScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with favorite button and close button
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                  child: recipe['image_url'] != null && recipe['image_url'].toString().isNotEmpty
-                      ? Image.network(
-                          recipe['image_url'],
+            if (hasValidImage)
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                    child: Image.network(
+                      imageUrl,
+                      height: 250,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return SizedBox(
                           height: 250,
                           width: double.infinity,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              height: 250,
-                              color: Colors.grey[200],
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              height: 250,
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: Icon(Icons.restaurant, size: 64, color: Colors.grey),
-                              ),
-                            );
-                          },
-                        )
-                      : Container(
-                          height: 250,
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                          child: const Center(
-                            child: Icon(Icons.restaurant, size: 64, color: Colors.grey),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
                           ),
-                        ),
-                ),
-                // Close button (arriba a la izquierda)
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        if (mounted) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) setState(() => _failedImageIds.add(recipeId));
+                          });
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                  // Close button (arriba a la izquierda)
                 Positioned(
                   top: 12,
                   left: 12,
@@ -1311,14 +1336,46 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       ),
                       child: Icon(
                         isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey[600],
+                        color: isFavorite ? AppTheme.vividRed : Colors.grey[600],
                         size: 24,
                       ),
                     ),
                   ),
                 ),
               ],
-            ),
+            )
+            else
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => setState(() => _expandedRecipeId = null),
+                      child: const Icon(Icons.close, size: 28),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        recipe['title'] ?? 'Sin título',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _toggleFavorite(recipe),
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? AppTheme.vividRed : Colors.grey[600],
+                        size: 24,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             // Content (scrollable)
             Flexible(
               child: SingleChildScrollView(
@@ -1352,7 +1409,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                 icon: const Icon(Icons.public, size: 18),
                                 label: const Text('Publicar'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF4CAF50),
+                                  backgroundColor: AppTheme.primary,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 ),
@@ -1366,7 +1423,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                 icon: const Icon(Icons.public_off, size: 18),
                                 label: const Text('Quitar de públicas'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
+                                  backgroundColor: AppTheme.vividOrange,
                                   foregroundColor: Colors.white,
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                                 ),
@@ -1380,7 +1437,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                  recipe['user_id'] == _authService.userId))
                               IconButton(
                                 onPressed: () => _editRecipe(recipe),
-                                icon: const Icon(Icons.edit, color: Color(0xFF4CAF50)),
+                                icon: const Icon(Icons.edit, color: AppTheme.primary),
                                 tooltip: 'Editar receta',
                               ),
                             // Delete button
@@ -1392,7 +1449,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                  recipe['user_id'] == _authService.userId))
                               IconButton(
                                 onPressed: () => _deleteRecipe(recipe),
-                                icon: const Icon(Icons.delete, color: Colors.red),
+                                icon: Icon(Icons.delete, color: AppTheme.vividRed),
                                 tooltip: 'Eliminar receta',
                               ),
                           ],
@@ -1452,13 +1509,13 @@ class _RecipesScreenState extends State<RecipesScreen> {
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.orange.withOpacity(0.15),
+                                  color: AppTheme.vividOrange.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   '$caloriesPerServing kcal/ración',
                                   style: const TextStyle(
-                                    color: Colors.orange,
+                                    color: AppTheme.vividOrange,
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -1501,7 +1558,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                     _buildNutritionChip(
                                       'Calorías',
                                       '${nutrition['calories']!.round()}',
-                                      Colors.orange,
+                                      AppTheme.vividOrange,
                                     ),
                                   if (nutrition['protein']! > 0)
                                     _buildNutritionChip(
@@ -1519,7 +1576,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                     _buildNutritionChip(
                                       'Grasas',
                                       '${nutrition['fat']!.toStringAsFixed(1)}g',
-                                      Colors.red,
+                                      AppTheme.vividRed,
                                     ),
                                 ],
                               ),
@@ -1627,7 +1684,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                 width: 28,
                                 height: 28,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF4CAF50),
+                                  color: AppTheme.primary,
                                   shape: BoxShape.circle,
                                 ),
                                 child: Center(

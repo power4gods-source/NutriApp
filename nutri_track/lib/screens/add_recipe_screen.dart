@@ -8,6 +8,7 @@ import '../services/firebase_recipe_service.dart';
 import '../services/firebase_user_service.dart';
 import '../services/tracking_service.dart';
 import '../config/app_config.dart';
+import '../config/app_theme.dart';
 import '../utils/plural_helper.dart';
 
 class AddRecipeScreen extends StatefulWidget {
@@ -605,9 +606,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(

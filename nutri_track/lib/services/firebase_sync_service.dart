@@ -52,6 +52,19 @@ class FirebaseSyncService {
     }
   }
 
+  /// Elimina un archivo JSON de Firestore
+  Future<bool> deleteJsonFile(String fileName) async {
+    try {
+      final docRef = _firestore.collection(_collection).doc(_docId(fileName));
+      await docRef.delete();
+      print('✅ Archivo $fileName eliminado de Firestore');
+      return true;
+    } catch (e) {
+      print('⚠️ Error eliminando $fileName: $e');
+      return false;
+    }
+  }
+
   /// Descarga un archivo JSON desde Firestore
   Future<dynamic> downloadJsonFile(String fileName) async {
     try {

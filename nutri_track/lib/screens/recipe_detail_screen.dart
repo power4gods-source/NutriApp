@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/app_theme.dart';
 import 'dart:convert';
 import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
@@ -111,7 +112,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('✅ Receta guardada en privadas'),
-            backgroundColor: Color(0xFF4CAF50),
+            backgroundColor: AppTheme.primary,
           ),
         );
       } else {
@@ -217,7 +218,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       if (!mounted) return;
       if (resp.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Receta compartida'), backgroundColor: Color(0xFF4CAF50)),
+          const SnackBar(content: Text('✅ Receta compartida'), backgroundColor: AppTheme.primary),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -251,7 +252,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isFavorite ? 'Favorito eliminado' : 'Agregado a favoritos'),
-            backgroundColor: const Color(0xFF4CAF50),
+            backgroundColor: AppTheme.primary,
             duration: const Duration(seconds: 1),
           ),
         );
@@ -271,7 +272,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final ingredientsDetailed = recipe['ingredients_detailed'] as List<dynamic>?;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       body: CustomScrollView(
         slivers: [
           // AppBar con imagen
@@ -279,21 +280,14 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             expandedHeight: 250,
             pinned: true,
             flexibleSpace: FlexibleSpaceBar(
-              background: recipe['image_url'] != null && recipe['image_url'].toString().isNotEmpty
+              background: recipe['image_url'] != null && recipe['image_url'].toString().trim().isNotEmpty
                   ? Image.network(
                       recipe['image_url'],
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.restaurant, size: 80, color: Colors.grey),
-                        );
-                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          Container(color: const Color(0xFFF0F4F0)),
                     )
-                  : Container(
-                      color: Colors.grey[200],
-                      child: const Icon(Icons.restaurant, size: 80, color: Colors.grey),
-                    ),
+                  : Container(color: const Color(0xFFF0F4F0)),
             ),
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -325,7 +319,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 IconButton(
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.white,
+                    color: isFavorite ? AppTheme.vividRed : Colors.white,
                   ),
                   onPressed: _toggleFavorite,
                 ),
@@ -335,9 +329,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           // Contenido
           SliverToBoxAdapter(
             child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              decoration: BoxDecoration(
+                color: AppTheme.cardBackground,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -382,21 +376,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: Colors.orange.withOpacity(0.15),
+                                  color: AppTheme.vividOrange.withOpacity(0.2),
                                   borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: Colors.orange.withOpacity(0.3)),
+                                  border: Border.all(color: AppTheme.vividOrange.withOpacity(0.4)),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.local_fire_department, size: 16, color: Colors.orange),
+                                    Icon(Icons.local_fire_department, size: 16, color: AppTheme.vividOrange),
                                     const SizedBox(width: 4),
                                     Text(
                                       '$caloriesPerServing kcal/ración',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.orange,
+                                        color: AppTheme.vividOrange,
                                       ),
                                     ),
                                   ],

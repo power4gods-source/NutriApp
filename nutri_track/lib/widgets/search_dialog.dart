@@ -3,7 +3,7 @@ import '../screens/recipes_screen.dart';
 import '../screens/tracking_screen.dart';
 import '../screens/ingredients_screen.dart';
 import '../screens/favorites_screen.dart';
-import '../screens/profile_screen.dart';
+import '../screens/edit_profile_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/settings_screen.dart';
 import '../main.dart';
@@ -54,9 +54,9 @@ class _SearchDialogState extends State<SearchDialog> {
     SearchSuggestion(
       keyword: 'perfil',
       title: 'Perfil',
-      subtitle: 'Tu perfil de usuario',
+      subtitle: 'Editar tu perfil',
       icon: Icons.person,
-      route: (context) => const ProfileScreen(),
+      route: (context) => const EditProfileScreen(),
       aliases: ['usuario', 'cuenta'],
     ),
     SearchSuggestion(

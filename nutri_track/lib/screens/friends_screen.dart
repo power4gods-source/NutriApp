@@ -5,6 +5,7 @@ import 'dart:math';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
 import '../main.dart';
+import '../config/app_theme.dart';
 import 'chat_screen.dart';
 import 'user_profile_screen.dart';
 import 'chats_list_screen.dart';
@@ -388,7 +389,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
               ElevatedButton(
                 onPressed: () => _toggleFollow(userId, isFollowing),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isFollowing ? Colors.grey[300] : const Color(0xFF4CAF50),
+                  backgroundColor: isFollowing ? Colors.grey[300] : AppTheme.primary,
                   foregroundColor: isFollowing ? Colors.black87 : Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
@@ -460,9 +461,9 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
@@ -634,7 +635,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                         MaterialPageRoute(builder: (_) => const ChatsListScreen()),
                       ).then((_) => _loadData());
                     },
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: AppTheme.primary,
                     tooltip: 'Conversaciones',
                     child: const Icon(Icons.chat_bubble, color: Colors.white),
                   ),

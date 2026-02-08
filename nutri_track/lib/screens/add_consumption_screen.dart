@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../services/tracking_service.dart';
 import '../services/recipe_service.dart';
 import '../main.dart';
+import '../config/app_theme.dart';
 
 class AddConsumptionScreen extends StatefulWidget {
   const AddConsumptionScreen({super.key});
@@ -432,7 +433,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('✅ Consumo agregado correctamente'),
-              backgroundColor: Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
             ),
           );
           notifyConsumptionAdded?.call();
@@ -485,9 +486,9 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppTheme.scaffoldBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
@@ -929,7 +930,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppTheme.primary,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Guardar'),
@@ -1002,7 +1003,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppTheme.primary,
               foregroundColor: Colors.white,
             ),
             child: const Text('Agregar'),
