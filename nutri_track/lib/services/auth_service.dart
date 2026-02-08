@@ -131,12 +131,14 @@ class AuthService extends ChangeNotifier {
       // Usar backend si está disponible
       try {
         final url = await baseUrl;
+        final loginValue = email.trim();
         final response = await http
             .post(
               Uri.parse('$url/auth/login'),
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode({
-                'login': email.trim(),  // backend acepta email o nombre de usuario
+                'login': loginValue,
+                'email': loginValue,  // compatibilidad con backends que esperan "email"
                 'password': password,
               }),
             )
