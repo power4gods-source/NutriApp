@@ -784,8 +784,8 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  /// Login local (sin backend)
-  Future<Map<String, dynamic>> _loginLocal(String email, String password) async {
+  /// Login local (sin backend) - acepta email o username
+  Future<Map<String, dynamic>> _loginLocal(String emailOrUsername, String password) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       
@@ -799,17 +799,32 @@ class AuthService extends ChangeNotifier {
       }
       
       final users = jsonDecode(usersJson) as Map<String, dynamic>;
-      final normalizedEmail = email.toLowerCase().trim();
+      final input = emailOrUsername.toLowerCase().trim();
       
-      // Buscar usuario
-      if (!users.containsKey(normalizedEmail)) {
+      // Buscar usuario por email (clave) o por username
+      String? foundEmail;
+      for (final entry in users.entries) {
+        final email = (entry.key as String).toLowerCase();
+        final userData = entry.value as Map<String, dynamic>;
+        if (email == input) {
+          foundEmail = entry.key as String;
+          break;
+        }
+        final username = (userData['username'] as String? ?? '').toString().toLowerCase();
+        if (username == input) {
+          foundEmail = entry.key as String;
+          break;
+        }
+      }
+      
+      if (foundEmail == null) {
         return {
           'success': false,
           'error': 'Email o contraseña incorrectos.'
         };
       }
       
-      final userData = users[normalizedEmail] as Map<String, dynamic>;
+      final userData = users[foundEmail] as Map<String, dynamic>;
       final savedPassword = userData['password'] as String;
       
       // Verificar contraseña (SHA256 hash)
@@ -824,15 +839,15 @@ class AuthService extends ChangeNotifier {
       // Login exitoso - crear token local
       final userId = userData['user_id'] as String;
       final username = userData['username'] as String?;
-      final localToken = _generateLocalToken(userId, email);
+      final localToken = _generateLocalToken(userId, foundEmail);
       
-      final role = email == 'power4gods@gmail.com' ? 'admin' : 'user';
-      await _saveAuthData(localToken, userId, email, username, role: role);
+      final role = foundEmail == 'power4gods@gmail.com' ? 'admin' : 'user';
+      await _saveAuthData(localToken, userId, foundEmail, username, role: role);
       
       return {
         'success': true,
         'data': {
-          'email': email,
+          'email': foundEmail,
           'user_id': userId,
           'username': username,
           'access_token': localToken,
