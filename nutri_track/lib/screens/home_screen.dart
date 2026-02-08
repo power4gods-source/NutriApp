@@ -61,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    notifyConsumptionAdded = null;
     _quickRecipesScrollController.dispose();
     super.dispose();
   }
@@ -309,7 +310,9 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const AddConsumptionScreen()),
-    );
+    ).then((result) {
+      if (result == true && mounted) _loadData();
+    });
   }
 
   void _navigateToRecipes() {
@@ -687,44 +690,127 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Acciones rápidas: 4 iconos (Index.tsx QuickActions) sin título
+  /// Acciones rápidas: 4 iconos con texto descriptivo
   Widget _buildQuickActionsRow() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: Column(
         children: [
-          _buildQuickActionIcon(Icons.restaurant, AppTheme.primary, _navigateToIngredients),
-          _buildQuickActionIcon(Icons.add_circle_outline, AppTheme.primary, _navigateToAddConsumption),
-          _buildQuickActionIcon(Icons.search, AppTheme.primary, () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const RecipeFinderScreen()));
-          }),
-          _buildQuickActionIcon(Icons.shopping_cart_outlined, AppTheme.primary, _navigateToShoppingList),
+          Row(
+            children: [
+              _buildQuickActionIcon('Alimentación', Icons.restaurant, AppTheme.primary, _navigateToIngredients),
+              const SizedBox(width: 8),
+              _buildQuickActionIconWithTwoIcons('Buscar Recetas', Icons.search, Icons.menu_book, AppTheme.primary, () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const RecipeFinderScreen()));
+              }),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildQuickActionIcon('Agregar Consumo', Icons.local_fire_department, AppTheme.primary, _navigateToAddConsumption),
+              const SizedBox(width: 8),
+              _buildQuickActionIcon('Cesta de la compra', Icons.shopping_cart_outlined, AppTheme.primary, _navigateToShoppingList),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickActionIcon(IconData icon, Color color, VoidCallback onTap) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+  Widget _buildQuickActionIcon(String label, IconData icon, Color color, VoidCallback onTap) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: 26),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-          child: Icon(icon, color: color, size: 28),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActionIconWithTwoIcons(String label, IconData icon1, IconData icon2, Color color, VoidCallback onTap) {
+    return Expanded(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 26,
+                  height: 26,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(icon2, color: color.withValues(alpha: 0.6), size: 22),
+                      Icon(icon1, color: color, size: 16),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import '../services/auth_service.dart';
 import '../services/tracking_service.dart';
+import '../config/app_config.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'add_consumption_screen.dart';
 import '../main.dart';
@@ -27,7 +28,14 @@ class _TrackingScreenState extends State<TrackingScreen> {
   Map<String, dynamic> _monthlyStats = {};
   List<dynamic> _consumptionEntries = [];
   Map<String, dynamic> _goals = {};
+  Map<String, dynamic> _profile = {};
   bool _isLoading = true;
+  
+  // Tema Index.tsx
+  static const Color _primary = Color(0xFF2D6A4F);
+  static const Color _ecoSage = Color(0xFF84A98C);
+  static const Color _ecoTerracotta = Color(0xFFBC6C25);
+  static const Color _ecoCream = Color(0xFFFAF8F5);
   
   // Datos diarios para gráficos semanales y mensuales
   List<Map<String, dynamic>> _weeklyDailyData = []; // Datos por día de la semana
@@ -49,6 +57,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
     setState(() => _isLoading = true);
     await Future.wait([
       _loadGoals(),
+      _loadProfile(),
       _loadDailyStats(),
       _loadWeeklyStats(),
       _loadMonthlyStats(),
@@ -70,6 +79,19 @@ class _TrackingScreenState extends State<TrackingScreen> {
     setState(() {
       _goals = goals;
     });
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      final resp = await http.get(Uri.parse('$url/profile'), headers: headers).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        setState(() => _profile = json.decode(resp.body) as Map<String, dynamic>);
+      }
+    } catch (e) {
+      print('Error loading profile: $e');
+    }
   }
 
   Future<void> _loadDailyStats() async {
@@ -289,6 +311,24 @@ class _TrackingScreenState extends State<TrackingScreen> {
     return (_goals['daily_goals']?['calories'] ?? 2000).toDouble();
   }
 
+  /// Media kcal/día solo de los días en que se añadió consumo (periodo día/semana/mes)
+  double get _avgCaloriesDaysWithConsumption {
+    switch (_selectedPeriod) {
+      case 'day':
+        return _consumedCalories;
+      case 'week':
+        final withData = _weeklyDailyData.where((d) => (d['calories'] as double) > 0).toList();
+        if (withData.isEmpty) return 0;
+        return withData.map((d) => d['calories'] as double).reduce((a, b) => a + b) / withData.length;
+      case 'month':
+        final withData = _monthlyDailyData.where((d) => (d['calories'] as double) > 0).toList();
+        if (withData.isEmpty) return 0;
+        return withData.map((d) => d['calories'] as double).reduce((a, b) => a + b) / withData.length;
+      default:
+        return _consumedCalories;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -323,7 +363,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Color(0xFF4CAF50)),
+            icon: const Icon(Icons.local_fire_department, color: Color(0xFF4CAF50)),
+            tooltip: 'Agregar consumo',
             onPressed: () async {
               final result = await Navigator.push(
                 context,
@@ -346,31 +387,23 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   _buildPeriodSelector(),
                   const SizedBox(height: 20),
                   
-                  // Vista diaria
+                  // Día: solo círculo kcal (sin medias semanal/mensual)
                   if (_selectedPeriod == 'day') ...[
-                    _buildCaloriesCard(),
-                    const SizedBox(height: 20),
-                    _buildDailyChart(),
-                    const SizedBox(height: 20),
-                    _buildNutritionBreakdown(),
+                    _buildDailyCalorieCard(),
                     const SizedBox(height: 20),
                   ],
-                  
-                  // Vista semanal
+                  // Semana y Mes: solo gráfico (sin círculo)
                   if (_selectedPeriod == 'week') ...[
                     _buildWeeklyChart(),
                     const SizedBox(height: 20),
-                    _buildNutritionBreakdown(),
-                    const SizedBox(height: 20),
                   ],
-                  
-                  // Vista mensual
                   if (_selectedPeriod == 'month') ...[
                     _buildMonthlyChartWidget(),
                     const SizedBox(height: 20),
-                    _buildNutritionBreakdown(),
-                    const SizedBox(height: 20),
                   ],
+                  // Macronutrientes + Peso (estilo Index.tsx)
+                  _buildMacronutrientsSection(),
+                  const SizedBox(height: 20),
                   
                   // Consumption list
                   _buildConsumptionList(),
@@ -414,7 +447,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4CAF50) : Colors.grey[100],
+          color: isSelected ? _primary : Colors.grey[100],
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -431,6 +464,318 @@ class _TrackingScreenState extends State<TrackingScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Día: solo círculo kcal/día (sin medias semanal/mensual)
+  Widget _buildDailyCalorieCard() {
+    final goal = _goalCalories;
+    final consumed = _consumedCalories;
+    final progress = goal > 0 ? (consumed / goal).clamp(0.0, 1.0) : 0.0;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Tu día',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  'Hoy, ${DateTime.now().day} ${_getMonthName(DateTime.now().month)}',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit, size: 18, color: Color(0xFF2D6A4F)),
+                onPressed: _showCalorieGoalDialog,
+                tooltip: 'Editar objetivo',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Center(child: _buildCalorieCircle(consumed, goal, progress)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalorieCircle(double value, double goal, double progress, {String? subtitle}) {
+    const double size = 150;
+    final bottomText = subtitle ?? '/${goal.toInt()} kcal';
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: CircularProgressIndicator(
+              value: progress,
+              strokeWidth: 14,
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                progress > 1.0 ? _ecoTerracotta : _primary,
+              ),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                value.toInt().toString(),
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF2D6A4F)),
+              ),
+              Text(bottomText, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getMonthName(int month) {
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return months[(month - 1).clamp(0, 11)];
+  }
+
+  /// Macronutrientes estilo Index.tsx: Proteínas, Carbos, Grasas + Peso actual
+  Widget _buildMacronutrientsSection() {
+    final nutrition = _currentStats['nutrition'] ?? _currentStats['avg_daily_nutrition'] ?? {};
+    final goals = _goals['daily_goals'] ?? {};
+    final protein = (nutrition['protein'] ?? 0.0).toDouble();
+    final carbs = (nutrition['carbohydrates'] ?? 0.0).toDouble();
+    final fat = (nutrition['fat'] ?? 0.0).toDouble();
+    final proteinGoal = (goals['protein'] ?? 120.0).toDouble();
+    final carbsGoal = (goals['carbohydrates'] ?? 250.0).toDouble();
+    final fatGoal = (goals['fat'] ?? 65.0).toDouble();
+    final weightKg = (_profile['weight_kg'] ?? 0.0).toDouble();
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 16, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Macronutrientes',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.grey[700]),
+              ),
+              TextButton.icon(
+                onPressed: () => _showGoalsAndWeightDialog(),
+                icon: const Icon(Icons.edit, size: 14),
+                label: const Text('Editar'),
+                style: TextButton.styleFrom(foregroundColor: _primary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _buildMacroCard('Proteínas', protein, proteinGoal, _primary, Icons.fitness_center)),
+              const SizedBox(width: 8),
+              Expanded(child: _buildMacroCard('Carbos', carbs, carbsGoal, _ecoTerracotta, Icons.grain)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _buildMacroCard('Grasas', fat, fatGoal, _ecoSage, Icons.water_drop)),
+              const SizedBox(width: 8),
+              Expanded(child: _buildWeightCard(weightKg)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMacroCard(String name, double current, double goal, Color color, IconData icon) {
+    final progress = goal > 0 ? (current / goal).clamp(0.0, 1.0) : 0.0;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: color),
+          const SizedBox(height: 6),
+          Text(name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+          Text(
+            '${current.toInt()}/${goal.toInt()} g',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color),
+          ),
+          const SizedBox(height: 6),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: Colors.grey.withValues(alpha: 0.2),
+              valueColor: AlwaysStoppedAnimation<Color>(color),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeightCard(double weightKg) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(Icons.monitor_weight, size: 20, color: Colors.blue[700]),
+          const SizedBox(height: 6),
+          Text('Peso actual', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.grey[700])),
+          const SizedBox(height: 4),
+          Text(
+            weightKg > 0 ? '${weightKg.toStringAsFixed(1)} kg' : '-- kg',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue[700]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showGoalsAndWeightDialog() {
+    final goals = _goals['daily_goals'] ?? {};
+    final caloriesController = TextEditingController(text: (goals['calories'] ?? 2000).toString());
+    final proteinController = TextEditingController(text: (goals['protein'] ?? 150).toString());
+    final carbsController = TextEditingController(text: (goals['carbohydrates'] ?? 250).toString());
+    final fatController = TextEditingController(text: (goals['fat'] ?? 65).toString());
+    final weightController = TextEditingController(
+      text: (_profile['weight_kg'] != null && (_profile['weight_kg'] as num) > 0)
+          ? (_profile['weight_kg'] as num).toString()
+          : '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar objetivos y peso'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: caloriesController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Calorías (kcal)', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: proteinController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Proteínas (g)', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: carbsController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Carbohidratos (g)', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: fatController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Grasas (g)', border: OutlineInputBorder()),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: weightController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Peso actual (kg)', border: OutlineInputBorder()),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () async {
+              final newCal = double.tryParse(caloriesController.text) ?? 2000.0;
+              final newProt = double.tryParse(proteinController.text) ?? 150.0;
+              final newCarbs = double.tryParse(carbsController.text) ?? 250.0;
+              final newFat = double.tryParse(fatController.text) ?? 65.0;
+              final newWeight = double.tryParse(weightController.text);
+              final success = await _trackingService.updateGoals({
+                'calories': newCal,
+                'protein': newProt,
+                'carbohydrates': newCarbs,
+                'fat': newFat,
+              });
+              if (success) {
+                if (newWeight != null && newWeight > 0) {
+                  try {
+                    final url = await AppConfig.getBackendUrl();
+                    final headers = await _authService.getAuthHeaders();
+                    await http.put(
+                      Uri.parse('$url/profile'),
+                      headers: {...headers, 'Content-Type': 'application/json'},
+                      body: json.encode({'weight_kg': newWeight}),
+                    );
+                  } catch (e) {
+                    print('Error updating weight: $e');
+                  }
+                }
+                Navigator.pop(context);
+                await _loadGoals();
+                await _loadProfile();
+                if (mounted) setState(() {});
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Objetivos actualizados'), backgroundColor: Color(0xFF4CAF50)),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: _primary, foregroundColor: Colors.white),
+            child: const Text('Guardar'),
+          ),
+        ],
       ),
     );
   }
@@ -659,77 +1004,51 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 ),
               ),
               const SizedBox(width: 16),
-              // Barra gris con objetivo y media (más oscura) - mismo tamaño que las barras de consumo
-              SizedBox(
-                width: goalBarWidth,
-                height: barHeight,
-                child: Stack(
-                  children: [
-                    // Barra gris completa (objetivo)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: goalBarWidth,
-                        height: (goal / maxY) * barHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(4),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Barra más oscura dentro (media)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: goalBarWidth,
-                        height: (avg / maxY) * barHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[600],
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(4),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Etiquetas
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Column(
-                        children: [
-                          Text(
-                            'Meta: ${goal.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            'Media: ${avg.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              // Barra lateral: altura = meta (gris), relleno = media días con consumo (verde grisáceo), sin texto
+              _buildSideProgressBar(goal, _avgCaloriesDaysWithConsumption, goalBarWidth, barHeight),
             ],
           ),
         ],
       ),
     );
   }
-  
-  // Gráfico semanal (lunes a domingo)
+
+  Widget _buildSideProgressBar(double goal, double avg, double width, double height) {
+    final fillRatio = goal > 0 ? (avg / goal).clamp(0.0, 1.0) : 0.0;
+    final fillHeight = height * fillRatio;
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          // Fondo gris (altura = meta)
+          Container(
+            width: width,
+            height: height,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          // Relleno verde grisáceo (media de días con consumo)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: width,
+              height: fillHeight,
+              decoration: BoxDecoration(
+                color: const Color(0xFF84A98C), // eco-sage, verde grisáceo
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(4)),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Gráfico semanal (lunes a domingo + objetivo)
   Widget _buildWeeklyChart() {
     if (_weeklyDailyData.isEmpty) {
       return Container(
@@ -744,11 +1063,42 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
     
     final goal = _goalCalories;
-    final maxCalories = _weeklyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a > b ? a : b);
-    final maxY = ((maxCalories * 1.2).clamp(goal * 1.1, goal * 1.5)).toDouble();
-    final avgCalories = _weeklyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a + b) / _weeklyDailyData.length;
+    const marginKcal = 500.0;
+    final maxDayCalories = _weeklyDailyData.map((d) => d['calories'] as double).fold<double>(0, (a, b) => a > b ? a : b);
+    // Eje Y: base = objetivo + 500; si algún día lo supera, se autoajusta
+    final baseMax = goal + marginKcal;
+    final maxY = maxDayCalories > baseMax ? maxDayCalories + 100 : baseMax;
     final barHeight = 250.0;
-    final goalBarWidth = 35.0; // Tamaño fijo para barras de meta/media
+    final barWidth = 35.0;
+    
+    // Barra extra para Objetivo al final (7 días + Objetivo = 8 grupos)
+    final barGroups = <BarChartGroupData>[];
+    for (int i = 0; i < _weeklyDailyData.length; i++) {
+      final dayData = _weeklyDailyData[i];
+      final calories = dayData['calories'] as double;
+      barGroups.add(BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: calories,
+            color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
+            width: barWidth,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+          ),
+        ],
+      ));
+    }
+    barGroups.add(BarChartGroupData(
+      x: _weeklyDailyData.length,
+      barRods: [
+        BarChartRodData(
+          toY: goal,
+          color: Colors.grey[400]!,
+          width: barWidth,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+        ),
+      ],
+    ));
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -776,187 +1126,103 @@ class _TrackingScreenState extends State<TrackingScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: SizedBox(
-                  height: barHeight,
-                  child: BarChart(
-                    BarChartData(
-                      alignment: BarChartAlignment.spaceAround,
-                      maxY: maxY,
-                      barTouchData: BarTouchData(
-                        enabled: true,
-                        touchTooltipData: BarTouchTooltipData(
-                          getTooltipColor: (group) => Colors.white,
-                          tooltipPadding: const EdgeInsets.all(8),
-                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                            if (groupIndex < _weeklyDailyData.length) {
-                              final dayData = _weeklyDailyData[groupIndex];
-                              return BarTooltipItem(
-                                '${dayData['day_name']}\n${dayData['calories'].toStringAsFixed(0)} kcal',
-                                TextStyle(
-                                  color: Colors.grey[800],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              );
-                            }
-                            return BarTooltipItem('', const TextStyle());
-                          },
-                        ),
-                      ),
-                      titlesData: FlTitlesData(
-                        show: true,
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            getTitlesWidget: (value, meta) {
-                              if (value.toInt() >= 0 && value.toInt() < _weeklyDailyData.length) {
-                                final dayName = _weeklyDailyData[value.toInt()]['day_name'] as String;
-                                return Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    dayName,
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                );
-                              }
-                              return const Text('');
-                            },
+          SizedBox(
+            height: barHeight,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxY,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (group) => Colors.white,
+                    tooltipPadding: const EdgeInsets.all(8),
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      if (groupIndex < _weeklyDailyData.length) {
+                        final dayData = _weeklyDailyData[groupIndex];
+                        return BarTooltipItem(
+                          '${dayData['day_name']}\n${dayData['calories'].toStringAsFixed(0)} kcal',
+                          TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 40,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                value.toInt().toString(),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 10,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                      ),
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey[200]!,
-                            strokeWidth: 1,
-                          );
-                        },
-                      ),
-                      borderData: FlBorderData(show: false),
-                      barGroups: _weeklyDailyData.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final dayData = entry.value;
-                        final calories = dayData['calories'] as double;
-                        return BarChartGroupData(
-                          x: index,
-                          barRods: [
-                            BarChartRodData(
-                              toY: calories,
-                              color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
-                              width: goalBarWidth, // Mismo tamaño que barras de meta/media
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(4),
-                              ),
-                            ),
-                          ],
                         );
-                      }).toList(),
-                    ),
+                      }
+                      if (groupIndex == _weeklyDailyData.length) {
+                        return BarTooltipItem(
+                          'Objetivo\n${goal.toInt()} kcal',
+                          TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      }
+                      return BarTooltipItem('', const TextStyle());
+                    },
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              // Barra gris con objetivo y media (más oscura) - mismo tamaño que las barras de consumo
-              SizedBox(
-                width: goalBarWidth,
-                height: barHeight,
-                child: Stack(
-                  children: [
-                    // Barra gris completa (objetivo)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: goalBarWidth,
-                        height: (goal / maxY) * barHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(4),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Barra más oscura dentro (media)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: goalBarWidth,
-                        height: (avgCalories / maxY) * barHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[600],
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(4),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Etiquetas
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Column(
-                        children: [
-                          Text(
-                            'Meta: ${goal.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        if (value.toInt() >= 0 && value.toInt() < _weeklyDailyData.length) {
+                          final dayName = _weeklyDailyData[value.toInt()]['day_name'] as String;
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              dayName,
+                              style: TextStyle(color: Colors.grey[600], fontSize: 11),
                             ),
-                          ),
-                          Text(
-                            'Media: ${avgCalories.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          );
+                        }
+                        if (value.toInt() == _weeklyDailyData.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Objetivo',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 10, fontWeight: FontWeight.w600),
                             ),
-                          ),
-                        ],
-                      ),
+                          );
+                        }
+                        return const Text('');
+                      },
                     ),
-                  ],
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) {
+                        return Text(
+                          value.toInt().toString(),
+                          style: TextStyle(color: Colors.grey[600], fontSize: 10),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey[200]!, strokeWidth: 1),
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: barGroups,
               ),
-            ],
+            ),
           ),
         ],
       ),
     );
   }
   
-  // Gráfico mensual (días del mes)
+  // Gráfico mensual (días del mes + objetivo)
   Widget _buildMonthlyChartWidget() {
     if (_monthlyDailyData.isEmpty) {
       return Container(
@@ -971,20 +1237,44 @@ class _TrackingScreenState extends State<TrackingScreen> {
     }
     
     final goal = _goalCalories;
-    final maxCalories = _monthlyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a > b ? a : b);
-    final maxY = ((maxCalories * 1.2).clamp(goal * 1.1, goal * 1.5)).toDouble();
-    final avgCalories = _monthlyDailyData.map((d) => d['calories'] as double).reduce((a, b) => a + b) / _monthlyDailyData.length;
+    const marginKcal = 500.0;
+    final maxDayCalories = _monthlyDailyData.map((d) => d['calories'] as double).fold<double>(0, (a, b) => a > b ? a : b);
+    // Eje Y: base = objetivo + 500; si algún día lo supera, se autoajusta
+    final baseMax = goal + marginKcal;
+    final maxY = maxDayCalories > baseMax ? maxDayCalories + 100 : baseMax;
     final barHeight = 250.0;
-    final goalBarWidth = 12.0; // Tamaño fijo para barras de meta/media
     
-    // Calcular ancho de barras diarias basado en espacio disponible
-    // Mantener tamaño fijo de barras de meta/media, ajustar barras diarias al espacio restante
-    final availableWidth = MediaQuery.of(context).size.width - 80; // Ancho disponible menos márgenes
-    final goalBarSpace = goalBarWidth + 16; // Ancho de barra de meta + espacio
-    final dailyBarsSpace = availableWidth - goalBarSpace;
-    final dailyBarWidth = (_monthlyDailyData.length > 0) 
-        ? (dailyBarsSpace / _monthlyDailyData.length).clamp(8.0, 20.0) 
-        : 12.0; // Ancho dinámico pero con límites
+    final availableWidth = MediaQuery.of(context).size.width - 80;
+    final totalGroups = _monthlyDailyData.length + 1; // días + Objetivo
+    final dailyBarWidth = totalGroups > 0 ? (availableWidth / totalGroups).clamp(6.0, 16.0) : 8.0;
+    
+    final barGroups = <BarChartGroupData>[];
+    for (int i = 0; i < _monthlyDailyData.length; i++) {
+      final dayData = _monthlyDailyData[i];
+      final calories = dayData['calories'] as double;
+      barGroups.add(BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: calories,
+            color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
+            width: dailyBarWidth,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+          ),
+        ],
+      ));
+    }
+    barGroups.add(BarChartGroupData(
+      x: _monthlyDailyData.length,
+      barRods: [
+        BarChartRodData(
+          toY: goal,
+          color: Colors.grey[400]!,
+          width: dailyBarWidth * 1.5, // Barra objetivo un poco más ancha
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
+        ),
+      ],
+    ));
     
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -1026,7 +1316,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                     initialDate: startDate,
                     firstDate: DateTime(2020),
                     lastDate: DateTime.now(),
-                    helpText: 'Seleccionar día inicio',
+                    helpText: 'Día inicio',
                   );
                   
                   if (startPicked != null) {
@@ -1035,7 +1325,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       initialDate: endDate.isBefore(startPicked) ? startPicked : endDate,
                       firstDate: startPicked,
                       lastDate: DateTime.now(),
-                      helpText: 'Seleccionar día fin',
+                      helpText: 'Día fin',
                     );
                     
                     if (endPicked != null) {
@@ -1059,192 +1349,102 @@ class _TrackingScreenState extends State<TrackingScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: SizedBox(
-                  height: barHeight,
-                  child: BarChart(
-                    BarChartData(
-                      alignment: BarChartAlignment.spaceAround,
-                      maxY: maxY,
-                      barTouchData: BarTouchData(
-                        enabled: true,
-                        touchTooltipData: BarTouchTooltipData(
-                          getTooltipColor: (group) => Colors.white,
-                          tooltipPadding: const EdgeInsets.all(8),
-                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                            if (groupIndex < _monthlyDailyData.length) {
-                              final dayData = _monthlyDailyData[groupIndex];
-                              return BarTooltipItem(
-                                'Día ${dayData['day']}\n${dayData['calories'].toStringAsFixed(0)} kcal',
-                                TextStyle(
-                                  color: Colors.grey[800],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              );
-                            }
-                            return BarTooltipItem('', const TextStyle());
-                          },
-                        ),
-                      ),
-                      titlesData: FlTitlesData(
-                        show: true,
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 30,
-                                getTitlesWidget: (value, meta) {
-                                  if (value.toInt() >= 0 && value.toInt() < _monthlyDailyData.length) {
-                                    final dayData = _monthlyDailyData[value.toInt()];
-                                    final day = dayData['day'] as int;
-                                    final month = dayData['month'] as int;
-                                    // Mostrar día y mes si cambia de mes, o cada 5 días
-                                    final isFirstOfMonth = day == 1;
-                                    final isEvery5Days = day % 5 == 0;
-                                    final isLast = value.toInt() == _monthlyDailyData.length - 1;
-                                    
-                                    if (isFirstOfMonth || isEvery5Days || isLast) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(top: 8.0),
-                                        child: Text(
-                                          isFirstOfMonth && day == 1
-                                              ? '${day}/${month}'
-                                              : day.toString(),
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                  return const Text('');
-                                },
+          SizedBox(
+            height: barHeight,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY: maxY,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    getTooltipColor: (group) => Colors.white,
+                    tooltipPadding: const EdgeInsets.all(8),
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      if (groupIndex < _monthlyDailyData.length) {
+                        final dayData = _monthlyDailyData[groupIndex];
+                        return BarTooltipItem(
+                          'Día ${dayData['day']}\n${dayData['calories'].toStringAsFixed(0)} kcal',
+                          TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
                           ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 40,
-                            getTitlesWidget: (value, meta) {
-                              return Text(
-                                value.toInt().toString(),
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 10,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        topTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        rightTitles: const AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                      ),
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey[200]!,
-                            strokeWidth: 1,
-                          );
-                        },
-                      ),
-                      borderData: FlBorderData(show: false),
-                      barGroups: _monthlyDailyData.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final dayData = entry.value;
-                        final calories = dayData['calories'] as double;
-                        return BarChartGroupData(
-                          x: index,
-                          barRods: [
-                            BarChartRodData(
-                              toY: calories,
-                              color: calories > goal ? Colors.orange : const Color(0xFF4CAF50),
-                              width: dailyBarWidth, // Ancho dinámico ajustado al espacio disponible
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(2),
-                              ),
-                            ),
-                          ],
                         );
-                      }).toList(),
-                    ),
+                      }
+                      if (groupIndex == _monthlyDailyData.length) {
+                        return BarTooltipItem(
+                          'Objetivo\n${goal.toInt()} kcal',
+                          TextStyle(
+                            color: Colors.grey[800],
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      }
+                      return BarTooltipItem('', const TextStyle());
+                    },
                   ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              // Barra gris con objetivo y media (más oscura) - tamaño fijo
-              SizedBox(
-                width: goalBarWidth,
-                height: barHeight,
-                child: Stack(
-                  children: [
-                    // Barra gris completa (objetivo)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: goalBarWidth,
-                        height: (goal / maxY) * barHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(2),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Barra más oscura dentro (media)
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: goalBarWidth,
-                        height: (avgCalories / maxY) * barHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[600],
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(2),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Etiquetas
-                    Positioned(
-                      bottom: 8,
-                      left: 0,
-                      right: 0,
-                      child: Column(
-                        children: [
-                          Text(
-                            'Meta: ${goal.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                titlesData: FlTitlesData(
+                  show: true,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 30,
+                      getTitlesWidget: (value, meta) {
+                        if (value.toInt() >= 0 && value.toInt() < _monthlyDailyData.length) {
+                          final dayData = _monthlyDailyData[value.toInt()];
+                          final day = dayData['day'] as int;
+                          final month = dayData['month'] as int;
+                          final isFirstOfMonth = day == 1;
+                          final isEvery5Days = day % 5 == 0;
+                          final isLast = value.toInt() == _monthlyDailyData.length - 1;
+                          if (isFirstOfMonth || isEvery5Days || isLast) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                isFirstOfMonth && day == 1 ? '${day}/${month}' : day.toString(),
+                                style: TextStyle(color: Colors.grey[600], fontSize: 10),
+                              ),
+                            );
+                          }
+                        }
+                        if (value.toInt() == _monthlyDailyData.length) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              ' ',
+                              style: TextStyle(color: Colors.grey[600], fontSize: 9, fontWeight: FontWeight.w600),
                             ),
-                          ),
-                          Text(
-                            'Media: ${avgCalories.toStringAsFixed(0)}',
-                            style: const TextStyle(
-                              fontSize: 8,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
+                          );
+                        }
+                        return const Text('');
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      getTitlesWidget: (value, meta) => Text(
+                        value.toInt().toString(),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 10),
                       ),
                     ),
-                  ],
+                  ),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(color: Colors.grey[200]!, strokeWidth: 1),
+                ),
+                borderData: FlBorderData(show: false),
+                barGroups: barGroups,
               ),
-            ],
+            ),
           ),
         ],
       ),

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../screens/profile_screen.dart';
 import '../screens/recipes_screen.dart';
-import '../screens/favorites_screen.dart';
 import '../screens/notifications_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/login_screen.dart';
@@ -18,26 +17,52 @@ class AppDrawer extends StatelessWidget {
     final email = authService.email ?? 'Usuario';
     final username = authService.username ?? email.split('@')[0];
 
+    final phone = authService.phone ?? '';
     return Drawer(
       child: Column(
         children: [
-          // Header with user info
-          UserAccountsDrawerHeader(
+          // Header: foto, nombre, email, teléfono
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 48, 16, 24),
             decoration: const BoxDecoration(
               color: Color(0xFF4CAF50),
             ),
-            accountName: Text(
-              username,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Column(
+              children: [
+                _buildAvatar(authService.avatarUrl, username),
+                const SizedBox(height: 12),
+                Text(
+                  username,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email,
+                  style: const TextStyle(fontSize: 14, color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+                if (phone.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.phone, size: 14, color: Colors.white70),
+                      const SizedBox(width: 4),
+                      Text(
+                        phone,
+                        style: const TextStyle(fontSize: 13, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
             ),
-            accountEmail: Text(
-              email,
-              style: const TextStyle(fontSize: 14),
-            ),
-            currentAccountPicture: _buildAvatar(authService.avatarUrl, username),
           ),
           
           // Menu items
@@ -62,25 +87,13 @@ class AppDrawer extends StatelessWidget {
                 _buildDrawerItem(
                   context,
                   icon: Icons.restaurant_menu,
-                  title: 'Recetas',
-                  onTap: () {
-                    Navigator.pop(context);
-                    final navState = MainNavigationScreen.of(context);
-                    if (navState != null) {
-                      navState.setCurrentIndex(0); // Index 0 = Recetas
-                    }
-                  },
-                ),
-                _buildDrawerItem(
-                  context,
-                  icon: Icons.favorite,
-                  title: 'Favoritos',
+                  title: 'Mis recetas',
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const FavoritesScreen(),
+                        builder: (_) => const RecipesScreen(forceFilter: 'private'),
                       ),
                     );
                   },
@@ -99,6 +112,7 @@ class AppDrawer extends StatelessWidget {
                     );
                   },
                 ),
+                const Divider(),
                 _buildDrawerItem(
                   context,
                   icon: Icons.settings,
@@ -169,6 +183,7 @@ class AppDrawer extends StatelessWidget {
   Widget _buildAvatar(String? avatarUrl, String username) {
     final hasImage = avatarUrl != null && avatarUrl.isNotEmpty;
     return CircleAvatar(
+      radius: 40,
       backgroundColor: Colors.white,
       backgroundImage: hasImage ? NetworkImage(avatarUrl!) : null,
       child: hasImage

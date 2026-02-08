@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../widgets/pronto_badge.dart';
 import 'login_screen.dart';
-import 'notifications_screen.dart';
 import 'change_password_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -32,14 +31,6 @@ class SettingsScreen extends StatelessWidget {
           _buildSectionHeader('Cuenta'),
           _buildSettingsTile(
             context,
-            icon: Icons.person,
-            title: 'Perfil',
-            subtitle: 'Editar información personal',
-            onTap: () => _showProntoSnack(context),
-            showPronto: true,
-          ),
-          _buildSettingsTile(
-            context,
             icon: Icons.lock,
             title: 'Contraseña',
             subtitle: 'Cambiar contraseña',
@@ -50,18 +41,6 @@ class SettingsScreen extends StatelessWidget {
               );
             },
             showPronto: false,
-          ),
-          _buildSettingsTile(
-            context,
-            icon: Icons.notifications,
-            title: 'Notificaciones',
-            subtitle: 'Gestionar notificaciones',
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
-              );
-            },
           ),
           
           const Divider(),
@@ -104,9 +83,24 @@ class SettingsScreen extends StatelessWidget {
           ),
           _buildSettingsTile(
             context,
-            icon: Icons.help,
-            title: 'Ayuda',
-            subtitle: 'Centro de ayuda',
+            icon: Icons.info_outline,
+            title: 'Más info',
+            subtitle: 'Preguntas frecuentes y sugerencias',
+            onTap: () => _showMoreInfo(context),
+          ),
+          _buildSettingsTile(
+            context,
+            icon: Icons.shield,
+            title: 'Términos y condiciones',
+            subtitle: 'Legales y uso de la app',
+            onTap: () => _showProntoSnack(context),
+            showPronto: true,
+          ),
+          _buildSettingsTile(
+            context,
+            icon: Icons.share,
+            title: 'Invitar amigos',
+            subtitle: 'Comparte NutriTrack',
             onTap: () => _showProntoSnack(context),
             showPronto: true,
           ),
@@ -211,6 +205,129 @@ class SettingsScreen extends StatelessWidget {
         content: Text(msg),
         duration: const Duration(seconds: 2),
         backgroundColor: Colors.orange.shade700,
+      ),
+    );
+  }
+
+  void _showMoreInfo(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (ctx, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Text(
+                'Más información',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              _buildQaItem(
+                '¿Qué es NutriTrack?',
+                'NutriTrack es una aplicación para gestionar tu nutrición: recetas, seguimiento de calorías, ingredientes favoritos y lista de la compra.',
+              ),
+              _buildQaItem(
+                '¿Cómo añado consumo?',
+                'Desde el icono de calorías en la barra superior, o en Seguimiento > Agregar consumo. Puedes registrar comidas por fecha y tipo.',
+              ),
+              _buildQaItem(
+                '¿Dónde están mis favoritos?',
+                'Tus recetas favoritas están en Perfil > Favoritos, y también en Recetas > Filtro Favoritas.',
+              ),
+              _buildQaItem(
+                '¿Cómo cambio mi foto de perfil?',
+                'Ve a Perfil > Editar perfil. Pulsa el icono de cámara sobre tu foto para seleccionar una imagen nueva.',
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                '¿Necesitas ayuda o tienes sugerencias?',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Escríbenos y te responderemos lo antes posible.',
+                style: TextStyle(color: Colors.grey, fontSize: 14),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                maxLines: 4,
+                decoration: InputDecoration(
+                  hintText: 'Escribe tu consulta, sugerencia o lo que necesites...',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Gracias. Recibiremos tu mensaje pronto.'),
+                        backgroundColor: Color(0xFF4CAF50),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.send),
+                  label: const Text('Enviar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4CAF50),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQaItem(String question, String answer) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            question,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF2D6A4F),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            answer,
+            style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4),
+          ),
+        ],
       ),
     );
   }

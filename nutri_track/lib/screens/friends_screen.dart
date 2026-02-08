@@ -19,10 +19,12 @@ class FriendsScreen extends StatefulWidget {
 class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProviderStateMixin {
   final AuthService _authService = AuthService();
   late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
   
   List<Map<String, dynamic>> _allProfiles = [];
   List<Map<String, dynamic>> _followingProfiles = [];
   bool _isLoading = true;
+  String _searchQuery = '';
   
   int _followersCount = 0;
   int _connectionsCount = 0;
@@ -32,13 +34,26 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _searchController.addListener(() {
+      setState(() => _searchQuery = _searchController.text.trim().toLowerCase());
+    });
     _loadData();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  List<Map<String, dynamic>> _filterProfiles(List<Map<String, dynamic>> profiles) {
+    if (_searchQuery.isEmpty) return profiles;
+    return profiles.where((p) {
+      final username = (p['username'] ?? p['display_name'] ?? p['email']?.split('@')[0] ?? '').toString().toLowerCase();
+      final email = (p['email'] ?? '').toString().toLowerCase();
+      return username.contains(_searchQuery) || email.contains(_searchQuery);
+    }).toList();
   }
 
   Future<void> _loadData() async {
@@ -462,7 +477,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
           },
         ),
         title: const Text(
-          'Amigos',
+          'Comunidad',
           style: TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
@@ -478,10 +493,27 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(100),
+          preferredSize: const Size.fromHeight(150),
           child: Column(
             children: [
               _buildStatsHeader(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar amigos o explorar...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    filled: true,
+                    fillColor: Colors.grey[50],
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
               TabBar(
                 controller: _tabController,
                 labelColor: const Color(0xFF4CAF50),
@@ -489,7 +521,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                 indicatorColor: const Color(0xFF4CAF50),
                 indicatorWeight: 3,
                 tabs: const [
-                  Tab(text: 'Amigos'),
+                  Tab(text: 'Tu círculo'),
                   Tab(text: 'Explorar'),
                 ],
               ),
@@ -505,19 +537,19 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                   controller: _tabController,
                   children: [
                 // Tab: Amigos (Following)
-                _followingProfiles.isEmpty
+                _filterProfiles(_followingProfiles).isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.person_add_outlined,
+                              _searchQuery.isEmpty ? Icons.person_add_outlined : Icons.search_off,
                               size: 80,
                               color: Colors.grey[300],
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'Aún no sigues a nadie',
+                              _searchQuery.isEmpty ? 'Aún no sigues a nadie' : 'No hay coincidencias',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -526,7 +558,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Explora usuarios y comienza a seguir',
+                              _searchQuery.isEmpty ? 'Explora usuarios y comienza a seguir' : 'Prueba con otro término de búsqueda',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[500],
@@ -539,9 +571,9 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                         onRefresh: _loadData,
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
-                          itemCount: _followingProfiles.length,
+                          itemCount: _filterProfiles(_followingProfiles).length,
                           itemBuilder: (context, index) {
-                            final profile = _followingProfiles[index];
+                            final profile = _filterProfiles(_followingProfiles)[index];
                             profile['is_following'] = true;
                             return _buildProfileCard(profile);
                           },
@@ -549,19 +581,19 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                       ),
                 
                 // Tab: Explorar (All Profiles)
-                _allProfiles.isEmpty
+                _filterProfiles(_allProfiles).isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.people_outline,
+                              _searchQuery.isEmpty ? Icons.people_outline : Icons.search_off,
                               size: 80,
                               color: Colors.grey[300],
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'No hay perfiles disponibles',
+                              _searchQuery.isEmpty ? 'No hay perfiles disponibles' : 'No hay coincidencias',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -570,7 +602,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Los perfiles de usuarios aparecerán aquí',
+                              _searchQuery.isEmpty ? 'Los perfiles de usuarios aparecerán aquí' : 'Prueba con otro término de búsqueda',
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Colors.grey[500],
@@ -583,9 +615,9 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                         onRefresh: _loadData,
                         child: ListView.builder(
                           padding: const EdgeInsets.all(16),
-                          itemCount: _allProfiles.length,
+                          itemCount: _filterProfiles(_allProfiles).length,
                           itemBuilder: (context, index) {
-                            return _buildProfileCard(_allProfiles[index]);
+                            return _buildProfileCard(_filterProfiles(_allProfiles)[index]);
                           },
                         ),
                       ),

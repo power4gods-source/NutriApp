@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -32,6 +33,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
+  Timer? _phoneDebounce;
   
   @override
   void initState() {
@@ -41,7 +43,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   
   @override
   void dispose() {
-    _usernameController.dispose();
+    _phoneDebounce?.cancel();
+    _phoneController.dispose();
     _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
@@ -62,7 +65,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          _usernameController.text = data['username'] ?? _authService.username ?? '';
+          _phoneController.text = data['phone']?.toString().trim() ?? _authService.phone ?? '';
           _currentAvatarUrl = data['avatar_url'];
           _previousAvatarUrl = data['avatar_url'];
         });
@@ -70,7 +73,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       print('Error loading profile: $e');
       setState(() {
-        _usernameController.text = _authService.username ?? '';
+        _phoneController.text = _authService.phone ?? '';
         _currentAvatarUrl = _authService.avatarUrl;
         _previousAvatarUrl = _authService.avatarUrl;
       });
@@ -208,9 +211,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
-  Future<void> _saveUsername() async {
+  void _onPhoneChanged(String value) {
+    _phoneDebounce?.cancel();
+    _phoneDebounce = Timer(const Duration(milliseconds: 800), () {
+      _savePhone(value.trim());
+    });
+  }
+
+  Future<void> _savePhone(String newPhone) async {
     if (_isSaving) return;
-    final newUsername = _usernameController.text.trim();
     setState(() => _isSaving = true);
     try {
       final headers = await _authService.getAuthHeaders();
@@ -218,24 +227,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final response = await http.put(
         Uri.parse('$url/profile'),
         headers: {...headers, 'Content-Type': 'application/json'},
-        body: jsonEncode({'username': newUsername}),
+        body: jsonEncode({'phone': newPhone}),
       ).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
-        await _updateUsernameInUsers(newUsername);
+        await _authService.savePhone(newPhone.isEmpty ? null : newPhone);
         await _authService.reloadAuthData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Nombre actualizado'), backgroundColor: Colors.green),
+            const SnackBar(content: Text('Teléfono guardado'), backgroundColor: Colors.green),
           );
         }
       } else {
-        final error = jsonDecode(response.body);
+        final err = jsonDecode(response.body);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${error['detail'] ?? 'Error'}'),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text('Error: ${err['detail'] ?? 'Error'}'), backgroundColor: Colors.red),
           );
         }
       }
@@ -249,31 +255,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (mounted) setState(() => _isSaving = false);
     }
   }
-  
-  Future<void> _updateUsernameInUsers(String newUsername) async {
-    try {
-      final headers = await _authService.getAuthHeaders();
-      final url = await AppConfig.getBackendUrl();
-      
-      // Endpoint para actualizar username en users.json
-      final response = await http.put(
-        Uri.parse('$url/profile/username'),
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'username': newUsername}),
-      ).timeout(const Duration(seconds: 10));
-      
-      if (response.statusCode == 200) {
-        print('✅ Username actualizado en users.json');
-      }
-    } catch (e) {
-      print('⚠️ Error actualizando username en users.json: $e');
-      // No es crítico, continuar
-    }
-  }
-  
+
   Future<void> _changePassword() async {
     final pwdError = PasswordValidator.validate(_newPasswordController.text);
     if (pwdError != null) {
@@ -361,6 +343,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return null;
   }
   
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[300]!),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey[600], size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value.isNotEmpty ? value : '—',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAvatarSection() {
     return Center(
       child: Column(
@@ -420,24 +438,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
     }
     
-    final canRevertAvatar = _selectedImageBytes != null ||
-        (_currentAvatarUrl != null &&
-            _previousAvatarUrl != null &&
-            _currentAvatarUrl != _previousAvatarUrl);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Editar perfil'),
         backgroundColor: const Color(0xFF4CAF50),
         foregroundColor: Colors.white,
-        actions: [
-          if (canRevertAvatar)
-            IconButton(
-              icon: const Icon(Icons.undo, color: Colors.white),
-              tooltip: 'Revertir foto',
-              onPressed: _isSaving ? null : _revertAvatar,
-            ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -448,17 +453,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildAvatarSection(),
             const SizedBox(height: 32),
             
-            // Username - se guarda automáticamente al terminar de editar
+            // Info de usuario (solo lectura: nombre, email)
+            _buildInfoRow(Icons.person, 'Nombre de usuario', _authService.username ?? ''),
+            const SizedBox(height: 12),
+            _buildInfoRow(Icons.email, 'Email', _authService.email ?? ''),
+            const SizedBox(height: 12),
+            // Teléfono (editable, se guarda automáticamente)
             TextField(
-              controller: _usernameController,
-              onEditingComplete: _saveUsername,
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              onChanged: _onPhoneChanged,
               decoration: InputDecoration(
-                labelText: 'Nombre de usuario',
-                prefixIcon: const Icon(Icons.person),
+                labelText: 'Teléfono',
+                prefixIcon: const Icon(Icons.phone),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                hintText: 'Se guarda automáticamente',
+                hintText: 'Se guarda automáticamente al escribir',
               ),
             ),
             const SizedBox(height: 24),

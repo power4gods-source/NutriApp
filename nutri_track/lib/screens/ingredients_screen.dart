@@ -13,7 +13,6 @@ import '../config/app_config.dart';
 import 'ai_menu_screen.dart';
 import 'ai_recipe_generator_screen.dart';
 import 'ingredients_tab.dart';
-import 'shopping_list_screen.dart';
 import 'suggestions_screen.dart';
 
 class IngredientsScreen extends StatefulWidget {
@@ -62,38 +61,13 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Por lo que tienes en tu nevera',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
-                        ),
-                      ),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ShoppingListScreen()),
-                        );
-                      },
-                      icon: const Icon(Icons.add_shopping_cart, size: 18),
-                      label: const Text('Lista Compra'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4CAF50),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  'Por lo que tienes en tu nevera',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Row(

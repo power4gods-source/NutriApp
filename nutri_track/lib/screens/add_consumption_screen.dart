@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../services/auth_service.dart';
 import '../services/tracking_service.dart';
 import '../services/recipe_service.dart';
+import '../main.dart';
 
 class AddConsumptionScreen extends StatefulWidget {
   const AddConsumptionScreen({super.key});
@@ -434,6 +435,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
               backgroundColor: Color(0xFF4CAF50),
             ),
           );
+          notifyConsumptionAdded?.call();
           Navigator.pop(context, true); // Return true to refresh
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

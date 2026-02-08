@@ -208,6 +208,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
   }
 }
 
+/// Llamar cuando se añade consumo para que HomeScreen refresque
+void Function()? notifyConsumptionAdded;
+
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 

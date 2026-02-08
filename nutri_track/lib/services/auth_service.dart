@@ -17,6 +17,7 @@ class AuthService extends ChangeNotifier {
   String? _username;
   String? _role;
   String? _avatarUrl;
+  String? _phone;
 
   static const String _localUsersKey = 'local_users';
   final FirebaseUserService _firebaseUserService = FirebaseUserService();
@@ -30,6 +31,7 @@ class AuthService extends ChangeNotifier {
   String? get username => _username;
   String? get role => _role;
   String? get avatarUrl => _avatarUrl;
+  String? get phone => _phone;
   bool get isAuthenticated => _token != null;
   bool get isAdmin => _role == 'admin';
 
@@ -45,6 +47,7 @@ class AuthService extends ChangeNotifier {
     _username = prefs.getString('username');
     _role = prefs.getString('user_role');
     _avatarUrl = prefs.getString('avatar_url');
+    _phone = prefs.getString('user_phone');
     // Si el email es power4gods@gmail.com, asegurar que sea admin
     if (_email == 'power4gods@gmail.com' && _role != 'admin') {
       _role = 'admin';
@@ -57,6 +60,19 @@ class AuthService extends ChangeNotifier {
   // Método público para recargar datos de autenticación
   Future<void> reloadAuthData() async {
     await _loadAuthData();
+  }
+
+  /// Guarda el teléfono del usuario (tras actualizar perfil).
+  Future<void> savePhone(String? phone) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (phone == null || phone.isEmpty) {
+      await prefs.remove('user_phone');
+      _phone = null;
+    } else {
+      await prefs.setString('user_phone', phone);
+      _phone = phone;
+    }
+    notifyListeners();
   }
 
   /// Guarda la URL del avatar (p. ej. tras actualizar perfil) para que coincida en home y perfil.
@@ -120,7 +136,7 @@ class AuthService extends ChangeNotifier {
               Uri.parse('$url/auth/login'),
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode({
-                'email': email,  // backend acepta 'email' o 'login'; permite email o username
+                'login': email.trim(),  // backend acepta email o nombre de usuario
                 'password': password,
               }),
             )
@@ -348,6 +364,11 @@ class AuthService extends ChangeNotifier {
       }
       if (profile['username'] != null) {
         await prefs.setString('username', profile['username'].toString());
+      }
+      if (profile['phone'] != null && profile['phone'].toString().isNotEmpty) {
+        await prefs.setString('user_phone', profile['phone'].toString());
+      } else {
+        await prefs.remove('user_phone');
       }
       _loadAuthData();
 
@@ -704,6 +725,7 @@ class AuthService extends ChangeNotifier {
     _username = null;
     _role = null;
     _avatarUrl = null;
+    _phone = null;
     notifyListeners();
   }
 

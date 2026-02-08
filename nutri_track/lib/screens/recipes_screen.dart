@@ -4,12 +4,14 @@ import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
 import '../services/firebase_recipe_service.dart';
 import '../utils/nutrition_parser.dart';
-import '../widgets/search_dialog.dart';
 import '../main.dart';
 import 'add_recipe_screen.dart';
+import 'recipe_finder_screen.dart';
 
 class RecipesScreen extends StatefulWidget {
-  const RecipesScreen({super.key});
+  /// Si se especifica, fuerza el filtro y oculta los chips de filtro (ej. 'private' para Mis recetas)
+  final String? forceFilter;
+  const RecipesScreen({super.key, this.forceFilter});
 
   @override
   State<RecipesScreen> createState() => _RecipesScreenState();
@@ -21,14 +23,93 @@ class _RecipesScreenState extends State<RecipesScreen> {
   List<dynamic> _recipes = [];
   Set<String> _favoriteIds = {};
   bool _isLoading = true;
-  String? _expandedRecipeId; // ID de la receta expandida
-  String _selectedFilter = 'favorites'; // Por defecto: Favoritas
+  String? _expandedRecipeId;
+  String _selectedFilter = 'general';
+  final TextEditingController _nameSearchController = TextEditingController();
+  String _nameQuery = '';
+  String _sortBy = 'relevance'; // relevance, duration, az
 
   @override
   void initState() {
     super.initState();
+    if (widget.forceFilter != null) {
+      _selectedFilter = widget.forceFilter!;
+    }
+    _nameSearchController.addListener(() {
+      setState(() => _nameQuery = _nameSearchController.text.trim().toLowerCase());
+    });
     _loadData();
   }
+
+  @override
+  void dispose() {
+    _nameSearchController.dispose();
+    super.dispose();
+  }
+
+  List<dynamic> get _filteredRecipes {
+    var list = _recipes.where((r) {
+      if (_nameQuery.isEmpty) return true;
+      final query = _nameQuery;
+      final title = (r['title'] ?? '').toString().toLowerCase();
+      final ingList = r['ingredients'];
+      String ingStr = '';
+      if (ingList is List) {
+        ingStr = ingList.map((e) => (e is Map ? e['name'] ?? '' : e).toString().toLowerCase()).join(' ');
+      } else if (ingList != null) {
+        ingStr = ingList.toString().toLowerCase();
+      }
+      // Prioridad: coincidencias exactas en título, luego ingredientes
+      final titleMatch = title == query || title.contains(query);
+      final ingMatch = ingStr.contains(query);
+      return titleMatch || ingMatch;
+    }).toList();
+
+    // Ordenar: prioridad título, luego ingredientes (coincidencias exactas primero)
+    if (_nameQuery.isNotEmpty) {
+      list = list.toList()..sort((a, b) {
+        final scoreA = _relevanceScore(a);
+        final scoreB = _relevanceScore(b);
+        return scoreB.compareTo(scoreA);
+      });
+    } else {
+      switch (_sortBy) {
+        case 'az':
+          list = list.toList()..sort((a, b) => ((a['title'] ?? '').toString().toLowerCase())
+              .compareTo((b['title'] ?? '').toString().toLowerCase()));
+          break;
+        case 'duration':
+          list = list.toList()..sort((a, b) {
+            final ta = a['time_minutes'] is int ? a['time_minutes'] : (int.tryParse(a['time_minutes']?.toString() ?? '') ?? 999);
+            final tb = b['time_minutes'] is int ? b['time_minutes'] : (int.tryParse(b['time_minutes']?.toString() ?? '') ?? 999);
+            return (ta as int).compareTo(tb as int);
+          });
+          break;
+        case 'relevance':
+        default:
+          break;
+      }
+    }
+    return list;
+  }
+
+  int _relevanceScore(dynamic r) {
+    final title = (r['title'] ?? '').toString().toLowerCase();
+    final ingList = r['ingredients'];
+    String ingStr = '';
+    if (ingList is List) {
+      ingStr = ingList.map((e) => (e is Map ? e['name'] ?? '' : e).toString().toLowerCase()).join(' ');
+    } else if (ingList != null) {
+      ingStr = ingList.toString().toLowerCase();
+    }
+    // Prioridad: título exacto > título contiene > ingredientes
+    if (title == _nameQuery) return 100;
+    if (title.contains(_nameQuery)) return 80;
+    if (ingStr.contains(_nameQuery)) return 50;
+    return 0;
+  }
+
+  bool get _isMyRecipesMode => widget.forceFilter == 'private';
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
@@ -627,21 +708,21 @@ class _RecipesScreenState extends State<RecipesScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () {
-            // Volver a la homepage (MainNavigationScreen index 2)
-            final mainNavState = MainNavigationScreen.of(context);
-            if (mainNavState != null) {
-              mainNavState.setCurrentIndex(2); // Inicio
+            if (_isMyRecipesMode && Navigator.canPop(context)) {
+              Navigator.pop(context);
             } else {
-              // Fallback: intentar pop si no hay MainNavigationScreen
-              if (Navigator.canPop(context)) {
+              final mainNavState = MainNavigationScreen.of(context);
+              if (mainNavState != null) {
+                mainNavState.setCurrentIndex(2); // Inicio
+              } else if (Navigator.canPop(context)) {
                 Navigator.pop(context);
               }
             }
           },
         ),
-        title: const Text(
-          'Recetas',
-          style: TextStyle(
+        title: Text(
+          _isMyRecipesMode ? 'Mis recetas' : 'Recetas',
+          style: const TextStyle(
             color: Colors.black87,
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -649,21 +730,15 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ),
         centerTitle: true,
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.search, color: Colors.black87),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => const SearchDialog(),
-                );
-              },
-            ),
+          IconButton(
+            icon: const Icon(Icons.menu_book, color: Colors.black87),
+            tooltip: 'Buscador de recetas',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RecipeFinderScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -688,7 +763,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                     child: GestureDetector(
                       onTap: () {}, // Prevenir cierre al tocar la tarjeta
                       child: _buildExpandedCard(
-                        _recipes.firstWhere(
+                        _filteredRecipes.firstWhere(
                           (r) => _getRecipeId(r) == _expandedRecipeId,
                         ),
                       ),
@@ -699,23 +774,67 @@ class _RecipesScreenState extends State<RecipesScreen> {
             )
           : Column(
               children: [
-                // Filter chips (solo visible cuando no hay receta expandida)
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  color: Colors.white,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                // Buscador por texto + filtros (ocultos en modo Mis recetas)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: TextField(
+                    controller: _nameSearchController,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar recetas...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true,
+                      fillColor: Colors.grey[50],
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ),
+                if (!_isMyRecipesMode)
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    color: Colors.white,
                     child: Row(
                       children: [
+                        _buildFilterChip('Generales', 'general'),
+                        const SizedBox(width: 8),
                         _buildFilterChip('Favoritas', 'favorites'),
                         const SizedBox(width: 8),
                         _buildFilterChip('Privadas', 'private'),
                         const SizedBox(width: 8),
                         _buildFilterChip('Publicadas', 'public'),
-                        const SizedBox(width: 8),
-                        _buildFilterChip('Generales', 'general'),
                       ],
                     ),
+                  ),
+                // Ordenar + resultados
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${_filteredRecipes.length} recetas',
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                      ),
+                      Row(
+                        children: [
+                          Text('Ordenar: ', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                          DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: _sortBy,
+                              isDense: true,
+                              items: const [
+                                DropdownMenuItem(value: 'relevance', child: Text('Relevancia')),
+                                DropdownMenuItem(value: 'duration', child: Text('Duración')),
+                                DropdownMenuItem(value: 'az', child: Text('A-Z')),
+                              ],
+                              onChanged: (v) {
+                                if (v != null) setState(() => _sortBy = v);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
                 // Recipes list
@@ -724,7 +843,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                     children: [
                       _isLoading
                           ? const Center(child: CircularProgressIndicator())
-                          : _recipes.isEmpty
+                          : _filteredRecipes.isEmpty
                               ? Center(
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -744,9 +863,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                 )
                               : ListView.builder(
                                   padding: const EdgeInsets.all(16),
-                                  itemCount: _recipes.length,
+                                  itemCount: _filteredRecipes.length,
                                   itemBuilder: (context, index) {
-                                    final recipe = _recipes[index];
+                                    final recipe = _filteredRecipes[index];
                                     return _buildRecipeCard(recipe, false);
                                   },
                                 ),
@@ -923,6 +1042,24 @@ class _RecipesScreenState extends State<RecipesScreen> {
                           ),
                         ),
                 ),
+                // Icono ojo: publicada (encendido) o no (apagado) - solo en recetas privadas
+                if (_selectedFilter == 'private' || _isMyRecipesMode)
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        (recipe['is_public'] ?? false) ? Icons.visibility : Icons.visibility_off,
+                        color: (recipe['is_public'] ?? false) ? const Color(0xFF4CAF50) : Colors.grey[600],
+                        size: 22,
+                      ),
+                    ),
+                  ),
                 // Favorite button
                 Positioned(
                   top: 12,
