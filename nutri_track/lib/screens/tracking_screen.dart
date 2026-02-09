@@ -327,13 +327,13 @@ class _TrackingScreenState extends State<TrackingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () {
             // Volver a la homepage (MainNavigationScreen index 2)
             final mainNavState = MainNavigationScreen.of(context);
@@ -347,10 +347,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Seguimiento',
           style: TextStyle(
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -407,7 +407,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
   Widget _buildPeriodSelector() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      color: AppTheme.cardBackground,
+      color: AppTheme.cardColor(context),
       child: Row(
         children: [
           Expanded(
@@ -438,17 +438,17 @@ class _TrackingScreenState extends State<TrackingScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary : Colors.grey[100],
+          color: isSelected ? AppTheme.primary : AppTheme.fillLight(context),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? Colors.white : Colors.grey[600], size: 20),
+            Icon(icon, color: isSelected ? Colors.white : AppTheme.textSecondary(context), size: 20),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Colors.grey[600],
+                color: isSelected ? Colors.white : AppTheme.textSecondary(context),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 12,
               ),
@@ -468,7 +468,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         boxShadow: [
@@ -774,7 +774,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -883,7 +883,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1039,7 +1039,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppTheme.cardBackground,
+          color: AppTheme.cardColor(context),
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(child: CircularProgressIndicator()),
@@ -1088,7 +1088,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1217,7 +1217,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppTheme.cardBackground,
+          color: AppTheme.cardColor(context),
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Center(child: CircularProgressIndicator()),
@@ -1268,7 +1268,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1484,7 +1484,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -1776,7 +1776,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 20),
         padding: const EdgeInsets.all(40),
         decoration: BoxDecoration(
-          color: AppTheme.cardBackground,
+          color: AppTheme.cardColor(context),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Column(
@@ -1808,7 +1808,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(

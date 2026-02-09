@@ -486,9 +486,9 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(

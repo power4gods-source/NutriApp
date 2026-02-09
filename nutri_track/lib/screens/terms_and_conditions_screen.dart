@@ -8,9 +8,9 @@ class TermsAndConditionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         title: const Text(
           'Términos y Condiciones',
@@ -53,12 +53,20 @@ class TermsAndConditionsScreen extends StatelessWidget {
               'El usuario es el único propietario y responsable de los datos, fotos y comentarios que publique. Al usar la App, el usuario se obliga a mantener indemne al Titular de la App ante cualquier reclamación de terceros (incluyendo infracciones de derechos de autor, honor o intimidad).\n\nCooKind no supervisa los contenidos antes de su publicación.\n\nEl usuario acepta que, ante una denuncia judicial, CooKind colaborará con las autoridades facilitando los datos de registro (email e IP) del infractor.',
             ),
             _buildTermsSubsection(
-              '1.3. Renuncia a Acciones Legales',
+              '1.3. Subida de Información o Propiedad de Terceros',
+              'La subida de información, imágenes, textos, recetas o cualquier contenido que sea propiedad intelectual o de terceros es responsabilidad exclusiva del usuario que lo sube. CooKind no se hace responsable de las infracciones de derechos de autor, marcas o propiedad intelectual que puedan derivarse del contenido publicado por los usuarios. El usuario garantiza que dispone de los derechos necesarios sobre todo el contenido que publique y asume toda responsabilidad legal ante reclamaciones de terceros.',
+            ),
+            _buildTermsSubsection(
+              '1.4. Renuncia a Acciones Legales',
               'Mediante la aceptación de estos términos, el usuario renuncia expresamente a interponer cualquier demanda, querella o reclamación civil, penal o administrativa contra CooKind o el Titular de la App por conceptos de:\n• Errores en la información nutricional.\n• Fallos técnicos o pérdida de datos de su historial alimenticio.\n• Comportamiento inapropiado de otros usuarios en el chat.',
             ),
             _buildTermsSection(
               '2. POLÍTICA DE PRIVACIDAD',
               'Esta política regula el tratamiento de datos personales conforme al Reglamento (UE) 2016/679 (RGPD) y la LOPDGDD 3/2018.',
+            ),
+            _buildTermsSubsection(
+              '2.0. Información Básica sobre Protección de Datos',
+              'Responsable: CooKind.\n\nFinalidad: Gestionar tu perfil de usuario, permitir la creación de recetas y facilitar la interacción social en la App.\n\nLegitimación: Consentimiento del interesado y ejecución de los Términos de Uso.\n\nDestinatarios: No se cederán datos a terceros, salvo obligación legal. No almacenamos datos bancarios.\n\nDerechos: Tienes derecho a acceder, rectificar y suprimir tus datos, así como otros derechos detallados en el apartado 2.4 (Derechos del Usuario ARCO+).',
             ),
             _buildTermsSubsection(
               '2.1. Responsable del Tratamiento',

@@ -1,8 +1,12 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../services/auth_service.dart';
+import '../services/firebase_storage_paths.dart';
 import '../services/recipe_service.dart';
 import '../services/firebase_recipe_service.dart';
 import '../services/firebase_user_service.dart';
@@ -47,6 +51,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   Map<String, dynamic>? _calculatedNutrition;
   bool _isCalculating = false;
   bool _isSaving = false;
+  String? _recipeImageUrl;
+  Uint8List? _selectedImageBytes;
   
   final TextEditingController _ingredientNameController = TextEditingController();
   final TextEditingController _ingredientQuantityController = TextEditingController();
@@ -67,6 +73,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       _timeController.text = (recipe['time_minutes'] ?? 30).toString();
       _difficulty = recipe['difficulty'] ?? 'Fácil';
       _servingsController.text = (recipe['servings'] ?? 4).toString();
+      final imgUrl = recipe['image_url']?.toString().trim() ?? '';
+      if (imgUrl.isNotEmpty && !imgUrl.contains('unsplash.com')) {
+        _recipeImageUrl = imgUrl;
+      }
       
       // Parsear descripción e instrucciones
       // Primero verificar si hay instrucciones en formato array (recetas generales)
@@ -337,6 +347,43 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     });
   }
 
+  Future<void> _pickRecipeImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800,
+        maxHeight: 600,
+        imageQuality: 85,
+      );
+      if (image != null && mounted) {
+        final bytes = await image.readAsBytes();
+        setState(() {
+          _selectedImageBytes = bytes;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al seleccionar imagen: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  Future<String?> _uploadRecipeImage(Uint8List bytes) async {
+    try {
+      final userId = _authService.userId ?? '';
+      final path = FirebaseStoragePaths.recipeImageNew(userId);
+      final ref = FirebaseStorage.instance.ref().child(path);
+      await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+      return await ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading recipe image: $e');
+      return null;
+    }
+  }
+
   Future<void> _saveRecipe() async {
     if (!_formKey.currentState!.validate()) return;
     if (_ingredients.isEmpty) {
@@ -382,6 +429,13 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       final caloriesPerServing = _calculatedNutrition != null 
           ? _calculatedNutrition!['calories'] as int 
           : 0;
+
+      // Resolver imagen: subir si hay bytes nuevos, usar existente o por defecto
+      String imageUrl = _recipeImageUrl ?? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';
+      if (_selectedImageBytes != null) {
+        final uploaded = await _uploadRecipeImage(_selectedImageBytes!);
+        if (uploaded != null) imageUrl = uploaded;
+      }
       
       final recipe = {
         'title': _titleController.text.trim(),
@@ -390,7 +444,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         'difficulty': _difficulty,
         'ingredients': ingredientsString,
         'nutrients': nutrientsString,
-        'image_url': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop', // Imagen por defecto
+        'image_url': imageUrl,
         'tags': '',
         'servings': servings,
         'calories_per_serving': caloriesPerServing, // Calorías por porción
@@ -606,9 +660,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
@@ -664,6 +718,38 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+
+              // Foto de receta
+              InkWell(
+                onTap: _pickRecipeImage,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _selectedImageBytes != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.memory(_selectedImageBytes!, fit: BoxFit.cover, width: double.infinity),
+                        )
+                      : _recipeImageUrl != null && _recipeImageUrl!.isNotEmpty
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(_recipeImageUrl!, fit: BoxFit.cover, width: double.infinity),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate, size: 40, color: Colors.grey.shade600),
+                                const SizedBox(width: 12),
+                                Text('Añadir foto de receta', style: TextStyle(color: Colors.grey.shade600)),
+                              ],
+                            ),
+                ),
               ),
               const SizedBox(height: 16),
 

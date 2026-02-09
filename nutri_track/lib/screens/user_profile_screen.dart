@@ -123,7 +123,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final recipesCount = _recipes.length;
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppTheme.surface,
         elevation: 0,

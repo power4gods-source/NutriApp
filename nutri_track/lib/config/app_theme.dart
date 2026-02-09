@@ -36,4 +36,34 @@ class AppTheme {
   // Bordes y divisores
   static const Color divider = Color(0xFFD4E2CE);
   static const Color borderLight = Color(0xFFE2ECDD);
+
+  // Dark mode - fondo negro base
+  static const Color darkScaffoldBackground = Color(0xFF0A0A0A);
+  static const Color darkSurface = Color(0xFF121212);
+  static const Color darkSurfaceElevated = Color(0xFF1A1A1A);
+  static const Color darkCardBackground = Color(0xFF1E1E1E);
+  static const Color darkCardBackgroundElevated = Color(0xFF262626);
+  static const Color darkCardBorder = Color(0xFF2E2E2E);
+  static const Color darkDivider = Color(0xFF333333);
+
+  // Dark mode - texto (blanco/gris según contraste)
+  static const Color darkTextPrimary = Color(0xFFF5F5F5);
+  static const Color darkTextSecondary = Color(0xFFB0B0B0);
+  static const Color darkTextTertiary = Color(0xFF808080);
+
+  /// Colores según el tema actual (light/dark)
+  static Color cardColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkCardBackground : cardBackground;
+  static Color cardBorderColor(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkCardBorder : cardBorder;
+  static Color textPrimary(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkTextPrimary : const Color(0xFF1A1A1A);
+  static Color textSecondary(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkTextSecondary : const Color(0xFF5A5A5A);
+  static Color textTertiary(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkTextTertiary : const Color(0xFF808080);
+  static Color fillLight(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkCardBackground : const Color(0xFFF5F5F5);
+  static Color fillMedium(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? darkCardBackgroundElevated : const Color(0xFFE0E0E0);
 }

@@ -9,6 +9,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
+import 'services/theme_provider.dart';
 import 'services/firebase_sync_service.dart';
 import 'services/firebase_user_service.dart';
 import 'config/app_config.dart';
@@ -71,8 +72,10 @@ class CooKindApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: MaterialApp(
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, _) => MaterialApp(
         title: 'CooKind',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
@@ -111,7 +114,77 @@ class CooKindApp extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Roboto',
         ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: AppTheme.primary,
+          scaffoldBackgroundColor: AppTheme.darkScaffoldBackground,
+          colorScheme: const ColorScheme.dark(
+            primary: AppTheme.primary,
+            secondary: AppTheme.ecoSage,
+            surface: AppTheme.darkSurface,
+            onPrimary: Colors.white,
+            onSecondary: Colors.white,
+            onSurface: AppTheme.darkTextPrimary,
+            onSurfaceVariant: AppTheme.darkTextSecondary,
+            onError: Colors.white,
+            error: AppTheme.vividRed,
+            outline: AppTheme.darkCardBorder,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: AppTheme.darkSurface,
+            foregroundColor: AppTheme.darkTextPrimary,
+            elevation: 0,
+            scrolledUnderElevation: 2,
+          ),
+          cardTheme: CardThemeData(
+            color: AppTheme.darkCardBackground,
+            elevation: 2,
+            shadowColor: Colors.black87,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: const BorderSide(color: AppTheme.darkCardBorder, width: 1),
+            ),
+          ),
+          dividerColor: AppTheme.darkDivider,
+          listTileTheme: const ListTileThemeData(
+            textColor: AppTheme.darkTextPrimary,
+            iconColor: AppTheme.darkTextSecondary,
+          ),
+          drawerTheme: const DrawerThemeData(
+            backgroundColor: AppTheme.darkSurface,
+          ),
+          inputDecorationTheme: const InputDecorationTheme(
+            filled: true,
+            fillColor: AppTheme.darkCardBackground,
+            labelStyle: TextStyle(color: AppTheme.darkTextSecondary),
+            hintStyle: TextStyle(color: AppTheme.darkTextTertiary),
+            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide(color: AppTheme.darkCardBorder),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              borderSide: BorderSide(color: AppTheme.primary, width: 2),
+            ),
+          ),
+          textTheme: const TextTheme(
+            bodyLarge: TextStyle(color: AppTheme.darkTextPrimary),
+            bodyMedium: TextStyle(color: AppTheme.darkTextPrimary),
+            bodySmall: TextStyle(color: AppTheme.darkTextSecondary),
+            titleLarge: TextStyle(color: AppTheme.darkTextPrimary, fontWeight: FontWeight.bold),
+            titleMedium: TextStyle(color: AppTheme.darkTextPrimary, fontWeight: FontWeight.w600),
+            titleSmall: TextStyle(color: AppTheme.darkTextPrimary),
+            labelLarge: TextStyle(color: AppTheme.darkTextPrimary),
+            labelMedium: TextStyle(color: AppTheme.darkTextSecondary),
+            labelSmall: TextStyle(color: AppTheme.darkTextTertiary),
+          ),
+          useMaterial3: true,
+          fontFamily: 'Roboto',
+        ),
+        themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
         home: const AuthWrapper(),
+        ),
       ),
     );
   }
@@ -268,7 +341,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: IndexedStack(
         index: _currentIndex,
         children: _screens,
@@ -295,7 +368,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: AppTheme.primary,
             unselectedItemColor: Colors.grey,
-            backgroundColor: AppTheme.surface,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             selectedFontSize: 12,
             unselectedFontSize: 12,

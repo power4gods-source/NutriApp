@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/app_theme.dart';
 import '../services/auth_service.dart';
+import '../services/theme_provider.dart';
 import '../screens/edit_profile_screen.dart';
 import '../screens/recipes_screen.dart';
 import '../screens/notifications_screen.dart';
@@ -19,7 +20,9 @@ class AppDrawer extends StatelessWidget {
     final username = authService.username ?? email.split('@')[0];
 
     final phone = authService.phone ?? '';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Drawer(
+      backgroundColor: isDark ? AppTheme.darkSurface : null,
       child: Column(
         children: [
           // Header: foto, nombre, email, teléfono
@@ -31,7 +34,7 @@ class AppDrawer extends StatelessWidget {
             ),
             child: Column(
               children: [
-                _buildAvatar(authService.avatarUrl, username),
+                _buildAvatar(context, authService.avatarUrl, username),
                 const SizedBox(height: 12),
                 Text(
                   username,
@@ -128,7 +131,18 @@ class AppDrawer extends StatelessWidget {
                     );
                   },
                 ),
-                
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, _) => SwitchListTile(
+                    secondary: const Icon(Icons.dark_mode, color: AppTheme.primary),
+                    title: const Text(
+                      'Modo oscuro',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    value: themeProvider.isDarkMode,
+                    onChanged: (_) => themeProvider.toggleDarkMode(),
+                    activeColor: AppTheme.primary,
+                  ),
+                ),
                 const Divider(),
                 
                 // Logout
@@ -173,7 +187,7 @@ class AppDrawer extends StatelessWidget {
       title: Text(
         title,
         style: TextStyle(
-          color: textColor,
+          color: textColor ?? Theme.of(context).colorScheme.onSurface,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -181,11 +195,12 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(String? avatarUrl, String username) {
+  Widget _buildAvatar(BuildContext context, String? avatarUrl, String username) {
     final hasImage = avatarUrl != null && avatarUrl.isNotEmpty;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return CircleAvatar(
       radius: 40,
-      backgroundColor: AppTheme.surface,
+      backgroundColor: isDark ? AppTheme.darkCardBackground : AppTheme.surface,
       backgroundImage: hasImage ? NetworkImage(avatarUrl!) : null,
       child: hasImage
           ? null

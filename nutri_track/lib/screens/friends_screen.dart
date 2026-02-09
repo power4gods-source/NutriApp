@@ -389,7 +389,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
               ElevatedButton(
                 onPressed: () => _toggleFollow(userId, isFollowing),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isFollowing ? Colors.grey[300] : AppTheme.primary,
+                  backgroundColor: isFollowing ? AppTheme.textTertiary(context) : AppTheme.primary,
                   foregroundColor: isFollowing ? Colors.black87 : Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
@@ -411,11 +411,11 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildStatsHeader() {
+  Widget _buildStatsHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -427,15 +427,15 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          _buildStatItem('Te siguen', _followersCount),
+          _buildStatItem(context, 'Te siguen', _followersCount),
           const SizedBox(width: 24),
-          _buildStatItem('Conexiones', _connectionsCount),
+          _buildStatItem(context, 'Conexiones', _connectionsCount),
         ],
       ),
     );
   }
 
-  Widget _buildStatItem(String label, int value) {
+  Widget _buildStatItem(BuildContext context, String label, int value) {
     return Column(
       children: [
         Text(
@@ -443,7 +443,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF4CAF50),
+            color: AppTheme.primary,
           ),
         ),
         const SizedBox(height: 2),
@@ -451,7 +451,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: AppTheme.textSecondary(context),
           ),
         ),
       ],
@@ -461,13 +461,13 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () {
             final mainNavState = MainNavigationScreen.of(context);
             if (mainNavState != null) {
@@ -477,10 +477,10 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
             }
           },
         ),
-        title: const Text(
+        title: Text(
           'Comunidad',
           style: TextStyle(
-            color: Colors.black87,
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -497,7 +497,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
           preferredSize: const Size.fromHeight(150),
           child: Column(
             children: [
-              _buildStatsHeader(),
+              _buildStatsHeader(context),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: TextField(
@@ -510,7 +510,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: AppTheme.fillLight(context),
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -518,7 +518,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
               TabBar(
                 controller: _tabController,
                 labelColor: const Color(0xFF4CAF50),
-                unselectedLabelColor: Colors.grey,
+                unselectedLabelColor: AppTheme.textSecondary(context),
                 indicatorColor: const Color(0xFF4CAF50),
                 indicatorWeight: 3,
                 tabs: const [
@@ -546,14 +546,14 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                             Icon(
                               _searchQuery.isEmpty ? Icons.person_add_outlined : Icons.search_off,
                               size: 80,
-                              color: Colors.grey[300],
+                              color: AppTheme.textTertiary(context),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               _searchQuery.isEmpty ? 'Aún no sigues a nadie' : 'No hay coincidencias',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.grey[600],
+                                color: AppTheme.textSecondary(context),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -562,7 +562,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                               _searchQuery.isEmpty ? 'Explora usuarios y comienza a seguir' : 'Prueba con otro término de búsqueda',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[500],
+                                color: AppTheme.textSecondary(context),
                               ),
                             ),
                           ],
@@ -590,14 +590,14 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                             Icon(
                               _searchQuery.isEmpty ? Icons.people_outline : Icons.search_off,
                               size: 80,
-                              color: Colors.grey[300],
+                              color: AppTheme.textTertiary(context),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               _searchQuery.isEmpty ? 'No hay perfiles disponibles' : 'No hay coincidencias',
                               style: TextStyle(
                                 fontSize: 16,
-                                color: Colors.grey[600],
+                                color: AppTheme.textSecondary(context),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -606,7 +606,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                               _searchQuery.isEmpty ? 'Los perfiles de usuarios aparecerán aquí' : 'Prueba con otro término de búsqueda',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[500],
+                                color: AppTheme.textSecondary(context),
                               ),
                             ),
                           ],

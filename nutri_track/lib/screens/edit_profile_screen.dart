@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../services/auth_service.dart';
+import '../services/firebase_storage_paths.dart';
 import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import '../utils/password_validator.dart';
@@ -213,8 +214,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<String?> _uploadImageToFirebase(Uint8List imageBytes) async {
     try {
       final userId = _authService.userId ?? '';
-      final fileName = 'avatars/$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = FirebaseStorage.instance.ref().child(fileName);
+      final path = FirebaseStoragePaths.userAvatar(userId);
+      final ref = FirebaseStorage.instance.ref().child(path);
       await ref.putData(
         imageBytes,
         SettableMetadata(contentType: 'image/jpeg'),

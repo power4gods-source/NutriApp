@@ -272,7 +272,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final ingredientsDetailed = recipe['ingredients_detailed'] as List<dynamic>?;
 
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
           // AppBar con imagen

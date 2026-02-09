@@ -6,7 +6,6 @@ import '../services/auth_service.dart';
 import '../utils/password_validator.dart';
 import '../main.dart';
 import 'forgot_password_screen.dart';
-import 'reset_password_screen.dart';
 import 'terms_and_conditions_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -209,7 +208,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -392,7 +391,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               );
             },
             child: const Text(
-              'Olvidaste la contraseña?',
+              'Restablecer contraseña',
               style: TextStyle(color: Colors.grey),
             ),
           ),
@@ -400,12 +399,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const ResetPasswordScreen()),
+                MaterialPageRoute(builder: (_) => const ForgotPasswordScreen(showCodeStep: true)),
               );
             },
             child: Text(
-              'Ya tengo el token',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              'Ya tengo el código',
+              style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12),
             ),
           ),
           const SizedBox(height: 24),
@@ -508,33 +507,6 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               validator: (value) => PasswordValidator.validate(value),
             ),
             const SizedBox(height: 20),
-            
-            // Texto legal de protección de datos
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[300]!),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Información básica sobre protección de datos:',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey[800]),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Responsable: CooKind. Finalidad: Gestionar tu perfil, permitir la creación de recetas y facilitar la interacción social. '
-                    'Legitimación: Consentimiento y ejecución de los Términos de Uso. Destinatarios: No se cederán datos a terceros, salvo obligación legal. '
-                    'Derechos: Acceso, rectificación y supresión, detallados en nuestra Política de Privacidad.',
-                    style: TextStyle(fontSize: 11, color: Colors.grey[700], height: 1.4),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
             
             // Checkbox 1: Términos y Política
             Row(

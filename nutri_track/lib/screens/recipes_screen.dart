@@ -700,15 +700,15 @@ class _RecipesScreenState extends State<RecipesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.scaffoldBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: _expandedRecipeId != null
           ? null // Ocultar AppBar cuando hay receta expandida
           : AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () {
             if (_isMyRecipesMode && Navigator.canPop(context)) {
               Navigator.pop(context);
@@ -724,8 +724,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ),
         title: Text(
           _isMyRecipesMode ? 'Mis recetas' : 'Recetas',
-          style: const TextStyle(
-            color: Colors.black87,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -733,7 +733,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.menu_book, color: Colors.black87),
+            icon: Icon(Icons.menu_book, color: Theme.of(context).colorScheme.onSurface),
             tooltip: 'Buscador de recetas',
             onPressed: () {
               Navigator.push(
@@ -786,7 +786,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
-                      fillColor: Colors.grey[50],
+                      fillColor: AppTheme.fillLight(context),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                   ),
@@ -794,7 +794,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 if (!_isMyRecipesMode)
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     child: Row(
                       children: [
                         _buildFilterChip('Generales', 'general'),
@@ -951,26 +951,30 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Widget _buildFilterChip(String label, String value) {
     final isSelected = _selectedFilter == value;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) async {
-        if (selected) {
-          // Invalidar cache cuando se cambia de filtro
-          await _invalidateCache();
-          setState(() {
-            _selectedFilter = value;
-            _expandedRecipeId = null; // Cerrar receta expandida al cambiar filtro
-          });
-          // Recargar recetas
-          await _loadRecipes();
-        }
+    return Builder(
+      builder: (context) {
+        final textColor = isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface;
+        return FilterChip(
+          label: Text(label, style: TextStyle(color: textColor)),
+          selected: isSelected,
+          onSelected: (selected) async {
+            if (selected) {
+              await _invalidateCache();
+              setState(() {
+                _selectedFilter = value;
+                _expandedRecipeId = null;
+              });
+              await _loadRecipes();
+            }
+          },
+          selectedColor: AppTheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          labelStyle: TextStyle(
+            color: textColor,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        );
       },
-      selectedColor: AppTheme.primary,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black87,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
     );
   }
 

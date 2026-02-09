@@ -17,6 +17,7 @@ import 'shopping_list_screen.dart';
 import 'add_consumption_screen.dart';
 import 'recipes_screen.dart';
 import 'recipe_finder_screen.dart';
+import '../config/app_config.dart';
 import '../config/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -182,11 +183,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadTrendingRecipes() async {
     try {
-      // Obtener todas las recetas y tomar las primeras como tendencias
       final allRecipes = await _recipeService.getAllRecipes();
-      // Para tendencias, tomar las primeras 10 recetas
+      // Solo recetas con imagen
+      final withImage = allRecipes.where((r) {
+        final url = r['image_url']?.toString().trim() ?? '';
+        return url.isNotEmpty;
+      }).toList();
       setState(() {
-        _trendingRecipes = allRecipes.take(10).toList();
+        _trendingRecipes = withImage.take(10).toList();
       });
     } catch (e) {
       print('Error loading trending recipes: $e');
@@ -360,13 +364,15 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           },
         ),
-        title: const Text(
-          'COOKIND',
-          style: TextStyle(
-            color: AppTheme.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            letterSpacing: 1.5,
+        title: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 160, maxHeight: 40),
+          child: Image.asset(
+            'assets/images/Cookind.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Image.network(
+              AppConfig.logoFirebaseUrl,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
         centerTitle: true,
@@ -375,9 +381,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _loadData,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
+              child: Container(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.darkScaffoldBackground
+                    : const Color(0xFFECECEC),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 12),
@@ -394,6 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _buildQuickRecipesSection(),
                     const SizedBox(height: 24),
                   ],
+                ),
                 ),
               ),
             ),
@@ -427,9 +438,9 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppTheme.cardBackground,
+          color: AppTheme.cardColor(context),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppTheme.cardBorder),
+          border: Border.all(color: AppTheme.cardBorderColor(context)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.06),
@@ -445,12 +456,12 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Tu día',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: AppTheme.textPrimary(context),
                   ),
                 ),
                 Container(
@@ -463,7 +474,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     dateLabel,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[700],
+                      color: AppTheme.textSecondary(context),
                     ),
                   ),
                 ),
@@ -507,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey[700],
+                color: AppTheme.textSecondary(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -569,7 +580,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 '/${goal.toInt()} kcal',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: AppTheme.textSecondary(context),
                 ),
               ),
             ],
@@ -611,7 +622,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 label,
                 style: TextStyle(
                   fontSize: 11,
-                  color: Colors.grey[700],
+                  color: AppTheme.textSecondary(context),
                 ),
               ),
             ],
@@ -619,17 +630,17 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 4),
           Text(
             value.toInt().toString(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppTheme.textPrimary(context),
             ),
           ),
           Text(
             'kcal/día',
             style: TextStyle(
               fontSize: 11,
-              color: Colors.grey[600],
+              color: AppTheme.textSecondary(context),
             ),
           ),
         ],
@@ -656,7 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: Colors.grey[700],
+              color: AppTheme.textSecondary(context),
             ),
           ),
           const SizedBox(height: 4),
@@ -721,9 +732,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
-              color: AppTheme.cardBackground,
+              color: AppTheme.cardColor(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.cardBorder, width: 1),
+              border: Border.all(color: AppTheme.cardBorderColor(context), width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -742,7 +753,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: AppTheme.textPrimary(context),
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
@@ -766,9 +777,9 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
             decoration: BoxDecoration(
-              color: AppTheme.cardBackground,
+              color: AppTheme.cardColor(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.cardBorder, width: 1),
+              border: Border.all(color: AppTheme.cardBorderColor(context), width: 1),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -797,7 +808,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: AppTheme.textPrimary(context),
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 2,
@@ -831,9 +842,9 @@ class _HomeScreenState extends State<HomeScreen> {
           minHeight: 70, // Misma altura para ambos
         ),
         decoration: BoxDecoration(
-          color: AppTheme.cardBackground,
+          color: AppTheme.cardColor(context),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppTheme.cardBorder, width: 1),
+          border: Border.all(color: AppTheme.cardBorderColor(context), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -854,10 +865,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Flexible(
                         child: Text(
                           title,
-                          style: const TextStyle(
-                            fontSize: 14, // Texto más pequeño
+                          style: TextStyle(
+                            fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppTheme.textPrimary(context),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -888,7 +899,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: isSmall ? 12 : 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: AppTheme.textPrimary(context),
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -900,7 +911,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           subtitle,
                           style: TextStyle(
                             fontSize: 10,
-                            color: Colors.grey[600],
+                            color: AppTheme.textSecondary(context),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -941,7 +952,7 @@ class _HomeScreenState extends State<HomeScreen> {
               CircularProgressIndicator(
                 value: progress,
                 strokeWidth: strokeWidth,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: AppTheme.fillMedium(context),
                 valueColor: AlwaysStoppedAnimation<Color>(color),
               ),
               Column(
@@ -959,7 +970,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     '/${goal.toInt()} kcal',
                     style: TextStyle(
                       fontSize: goalFontSize,
-                      color: Colors.grey[600],
+                      color: AppTheme.textSecondary(context),
                     ),
                   ),
                 ],
@@ -973,7 +984,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: labelFontSize,
             fontWeight: isLarge ? FontWeight.bold : FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppTheme.textSecondary(context),
           ),
           textAlign: isLarge ? TextAlign.left : TextAlign.center,
         ),
@@ -1020,7 +1031,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: Colors.grey[700],
+            color: AppTheme.textSecondary(context),
           ),
           textAlign: TextAlign.center,
         ),
@@ -1044,9 +1055,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.cardBackground,
+            color: AppTheme.cardColor(context),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppTheme.cardBorder, width: 1),
+            border: Border.all(color: AppTheme.cardBorderColor(context), width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
@@ -1070,7 +1081,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -1080,15 +1091,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: AppTheme.textPrimary(context),
                       ),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text(
                       'Busca por ingredientes, tiempo...',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey,
+                        color: AppTheme.textSecondary(context),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -1121,12 +1132,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Tendencias',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppTheme.textPrimary(context),
                 ),
               ),
               TextButton(
@@ -1172,12 +1183,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Recetas rápidas',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: AppTheme.textPrimary(context),
                 ),
               ),
               TextButton(
@@ -1409,8 +1420,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          color: Colors.black87,
+                        style: TextStyle(
+                          color: AppTheme.textPrimary(context),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1425,16 +1436,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                              Icon(Icons.access_time, size: 14, color: AppTheme.textSecondary(context)),
                               const SizedBox(width: 4),
-                              Text('$time min', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                              Text('$time min', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
                             ],
                           ),
-                          Text(difficulty, style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                          Text(difficulty, style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
                           if (recipe['servings'] != null && recipe['servings'] > 0)
-                            Text('${recipe['servings']} raciones', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                            Text('${recipe['servings']} raciones', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
                           if (caloriesPerServing > 0)
-                            Text('$caloriesPerServing kcal', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
+                            Text('$caloriesPerServing kcal', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
                         ],
                       ),
                     ],
@@ -1483,9 +1494,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground,
+        color: AppTheme.cardColor(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.cardBorder),
+        border: Border.all(color: AppTheme.cardBorderColor(context)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -1529,10 +1540,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: AppTheme.textPrimary(context),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -1546,13 +1557,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
+                            Icon(Icons.access_time, size: 14, color: AppTheme.textSecondary(context)),
                             const SizedBox(width: 4),
                             Text(
                               '$time min',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.grey[600],
+                                color: AppTheme.textSecondary(context),
                               ),
                             ),
                           ],
@@ -1561,7 +1572,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: AppTheme.fillMedium(context),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
@@ -1569,7 +1580,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.grey[700],
+                                color: AppTheme.textSecondary(context),
                               ),
                             ),
                           ),
@@ -1578,13 +1589,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.restaurant, size: 14, color: Colors.grey[600]),
+                              Icon(Icons.restaurant, size: 14, color: AppTheme.textSecondary(context)),
                               const SizedBox(width: 4),
                               Text(
                                 '${recipe['servings']} raciones',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.grey[600],
+                                  color: AppTheme.textSecondary(context),
                                 ),
                               ),
                             ],
@@ -1617,14 +1628,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           return Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.grey[100],
+                              color: AppTheme.fillLight(context),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
                               tag,
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.grey[700],
+                                color: AppTheme.textSecondary(context),
                               ),
                             ),
                           );

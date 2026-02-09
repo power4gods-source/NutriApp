@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        // Application ID único: cambiar a tu dominio para Play Store (ej. com.tudominio.nutritrack)
+        // Application ID único: cambiar a tu dominio para Play Store (ej. com.tudominio.cookind)
         applicationId = "com.mycompany.nutrirecipeapp"
         minSdk = flutter.minSdkVersion  // Android 5.0+ para máxima compatibilidad
         targetSdk = 34  // Requerido por Play Store 2024+
