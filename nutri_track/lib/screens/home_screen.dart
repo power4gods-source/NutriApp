@@ -365,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         ),
         title: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 160, maxHeight: 40),
+          constraints: const BoxConstraints(maxWidth: 225, maxHeight: 58),
           child: Image.asset(
             'assets/images/Cookind.png',
             fit: BoxFit.contain,
