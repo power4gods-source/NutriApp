@@ -552,13 +552,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           const TextSpan(text: 'Acepto los '),
                           TextSpan(
                             text: 'Términos y Condiciones',
-                            style: const TextStyle(color: AppTheme.primary, decoration: TextDecoration.underline, fontWeight: FontWeight.w500),
+                            style: const TextStyle(color: Color.fromRGBO(158, 158, 158, 1), decoration: TextDecoration.underline, fontWeight: FontWeight.w500),
                             recognizer: TapGestureRecognizer()..onTap = _openTerms,
                           ),
                           const TextSpan(text: ' y la '),
                           TextSpan(
                             text: 'Política de Privacidad',
-                            style: const TextStyle(color: AppTheme.primary, decoration: TextDecoration.underline, fontWeight: FontWeight.w500),
+                            style: const TextStyle(color: Color.fromRGBO(158, 158, 158, 1), decoration: TextDecoration.underline, fontWeight: FontWeight.w500),
                             recognizer: TapGestureRecognizer()..onTap = _openTerms,
                           ),
                           const TextSpan(text: '. Entiendo que soy el único responsable de los contenidos que publique y de las consecuencias de salud derivadas del uso de las recetas. (Obligatorio)'),
@@ -584,7 +584,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     onTap: () => setState(() => _isOver14 = !_isOver14),
                     child: Text(
                       'Declaro que soy mayor de 14 años. (Obligatorio)',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[800]),
+                      style: TextStyle(fontSize: 12, color: const Color.fromRGBO(150, 150, 150, 1)),
                     ),
                   ),
                 ),

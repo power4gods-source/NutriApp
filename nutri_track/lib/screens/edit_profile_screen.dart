@@ -178,15 +178,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _saveAvatarToProfile(String avatarUrl) async {
     final headers = await _authService.getAuthHeaders();
     final url = await AppConfig.getBackendUrl();
-    // Usar endpoint dedicado de avatar para mayor fiabilidad
-    final response = await http.post(
-      Uri.parse('$url/profile/avatar'),
+    // PUT /profile actualiza avatar_url en profiles.json (sincronizado con Firebase)
+    final response = await http.put(
+      Uri.parse('$url/profile'),
       headers: {...headers, 'Content-Type': 'application/json'},
       body: jsonEncode({'avatar_url': avatarUrl}),
     ).timeout(const Duration(seconds: 10));
     if (response.statusCode == 200) {
       await _authService.saveAvatarUrl(avatarUrl);
-      await _authService.reloadAuthData();
+      await _authService.refreshUserDataFromBackend();
     } else {
       throw Exception('Error al guardar avatar: ${response.body}');
     }
@@ -226,9 +226,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
+  /// Sube la imagen a Firebase Storage: data/users/{userId}/avatar/{timestamp}.jpg
+  /// La URL devuelta es persistente y se guarda en el backend (profiles.json → Firestore)
   Future<String?> _uploadImageToFirebase(Uint8List imageBytes) async {
     try {
       final userId = _authService.userId ?? '';
+      if (userId.isEmpty) {
+        print('Error: userId vacío, no se puede subir avatar');
+        return null;
+      }
       final path = FirebaseStoragePaths.userAvatar(userId);
       final ref = FirebaseStorage.instance.ref().child(path);
       await ref.putData(
@@ -236,37 +242,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         SettableMetadata(contentType: 'image/jpeg'),
       );
       final url = await ref.getDownloadURL();
+      print('Avatar subido a Firebase: $path -> URL obtenida');
       return url;
     } catch (e) {
-      print('Error uploading image: $e');
+      print('Error subiendo imagen a Firebase: $e');
       return null;
     }
   }
   
   void _onFirstNameChanged(String value) {
     _firstNameDebounce?.cancel();
-    _firstNameDebounce = Timer(const Duration(milliseconds: 800), () {
+    _firstNameDebounce = Timer(const Duration(seconds: 2), () {
       _saveProfileField('first_name', value.trim());
     });
   }
 
   void _onLastNameChanged(String value) {
     _lastNameDebounce?.cancel();
-    _lastNameDebounce = Timer(const Duration(milliseconds: 800), () {
+    _lastNameDebounce = Timer(const Duration(seconds: 2), () {
       _saveProfileField('last_name', value.trim());
     });
   }
 
   void _onAddressChanged(String value) {
     _addressDebounce?.cancel();
-    _addressDebounce = Timer(const Duration(milliseconds: 800), () {
+    _addressDebounce = Timer(const Duration(seconds: 2), () {
       _saveProfileField('address', value.trim());
     });
   }
 
   void _onPhoneChanged(String value) {
     _phoneDebounce?.cancel();
-    _phoneDebounce = Timer(const Duration(milliseconds: 800), () {
+    _phoneDebounce = Timer(const Duration(seconds: 2), () {
       _savePhone(value.trim());
     });
   }
@@ -285,7 +292,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _saveProfileField(String key, String value) async {
-    if (_isSaving) return;
     setState(() => _isSaving = true);
     try {
       final headers = await _authService.getAuthHeaders();
@@ -329,7 +335,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _savePhone(String newPhone) async {
-    if (_isSaving) return;
     setState(() => _isSaving = true);
     try {
       final headers = await _authService.getAuthHeaders();
@@ -504,12 +509,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  /// Info row: mismo tamaño visual que los TextField (mismo padding, altura y decoración)
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Container(
+      constraints: const BoxConstraints(minHeight: 72),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      constraints: const BoxConstraints(minHeight: 56),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: Colors.grey[50],
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[300]!),
       ),
@@ -682,10 +688,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Expanded(
                   child: Text(
                     'Cambiar contraseña',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
+                      color: Color.fromRGBO(158, 158, 158, 1),
                     ),
                   ),
                 ),
