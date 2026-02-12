@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
@@ -216,20 +217,25 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              // Logo Cookind
+              // Logo Cookind (desde Firebase para reflejar actualizaciones)
               Center(
-                child: Image.asset(
-                  'assets/images/Cookind.png',
+                child: Image.network(
+                  AppConfig.logoFirebaseUrl,
                   height: 80,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Text(
-                    'CooKind',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.primary,
+                  errorBuilder: (_, __, ___) => Image.asset(
+                    'assets/images/Cookind.png',
+                    height: 80,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Text(
+                      'CooKind',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primary,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ),

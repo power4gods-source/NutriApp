@@ -373,11 +373,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         title: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 225, maxHeight: 58),
-          child: Image.asset(
-            'assets/images/Cookind.png',
+          child: Image.network(
+            AppConfig.logoFirebaseUrl,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Image.network(
-              AppConfig.logoFirebaseUrl,
+            errorBuilder: (_, __, ___) => Image.asset(
+              'assets/images/Cookind.png',
               fit: BoxFit.contain,
             ),
           ),
