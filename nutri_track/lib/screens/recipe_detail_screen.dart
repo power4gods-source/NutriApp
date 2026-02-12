@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import 'dart:convert';
 import '../services/recipe_service.dart';
@@ -121,6 +122,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           SnackBar(
             content: Text('❌ Error al guardar: ${resp.body}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -130,6 +132,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         SnackBar(
           content: Text('❌ Error al guardar: $e'),
           backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
         ),
       );
     } finally {
@@ -178,7 +181,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       if (!mounted) return;
       if (connections.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No tienes conexiones para compartir aún'), backgroundColor: Colors.orange),
+          const SnackBar(
+            content: Text('No tienes conexiones para compartir aún'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
         );
         return;
       }
@@ -222,13 +229,21 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Error al compartir: ${resp.body}'), backgroundColor: Colors.red),
+          SnackBar(
+          content: Text('❌ Error al compartir: ${resp.body}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
         );
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('❌ Error al compartir: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('❌ Error al compartir: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSharing = false);
@@ -271,55 +286,66 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final description = recipe['description'] ?? '';
     final ingredientsDetailed = recipe['ingredients_detailed'] as List<dynamic>?;
 
+    final recipeImageUrl = recipe['image_url']?.toString().trim() ?? '';
+    final imageUrl = recipeImageUrl.isNotEmpty ? recipeImageUrl : AppConfig.backupPhotoFirebaseUrl;
+    final hasValidImage = true; // Siempre hay imagen: receta o backup_photo
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          // AppBar con imagen
+          // AppBar con imagen (solo si hay foto válida; si no, barra mínima sin espacio vacío)
           SliverAppBar(
-            expandedHeight: 250,
+            expandedHeight: hasValidImage ? 250 : 56,
             pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: recipe['image_url'] != null && recipe['image_url'].toString().trim().isNotEmpty
-                  ? Image.network(
-                      recipe['image_url'],
+            flexibleSpace: hasValidImage
+                ? FlexibleSpaceBar(
+                    background: Image.network(
+                      imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           Container(color: const Color(0xFFF0F4F0)),
-                    )
-                  : Container(color: const Color(0xFFF0F4F0)),
-            ),
+                    ),
+                  )
+                : null,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              icon: Icon(Icons.arrow_back, color: hasValidImage ? Colors.white : Colors.black87),
               onPressed: () => Navigator.pop(context),
             ),
+            backgroundColor: hasValidImage ? null : AppTheme.cardBackground,
             actions: [
               IconButton(
                 icon: _isSharing
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: hasValidImage ? Colors.white : Colors.black87,
+                        ),
                       )
-                    : const Icon(Icons.share, color: Colors.white),
+                    : Icon(Icons.share, color: hasValidImage ? Colors.white : Colors.black87),
                 onPressed: _isSharing ? null : _shareRecipe,
               ),
               if (isAi)
                 IconButton(
                   icon: _isSavingAiRecipe
-                      ? const SizedBox(
+                      ? SizedBox(
                           width: 20,
                           height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: hasValidImage ? Colors.white : Colors.black87,
+                          ),
                         )
-                      : const Icon(Icons.bookmark_add, color: Colors.white),
+                      : Icon(Icons.bookmark_add, color: hasValidImage ? Colors.white : Colors.black87),
                   onPressed: _isSavingAiRecipe ? null : _onTapSaveAi,
                 )
               else
                 IconButton(
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? AppTheme.vividRed : Colors.white,
+                    color: isFavorite ? AppTheme.vividRed : (hasValidImage ? Colors.white : Colors.black87),
                   ),
                   onPressed: _toggleFavorite,
                 ),
@@ -338,12 +364,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Título
+                    // Título (siempre visible, color negro)
                     Text(
                       recipe['title'] ?? 'Sin título',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 12),

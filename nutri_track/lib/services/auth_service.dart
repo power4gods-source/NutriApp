@@ -513,13 +513,25 @@ class AuthService extends ChangeNotifier {
     try {
       final normalizedEmail = email.toLowerCase().trim();
       
-      // Verificar si el usuario ya existe en Firestore
+      // Verificar si el usuario ya existe (email)
       final existingUserId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
       if (existingUserId != null) {
         return {
           'success': false,
           'error': 'Este email ya está registrado. Por favor, inicia sesión.'
         };
+      }
+      
+      // Verificar si el username ya existe (cuando se proporciona)
+      final chosenUsername = (username ?? normalizedEmail.split('@')[0]).trim().toLowerCase();
+      if (chosenUsername.isNotEmpty) {
+        final existingByUsername = await _firebaseUserService.getUserIdFromLogin(chosenUsername);
+        if (existingByUsername != null) {
+          return {
+            'success': false,
+            'error': 'Este nombre de usuario ya existe. Elige otro.'
+          };
+        }
       }
       
       // Validar contraseña (8 chars, mayúscula, carácter especial)

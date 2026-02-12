@@ -1258,8 +1258,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final caloriesPerServing = recipe['calories_per_serving'] ?? 
         (recipe['calories'] != null && recipe['servings'] != null 
             ? (recipe['calories'] / recipe['servings']).round() : 0);
-    final imageUrl = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
-    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final recipeImg = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
+    final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
 
     return Container(
       width: isHorizontal ? 200 : double.infinity,
@@ -1269,7 +1270,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: hasValidImage ? null : Colors.white,
+        color: null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -1282,8 +1283,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: () => _navigateToRecipe(recipe),
-          child: hasValidImage
-              ? Stack(
+          child: Stack(
                   children: [
                     Image.network(
                       imageUrl,
@@ -1421,46 +1421,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ],
-          )
-              : Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          color: AppTheme.textPrimary(context),
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.access_time, size: 14, color: AppTheme.textSecondary(context)),
-                              const SizedBox(width: 4),
-                              Text('$time min', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
-                            ],
-                          ),
-                          Text(difficulty, style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
-                          if (recipe['servings'] != null && recipe['servings'] > 0)
-                            Text('${recipe['servings']} raciones', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
-                          if (caloriesPerServing > 0)
-                            Text('$caloriesPerServing kcal', style: TextStyle(color: AppTheme.textSecondary(context), fontSize: 12)),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+          ),
         ),
       ),
     );
@@ -1470,8 +1431,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final recipeId = (recipe['id'] ?? recipe['title'] ?? '').toString();
     final title = recipe['title'] ?? 'Sin título';
     final time = recipe['time_minutes'] ?? 0;
-    final imageUrl = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
-    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final recipeImg = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
+    final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
     // Obtener calorías por porción
     final caloriesPerServing = recipe['calories_per_serving'] ?? 
                                (recipe['calories'] != null && recipe['servings'] != null 
@@ -1520,8 +1482,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
-            if (hasValidImage)
-              ClipRRect(
+            ClipRRect(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(12),
                   bottomLeft: Radius.circular(12),

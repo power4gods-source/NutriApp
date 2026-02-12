@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/app_theme.dart';
 import '../services/auth_service.dart';
-import '../services/theme_provider.dart';
 import '../screens/edit_profile_screen.dart';
 import '../screens/recipes_screen.dart';
 import '../screens/notifications_screen.dart';
@@ -130,18 +129,6 @@ class AppDrawer extends StatelessWidget {
                       ),
                     );
                   },
-                ),
-                Consumer<ThemeProvider>(
-                  builder: (context, themeProvider, _) => SwitchListTile(
-                    secondary: const Icon(Icons.dark_mode, color: AppTheme.primary),
-                    title: const Text(
-                      'Modo oscuro',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    value: themeProvider.isDarkMode,
-                    onChanged: (_) => themeProvider.toggleDarkMode(),
-                    activeColor: AppTheme.primary,
-                  ),
                 ),
                 const Divider(),
                 

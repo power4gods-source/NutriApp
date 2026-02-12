@@ -276,8 +276,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final title = (recipe['title'] ?? 'Receta').toString();
     final time = recipe['time_minutes'] ?? '-';
     final difficulty = (recipe['difficulty'] ?? '-').toString();
-    final imageUrl = (recipe['image_url']?.toString() ?? '').trim();
-    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final recipeImg = (recipe['image_url']?.toString() ?? '').trim();
+    final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
 
     return Card(
       elevation: 2,
@@ -292,8 +293,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           );
         },
         borderRadius: BorderRadius.circular(12),
-        child: hasValidImage
-            ? Column(
+        child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
@@ -340,29 +340,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                   ),
                 ],
-              )
-            : Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '$time min · $difficulty',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
               ),
       ),
     );

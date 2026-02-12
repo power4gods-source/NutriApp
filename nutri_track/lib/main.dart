@@ -9,7 +9,6 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
-import 'services/theme_provider.dart';
 import 'services/firebase_sync_service.dart';
 import 'services/firebase_user_service.dart';
 import 'config/app_config.dart';
@@ -72,10 +71,8 @@ class CooKindApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthService()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, _) => MaterialApp(
+      child: MaterialApp(
         title: 'CooKind',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
@@ -189,9 +186,8 @@ class CooKindApp extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Roboto',
         ),
-        themeMode: themeProvider.isDarkMode ? ThemeMode.dark : ThemeMode.light,
+        themeMode: ThemeMode.light,
         home: const AuthWrapper(),
-        ),
       ),
     );
   }

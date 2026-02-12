@@ -46,7 +46,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
         title: const Text(
           'Mis Ingredientes',
           style: TextStyle(
-            color: Colors.black87,
+            color: Color.fromARGB(221, 255, 255, 255),
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -67,7 +67,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey[800],
+                    color: const Color.fromARGB(255, 255, 255, 255),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -92,6 +92,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                           const SnackBar(
                             content: Text('Agrega ingredientes primero'),
                             backgroundColor: Colors.orange,
+                            duration: Duration(seconds: 3),
                           ),
                         );
                         return;
@@ -449,7 +450,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
               const SnackBar(
                 content: Text('❌ Tu sesión ha expirado. Por favor, cierra sesión y vuelve a iniciar sesión'),
                 backgroundColor: Colors.orange,
-                duration: Duration(seconds: 5),
+                duration: const Duration(seconds: 3),
               ),
             );
           }
@@ -480,7 +481,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
             SnackBar(
               content: Text('Error: $errorMessage'),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 4),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -544,7 +545,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
           SnackBar(
             content: Text('Error de conexión: ${e is TimeoutException ? "Backend no disponible o sin conexión" : e}'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -639,7 +640,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
             SnackBar(
               content: Text('Error: $errorMessage'),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 4),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -652,7 +653,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
           SnackBar(
             content: Text('Error de conexión: $e'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -703,7 +704,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
             SnackBar(
               content: Text('Error: $errorMessage'),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 4),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -715,7 +716,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
           SnackBar(
             content: Text('Error de conexión: $e'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -753,7 +754,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: const Color.fromARGB(255, 35, 86, 49),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),

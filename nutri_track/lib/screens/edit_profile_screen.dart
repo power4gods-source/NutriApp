@@ -123,6 +123,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           SnackBar(
             content: Text('Error al seleccionar imagen: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -154,6 +155,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           const SnackBar(
             content: Text('Error al subir la imagen'),
             backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
           ),
         );
       }
@@ -161,7 +163,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (mounted) {
         setState(() => _selectedImageBytes = null);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     } finally {
@@ -172,13 +178,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _saveAvatarToProfile(String avatarUrl) async {
     final headers = await _authService.getAuthHeaders();
     final url = await AppConfig.getBackendUrl();
-    await http.put(
-      Uri.parse('$url/profile'),
+    // Usar endpoint dedicado de avatar para mayor fiabilidad
+    final response = await http.post(
+      Uri.parse('$url/profile/avatar'),
       headers: {...headers, 'Content-Type': 'application/json'},
       body: jsonEncode({'avatar_url': avatarUrl}),
     ).timeout(const Duration(seconds: 10));
-    await _authService.saveAvatarUrl(avatarUrl);
-    await _authService.reloadAuthData();
+    if (response.statusCode == 200) {
+      await _authService.saveAvatarUrl(avatarUrl);
+      await _authService.reloadAuthData();
+    } else {
+      throw Exception('Error al guardar avatar: ${response.body}');
+    }
   }
 
   /// Restaura la foto anterior
@@ -203,7 +214,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al revertir: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error al revertir: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     } finally {
@@ -290,14 +305,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         final err = jsonDecode(response.body);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${err['detail'] ?? 'Error'}'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Error: ${err['detail'] ?? 'Error'}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     } finally {
@@ -328,14 +351,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         final err = jsonDecode(response.body);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${err['detail'] ?? 'Error'}'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Error: ${err['detail'] ?? 'Error'}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
         );
       }
     } finally {
@@ -347,7 +378,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final pwdError = PasswordValidator.validate(_newPasswordController.text);
     if (pwdError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(pwdError), backgroundColor: Colors.orange),
+        SnackBar(
+          content: Text(pwdError),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 3),
+        ),
       );
       return;
     }
@@ -357,6 +392,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         const SnackBar(
           content: Text('Las contraseñas no coinciden'),
           backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
         ),
       );
       return;
@@ -402,6 +438,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             SnackBar(
               content: Text('Error: ${error['detail'] ?? 'Error al cambiar contraseña'}'),
               backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -413,6 +450,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           SnackBar(
             content: Text('Error: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -430,9 +468,46 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return null;
   }
   
+  static const _darkGray = Color(0xFF424242);
+
+  InputDecoration _inputDecoration(String label, IconData icon, String hint) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: _darkGray),
+      hintStyle: const TextStyle(color: _darkGray),
+      prefixIcon: Icon(icon, color: _darkGray),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      hintText: hint,
+    );
+  }
+
+  InputDecoration _passwordDecoration(
+    String label,
+    IconData icon,
+    bool obscure,
+    VoidCallback onToggle, {
+    String? helperText,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: _darkGray),
+      helperText: helperText,
+      helperStyle: const TextStyle(color: _darkGray),
+      prefixIcon: Icon(icon, color: _darkGray),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      suffixIcon: IconButton(
+        icon: Icon(obscure ? Icons.visibility_off : Icons.visibility, color: _darkGray),
+        onPressed: onToggle,
+      ),
+    );
+  }
+
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      constraints: const BoxConstraints(minHeight: 56),
       decoration: BoxDecoration(
         color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
@@ -440,15 +515,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.grey[600], size: 22),
+          Icon(icon, color: _darkGray, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   label,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: const TextStyle(fontSize: 12, color: _darkGray),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -456,6 +532,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: _darkGray,
                   ),
                 ),
               ],
@@ -557,56 +634,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Nombre, apellidos, dirección (opcionales, auto-guardado)
             TextField(
               controller: _firstNameController,
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: _darkGray),
               keyboardType: TextInputType.name,
               textCapitalization: TextCapitalization.words,
               onChanged: _onFirstNameChanged,
-              decoration: InputDecoration(
-                labelText: 'Nombre',
-                labelStyle: const TextStyle(color: Colors.black87),
-                hintStyle: const TextStyle(color: Colors.black54),
-                prefixIcon: const Icon(Icons.badge, color: Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: 'Opcional',
-              ),
+              decoration: _inputDecoration('Nombre', Icons.badge, 'Opcional'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _lastNameController,
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: _darkGray),
               keyboardType: TextInputType.name,
               textCapitalization: TextCapitalization.words,
               onChanged: _onLastNameChanged,
-              decoration: InputDecoration(
-                labelText: 'Apellidos',
-                labelStyle: const TextStyle(color: Colors.black87),
-                hintStyle: const TextStyle(color: Colors.black54),
-                prefixIcon: const Icon(Icons.badge_outlined, color: Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: 'Opcional',
-              ),
+              decoration: _inputDecoration('Apellidos', Icons.badge_outlined, 'Opcional'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _addressController,
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: _darkGray),
               keyboardType: TextInputType.streetAddress,
-              maxLines: 2,
+              minLines: 1,
+              maxLines: 3,
               onChanged: _onAddressChanged,
-              decoration: InputDecoration(
-                labelText: 'Dirección',
-                labelStyle: const TextStyle(color: Colors.black87),
-                hintStyle: const TextStyle(color: Colors.black54),
-                prefixIcon: const Icon(Icons.location_on, color: Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: 'Opcional',
-              ),
+              decoration: _inputDecoration('Dirección', Icons.location_on, 'Opcional'),
             ),
             const SizedBox(height: 24),
             
@@ -618,19 +669,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Teléfono (editable, se guarda automáticamente)
             TextField(
               controller: _phoneController,
-              style: const TextStyle(color: Colors.black87),
+              style: const TextStyle(color: _darkGray),
               keyboardType: TextInputType.phone,
               onChanged: _onPhoneChanged,
-              decoration: InputDecoration(
-                labelText: 'Teléfono',
-                labelStyle: const TextStyle(color: Colors.black87),
-                hintStyle: const TextStyle(color: Colors.black54),
-                prefixIcon: const Icon(Icons.phone, color: Colors.black54),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                hintText: 'Se guarda automáticamente al escribir',
-              ),
+              decoration: _inputDecoration('Teléfono', Icons.phone, 'Se guarda automáticamente al escribir'),
             ),
             const SizedBox(height: 24),
             
@@ -670,49 +712,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextField(
                 controller: _currentPasswordController,
                 obscureText: _obscureCurrent,
-                decoration: InputDecoration(
-                  labelText: 'Contraseña actual',
-                  prefixIcon: const Icon(Icons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscureCurrent ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscureCurrent = !_obscureCurrent),
-                  ),
+                style: const TextStyle(color: _darkGray),
+                decoration: _passwordDecoration(
+                  'Contraseña actual',
+                  Icons.lock,
+                  _obscureCurrent,
+                  () => setState(() => _obscureCurrent = !_obscureCurrent),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _newPasswordController,
                 obscureText: _obscureNew,
-                decoration: InputDecoration(
-                  labelText: 'Nueva contraseña',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                style: const TextStyle(color: _darkGray),
+                decoration: _passwordDecoration(
+                  'Nueva contraseña',
+                  Icons.lock_outline,
+                  _obscureNew,
+                  () => setState(() => _obscureNew = !_obscureNew),
                   helperText: 'Mín. 8 chars, 1 mayúscula, 1 especial',
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscureNew ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscureNew = !_obscureNew),
-                  ),
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _confirmPasswordController,
                 obscureText: _obscureConfirm,
-                decoration: InputDecoration(
-                  labelText: 'Confirmar nueva contraseña',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscureConfirm ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
-                  ),
+                style: const TextStyle(color: _darkGray),
+                decoration: _passwordDecoration(
+                  'Confirmar nueva contraseña',
+                  Icons.lock_outline,
+                  _obscureConfirm,
+                  () => setState(() => _obscureConfirm = !_obscureConfirm),
                 ),
               ),
               const SizedBox(height: 16),

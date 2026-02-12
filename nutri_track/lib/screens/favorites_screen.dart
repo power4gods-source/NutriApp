@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import '../services/recipe_service.dart';
 import '../utils/nutrition_parser.dart';
@@ -117,8 +118,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final recipeId = _getRecipeId(recipe);
     final ingredients = (recipe['ingredients'] ?? '').toString().split(',');
     final description = recipe['description'] ?? '';
-    final imageUrl = recipe['image_url']?.toString().trim() ?? '';
-    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final recipeImg = recipe['image_url']?.toString().trim() ?? '';
+    final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
 
     return GestureDetector(
       onTap: () async {
@@ -139,8 +141,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (hasValidImage)
-              Stack(
+            Stack(
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -194,45 +195,19 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                   ),
                 ],
-              )
-            else
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        recipe['title'] ?? 'Sin título',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _removeFavorite(recipe),
-                      child: const Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: Icon(Icons.favorite, color: AppTheme.vividRed, size: 24),
-                      ),
-                    ),
-                  ],
-                ),
               ),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (hasValidImage)
-                    Text(
-                      recipe['title'] ?? 'Sin título',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    recipe['title'] ?? 'Sin título',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 12,

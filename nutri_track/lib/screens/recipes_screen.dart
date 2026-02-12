@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
@@ -197,6 +198,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           SnackBar(
             content: Text('Error al cargar recetas: $e'),
             backgroundColor: AppTheme.vividRed,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -262,6 +264,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           SnackBar(
             content: Text('Error al ${isFavorite ? 'quitar' : 'agregar'} favorito'),
             backgroundColor: AppTheme.vividRed,
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -1001,15 +1004,15 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ),
         child: Builder(
           builder: (context) {
-            final imageUrl = recipe['image_url']?.toString().trim() ?? '';
-            final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
+            final recipeImg = recipe['image_url']?.toString().trim() ?? '';
+            final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
+            final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (hasValidImage) ...[
-                  Stack(
-                    children: [
-                      ClipRRect(
+                Stack(
+                  children: [
+                    ClipRRect(
                         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                         child: Image.network(
                           imageUrl,
@@ -1077,66 +1080,21 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       ),
                     ],
                   ),
-                ] else ...[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            recipe['title'] ?? 'Sin título',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        if (_selectedFilter == 'private' || _isMyRecipesMode)
-                          GestureDetector(
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: Icon(
-                                (recipe['is_public'] ?? false) ? Icons.visibility : Icons.visibility_off,
-                                color: (recipe['is_public'] ?? false) ? AppTheme.primary : Colors.grey[600],
-                                size: 22,
-                              ),
-                            ),
-                          ),
-                        GestureDetector(
-                          onTap: () => _toggleFavorite(recipe),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Icon(
-                              isFavorite ? Icons.favorite : Icons.favorite_border,
-                              color: isFavorite ? AppTheme.vividRed : Colors.grey[600],
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
                 // Content
                 Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (hasValidImage) ...[
-                    Text(
-                      recipe['title'] ?? 'Sin título',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
+                  Text(
+                    recipe['title'] ?? 'Sin título',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
-                    const SizedBox(height: 12),
-                  ],
+                  ),
+                  const SizedBox(height: 12),
                   // Time, difficulty, servings, and calories per serving
                   Wrap(
                     spacing: 12,
@@ -1251,8 +1209,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
     final instructions = recipe['instructions'] as List<dynamic>?;
     final description = recipe['description'] ?? '';
     final ingredientsDetailed = recipe['ingredients_detailed'] as List<dynamic>?;
-    final imageUrl = recipe['image_url']?.toString().trim() ?? '';
-    final hasValidImage = imageUrl.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final recipeImg = recipe['image_url']?.toString().trim() ?? '';
+    final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
 
     return Card(
       elevation: 8,
@@ -1267,8 +1226,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (hasValidImage)
-              Stack(
+            Stack(
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
@@ -1350,39 +1308,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                   ),
                 ),
               ],
-            )
-            else
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => setState(() => _expandedRecipeId = null),
-                      child: const Icon(Icons.close, size: 28),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        recipe['title'] ?? 'Sin título',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _toggleFavorite(recipe),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? AppTheme.vividRed : Colors.grey[600],
-                        size: 24,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            ),
             // Content (scrollable)
             Flexible(
               child: SingleChildScrollView(

@@ -275,13 +275,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(height: 8),
               const Text(
                 'Escríbenos y te responderemos lo antes posible.',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                style: TextStyle(color: Color(0xFF424242), fontSize: 14),
               ),
               const SizedBox(height: 12),
               TextField(
                 maxLines: 4,
+                style: const TextStyle(color: Colors.black87, fontSize: 15),
                 decoration: InputDecoration(
                   hintText: 'Escribe tu consulta, sugerencia o lo que necesites...',
+                  hintStyle: const TextStyle(color: Colors.black87),
+                  filled: true,
+                  fillColor: Colors.grey[100],
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -321,7 +325,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: Colors.white,
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
@@ -348,9 +352,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                const Text(
                   'Última actualización: 8 de febrero de 2026',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 12, color: Colors.black54),
                 ),
                 const SizedBox(height: 20),
                 _buildTermsSection(
@@ -423,9 +427,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 6),
           Text(
             content,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
-              color: Colors.grey[800],
+              color: Colors.black87,
               height: 1.5,
             ),
           ),
@@ -442,18 +446,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
+              color: Colors.black87,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             content,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
-              color: Colors.grey[700],
+              color: Colors.black87,
               height: 1.5,
             ),
           ),
@@ -479,7 +483,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const SizedBox(height: 6),
           Text(
             answer,
-            style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4),
+            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
           ),
         ],
       ),

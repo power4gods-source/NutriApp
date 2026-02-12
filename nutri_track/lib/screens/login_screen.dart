@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMessage),
-          duration: const Duration(seconds: 5),
+          duration: const Duration(seconds: 3),
           action: SnackBarAction(
             label: 'OK',
             onPressed: () {},
@@ -159,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             SnackBar(
               content: Text(result['error'] ?? 'Backend no disponible. Por favor, intenta hacer login.'),
               backgroundColor: Colors.orange,
-              duration: const Duration(seconds: 6),
+              duration: const Duration(seconds: 4),
               action: SnackBarAction(
                 label: 'Hacer Login',
                 textColor: Colors.white,
@@ -178,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             SnackBar(
               content: Text(errorMessage.toString()),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 5),
+              duration: const Duration(seconds: 3),
               action: isEmailTaken
                   ? SnackBarAction(
                       label: 'Iniciar sesión',
@@ -199,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           SnackBar(
             content: Text('Error al registrar: $e'),
             backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
@@ -547,7 +547,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     onTap: () => setState(() => _acceptTerms = !_acceptTerms),
                     child: RichText(
                       text: TextSpan(
-                        style: TextStyle(fontSize: 12, color: Colors.grey[800], height: 1.4),
+                        style: TextStyle(fontSize: 12, color: const Color.fromRGBO(158, 158, 158, 1), height: 1.4),
                         children: [
                           const TextSpan(text: 'Acepto los '),
                           TextSpan(

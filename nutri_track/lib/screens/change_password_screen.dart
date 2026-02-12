@@ -46,7 +46,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result['error'] ?? 'Error'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text(result['error'] ?? 'Error'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
       );
     }
   }
@@ -73,8 +77,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 TextFormField(
                   controller: _currentController,
                   obscureText: _obscureCurrent,
+                  style: const TextStyle(color: Colors.black87),
                   decoration: InputDecoration(
                     labelText: 'Contraseña actual',
+                    labelStyle: const TextStyle(color: Color(0xFF424242)),
                     filled: true,
                     fillColor: Colors.grey[50],
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -90,8 +96,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 TextFormField(
                   controller: _newController,
                   obscureText: _obscureNew,
+                  style: const TextStyle(color: Colors.black87),
                   decoration: InputDecoration(
                     labelText: 'Nueva contraseña',
+                    labelStyle: const TextStyle(color: Color(0xFF424242)),
                     filled: true,
                     fillColor: Colors.grey[50],
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -107,8 +115,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 TextFormField(
                   controller: _confirmController,
                   obscureText: _obscureConfirm,
+                  style: const TextStyle(color: Colors.black87),
                   decoration: InputDecoration(
                     labelText: 'Repetir nueva contraseña',
+                    labelStyle: const TextStyle(color: Color(0xFF424242)),
                     filled: true,
                     fillColor: Colors.grey[50],
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
