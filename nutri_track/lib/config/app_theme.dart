@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
-/// Tema CooKind: paleta verde elegante con acentos coloridos
+/// Tema CooKind: paleta verde elegante (#235631)
 class AppTheme {
-  // Colores principales (bosque elegante)
-  static const Color primary = Color(0xFF1B4332);
-  static const Color primaryLight = Color(0xFF2D6A4F);
-  static const Color primaryDark = Color(0xFF0D2818);
+  // Color principal - verde bosque
+  static const Color primary = Color(0xFF235631);
+
+  // Tonalidades del primary (más claro/oscuro)
+  static const Color primaryLight = Color(0xFF3D6B47);
+  static const Color primaryDark = Color(0xFF1A4025);
 
   // Verde acento (botones, highlights)
-  static const Color accent = Color(0xFF40916C);
+  static const Color accent = Color(0xFF4A7C54);
 
   // Acentos coloridos fuertes (tarjetas, iconos)
   static const Color vividRed = Color(0xFFD32F2F);      // Rojo intenso (favoritos, errores)
@@ -22,20 +24,20 @@ class AppTheme {
   static const Color ecoTerracotta = Color(0xFFBC6C25);
   static const Color ecoPeach = Color(0xFFF4A261);
 
-  // Fondos (abanico verdoso)
-  static const Color scaffoldBackground = Color(0xFFE0EBD8); // Verde menta suave
-  static const Color scaffoldBackgroundLight = Color(0xFFE8F0E4); // Variante más clara
-  static const Color ecoCream = Color(0xFFF5FAF2); // Crema con tono verde
-  static const Color surface = Color(0xFFF0F5EC);  // Superficie appbar (verde muy suave)
+  // Fondos: primary como base, tonalidades para interiores
+  static const Color scaffoldBackground = Color(0xFF235631);  // Fondo pestañas (primary)
+  static const Color scaffoldBackgroundLight = Color(0xFF2D4532); // Variante algo más clara
+  static const Color ecoCream = Color(0xFFE8F0E4); // Crema verdoso
+  static const Color surface = Color(0xFF2D4532);  // AppBar (tonalidad primary)
 
-  // Tarjetas: fondos tintados (no blanco puro)
-  static const Color cardBackground = Color(0xFFF5F8F0);   // Verde menta muy claro
-  static const Color cardBackgroundWarm = Color(0xFFF8F5F0); // Crema cálido
-  static const Color cardBorder = Color(0xFFD8E5D0);       // Borde verde suave
+  // Interiores con información: tonalidades muy claras para legibilidad
+  static const Color cardBackground = Color(0xFFE8F4E5);   // Verde muy claro (casi blanco)
+  static const Color cardBackgroundWarm = Color(0xFFF0F7ED); // Verde crema muy claro
+  static const Color cardBorder = Color(0xFFB8D4B0);       // Borde verde suave
 
   // Bordes y divisores
-  static const Color divider = Color(0xFFD4E2CE);
-  static const Color borderLight = Color(0xFFE2ECDD);
+  static const Color divider = Color(0xFFB8D4B0);
+  static const Color borderLight = Color(0xFFD0E2CA);
 
   // Dark mode - fondo negro base
   static const Color darkScaffoldBackground = Color(0xFF0A0A0A);

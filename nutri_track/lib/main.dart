@@ -81,17 +81,24 @@ class CooKindApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: AppTheme.primary,
           scaffoldBackgroundColor: AppTheme.scaffoldBackground,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: AppTheme.primary,
-            primary: AppTheme.primary,
-            secondary: AppTheme.ecoSage,
-            surface: AppTheme.surface,
+          colorScheme: ColorScheme(
             brightness: Brightness.light,
+            primary: AppTheme.primary,
+            onPrimary: Colors.white,
+            secondary: AppTheme.ecoSage,
+            onSecondary: Colors.white,
+            surface: AppTheme.surface,
+            onSurface: Colors.white,  // Para AppBar y barras sobre fondo verde
+            onSurfaceVariant: Colors.white70,
+            error: AppTheme.vividRed,
+            onError: Colors.white,
           ),
           appBarTheme: const AppBarTheme(
             backgroundColor: AppTheme.surface,
-            foregroundColor: AppTheme.primary,
+            foregroundColor: Colors.white,
             elevation: 0,
+            iconTheme: IconThemeData(color: Colors.white),
+            titleTextStyle: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),
           ),
           cardTheme: CardThemeData(
             color: AppTheme.cardBackground,
@@ -310,6 +317,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
 /// Llamar cuando se añade consumo para que HomeScreen refresque
 void Function()? notifyConsumptionAdded;
 
+/// Llamar cuando se actualizan objetivos para que HomeScreen y TrackingScreen refresquen
+void Function()? notifyGoalsUpdated;
+
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
 
@@ -366,8 +376,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               });
             },
             type: BottomNavigationBarType.fixed,
-            selectedItemColor: AppTheme.primary,
-            unselectedItemColor: Colors.grey,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white70,
             backgroundColor: Theme.of(context).colorScheme.surface,
             elevation: 0,
             selectedFontSize: 12,

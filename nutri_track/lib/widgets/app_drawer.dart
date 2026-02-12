@@ -22,7 +22,7 @@ class AppDrawer extends StatelessWidget {
     final phone = authService.phone ?? '';
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Drawer(
-      backgroundColor: isDark ? AppTheme.darkSurface : null,
+      backgroundColor: isDark ? AppTheme.darkSurface : AppTheme.surface,
       child: Column(
         children: [
           // Header: foto, nombre, email, teléfono
@@ -179,15 +179,15 @@ class AppDrawer extends StatelessWidget {
     required VoidCallback onTap,
     Color? textColor,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = textColor ?? (isDark ? AppTheme.primary : Colors.white);
+    final titleColor = textColor ?? (isDark ? AppTheme.darkTextPrimary : Colors.white);
     return ListTile(
-      leading: Icon(
-        icon,
-        color: textColor ?? AppTheme.primary,
-      ),
+      leading: Icon(icon, color: iconColor),
       title: Text(
         title,
         style: TextStyle(
-          color: textColor ?? Theme.of(context).colorScheme.onSurface,
+          color: titleColor,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -200,16 +200,16 @@ class AppDrawer extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return CircleAvatar(
       radius: 40,
-      backgroundColor: isDark ? AppTheme.darkCardBackground : AppTheme.surface,
+      backgroundColor: isDark ? AppTheme.darkCardBackground : Colors.white24,
       backgroundImage: hasImage ? NetworkImage(avatarUrl!) : null,
       child: hasImage
           ? null
           : Text(
               username.isNotEmpty ? username[0].toUpperCase() : '?',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.primary,
+                color: isDark ? AppTheme.primary : Colors.white,
               ),
             ),
     );

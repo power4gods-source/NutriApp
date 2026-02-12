@@ -8,7 +8,7 @@ import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'add_consumption_screen.dart';
-import '../main.dart';
+import '../main.dart' show MainNavigationScreen, notifyGoalsUpdated;
 
 class TrackingScreen extends StatefulWidget {
   const TrackingScreen({super.key});
@@ -329,11 +329,11 @@ class _TrackingScreenState extends State<TrackingScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             // Volver a la homepage (MainNavigationScreen index 2)
             final mainNavState = MainNavigationScreen.of(context);
@@ -347,10 +347,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
             }
           },
         ),
-        title: Text(
+        title: const Text(
           'Seguimiento',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -358,7 +358,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.local_fire_department, color: AppTheme.primary),
+            icon: const Icon(Icons.local_fire_department, color: Colors.white),
             tooltip: 'Agregar consumo',
             onPressed: () async {
               final result = await Navigator.push(
@@ -750,10 +750,16 @@ class _TrackingScreenState extends State<TrackingScreen> {
                 Navigator.pop(context);
                 await _loadGoals();
                 await _loadProfile();
+                await _loadDailyStats();
+                await _loadWeeklyStats();
+                await _loadMonthlyStats();
                 if (mounted) setState(() {});
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Objetivos actualizados'), backgroundColor: AppTheme.primary),
-                );
+                notifyGoalsUpdated?.call();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Objetivos actualizados'), backgroundColor: AppTheme.primary),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primary, foregroundColor: Colors.white),
@@ -1565,8 +1571,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
               
               if (success) {
                 Navigator.pop(context);
-                _loadGoals();
-                setState(() {}); // Refresh UI
+                await _loadGoals();
+                await _loadDailyStats();
+                await _loadWeeklyStats();
+                await _loadMonthlyStats();
+                if (mounted) setState(() {});
+                notifyGoalsUpdated?.call();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Objetivo de calorías actualizado'),
@@ -1673,20 +1683,29 @@ class _TrackingScreenState extends State<TrackingScreen> {
               
               if (success) {
                 Navigator.pop(context);
-                _loadGoals();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Objetivos actualizados'),
-                    backgroundColor: AppTheme.primary,
-                  ),
-                );
+                await _loadGoals();
+                await _loadDailyStats();
+                await _loadWeeklyStats();
+                await _loadMonthlyStats();
+                if (mounted) setState(() {});
+                notifyGoalsUpdated?.call();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Objetivos actualizados'),
+                      backgroundColor: AppTheme.primary,
+                    ),
+                  );
+                }
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Error al actualizar objetivos'),
-                    backgroundColor: AppTheme.vividRed,
-                  ),
-                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Error al actualizar objetivos'),
+                      backgroundColor: AppTheme.vividRed,
+                    ),
+                  );
+                }
               }
             },
             style: ElevatedButton.styleFrom(

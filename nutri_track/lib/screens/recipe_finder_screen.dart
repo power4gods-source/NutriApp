@@ -500,7 +500,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                 child: Container(
                   margin: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppTheme.surface,
+                    color: AppTheme.cardBackground,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Padding(
@@ -509,17 +509,18 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                        const Text(
+                        Text(
                           'Ingredientes',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
+                            color: AppTheme.textPrimary(context),
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Elige los ingredientes que quieres combinar',
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: TextStyle(color: AppTheme.textSecondary(context)),
                         ),
                         const SizedBox(height: 24),
                         
@@ -636,18 +637,19 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                         const SizedBox(height: 24),
                         
                         // Selected ingredients (scrollable)
-                        const Text(
+                        Text(
                           'Seleccionados:',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary(context),
                           ),
                         ),
                         const SizedBox(height: 8),
                         if (_selectedIngredients.isEmpty)
                           Text(
                             'No hay ingredientes seleccionados',
-                            style: TextStyle(color: Colors.grey[600]),
+                            style: TextStyle(color: AppTheme.textSecondary(context)),
                           )
                         else
                           SizedBox(

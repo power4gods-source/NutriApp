@@ -51,11 +51,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadData();
     _quickRecipesScrollController.addListener(_onQuickRecipesScroll);
+    notifyGoalsUpdated = _loadData;
   }
 
   @override
   void dispose() {
     notifyConsumptionAdded = null;
+    notifyGoalsUpdated = null;
     _quickRecipesScrollController.dispose();
     super.dispose();
   }
@@ -181,14 +183,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  bool _hasValidImageUrl(dynamic recipe) {
+    final url = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
+    if (url.isEmpty) return false;
+    final lower = url.toLowerCase();
+    if (lower == 'null' || lower == 'undefined' || lower.startsWith('placeholder')) return false;
+    return true;
+  }
+
   Future<void> _loadTrendingRecipes() async {
     try {
       final allRecipes = await _recipeService.getAllRecipes();
-      // Solo recetas con imagen
-      final withImage = allRecipes.where((r) {
-        final url = r['image_url']?.toString().trim() ?? '';
-        return url.isNotEmpty;
-      }).toList();
+      // Solo recetas con imagen válida (excluir placeholders, null, etc.)
+      final withImage = allRecipes.where(_hasValidImageUrl).toList();
       setState(() {
         _trendingRecipes = withImage.take(10).toList();
       });
@@ -334,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppTheme.scaffoldBackground,
       drawer: const AppDrawer(),
       appBar: AppBar(
-        backgroundColor: AppTheme.surface,
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: Builder(
@@ -384,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 color: Theme.of(context).brightness == Brightness.dark
                     ? AppTheme.darkScaffoldBackground
-                    : const Color(0xFFECECEC),
+                    : AppTheme.scaffoldBackground,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
@@ -492,14 +499,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       _buildAverageCard(
-                        label: 'Media semanal',
+                        label: 'media\nsemanal',
                         value: weeklyAvg,
                         color: const Color.fromARGB(255, 18, 63, 44),
                         gradientEnd: AppTheme.ecoSage,
                       ),
                       const SizedBox(height: 12),
                       _buildAverageCard(
-                        label: 'Media mensual',
+                        label: 'media\nmensual',
                         value: monthlyAvg,
                         color: const Color.fromARGB(255, 193, 104, 27),
                         gradientEnd: AppTheme.ecoCream,
@@ -544,7 +551,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Círculo de progreso diario con texto dentro (igual que CalorieCircle de Index.tsx)
   Widget _buildCalorieCircle({required double consumed, required double goal}) {
-    const double circleSize = 200;
+    const double circleSize = 150;
     final progress = goal > 0 ? (consumed / goal).clamp(0.0, 1.0) : 0.0;
     return SizedBox(
       width: circleSize,
@@ -615,14 +622,17 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Icon(Icons.trending_up, size: 14, color: color),
               const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AppTheme.textSecondary(context),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppTheme.textSecondary(context),
+                  ),
                 ),
               ),
             ],

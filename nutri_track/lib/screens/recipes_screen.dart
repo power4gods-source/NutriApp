@@ -704,11 +704,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
       appBar: _expandedRecipeId != null
           ? null // Ocultar AppBar cuando hay receta expandida
           : AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             if (_isMyRecipesMode && Navigator.canPop(context)) {
               Navigator.pop(context);
@@ -724,8 +724,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ),
         title: Text(
           _isMyRecipesMode ? 'Mis recetas' : 'Recetas',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
+          style: const TextStyle(
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -733,7 +733,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.menu_book, color: Theme.of(context).colorScheme.onSurface),
+            icon: const Icon(Icons.menu_book, color: Colors.white),
             tooltip: 'Buscador de recetas',
             onPressed: () {
               Navigator.push(
@@ -794,7 +794,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                 if (!_isMyRecipesMode)
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    color: Theme.of(context).colorScheme.surface,
+                    color: AppTheme.primary,
                     child: Row(
                       children: [
                         _buildFilterChip('Generales', 'general'),
@@ -951,30 +951,31 @@ class _RecipesScreenState extends State<RecipesScreen> {
 
   Widget _buildFilterChip(String label, String value) {
     final isSelected = _selectedFilter == value;
-    return Builder(
-      builder: (context) {
-        final textColor = isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface;
-        return FilterChip(
-          label: Text(label, style: TextStyle(color: textColor)),
-          selected: isSelected,
-          onSelected: (selected) async {
-            if (selected) {
-              await _invalidateCache();
-              setState(() {
-                _selectedFilter = value;
-                _expandedRecipeId = null;
-              });
-              await _loadRecipes();
-            }
-          },
-          selectedColor: AppTheme.primary,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          labelStyle: TextStyle(
-            color: textColor,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        );
+    return FilterChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? AppTheme.primary : Colors.white,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      selected: isSelected,
+      onSelected: (selected) async {
+        if (selected) {
+          await _invalidateCache();
+          setState(() {
+            _selectedFilter = value;
+            _expandedRecipeId = null;
+          });
+          await _loadRecipes();
+        }
       },
+      selectedColor: Colors.white,
+      backgroundColor: Colors.white24,
+      labelStyle: TextStyle(
+        color: isSelected ? AppTheme.primary : Colors.white,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
     );
   }
 
@@ -1088,6 +1089,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
                         ),
@@ -1130,6 +1132,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 12),

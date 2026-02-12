@@ -60,6 +60,23 @@ class FirebaseUserService {
     }
   }
 
+  /// Verifica usuario por email o username
+  Future<Map<String, dynamic>?> verifyUserByLogin(String login, String passwordHash) async {
+    try {
+      final userId = await getUserIdFromLogin(login);
+      if (userId == null) return null;
+      final userData = await getUserData(userId);
+      if (userData == null) return null;
+      final storedHash = userData['password_hash'] as String?;
+      if (storedHash == null || storedHash != passwordHash) return null;
+      final email = (userData['email'] ?? '').toString();
+      return {'user_id': userId, 'email': email, 'username': userData['username']};
+    } catch (e) {
+      print('Error verificando usuario por login: $e');
+      return null;
+    }
+  }
+
   Future<String?> getUserIdFromEmail(String email) async {
     try {
       final userId = _generateUserIdFromEmail(email.toLowerCase().trim());
@@ -72,6 +89,30 @@ class FirebaseUserService {
       print('Error obteniendo userId: $e');
       return null;
     }
+  }
+
+  /// Obtiene userId por email o nombre de usuario (busca en users.json si existe)
+  Future<String?> getUserIdFromLogin(String login) async {
+    final normalized = login.toLowerCase().trim();
+    if (normalized.contains('@')) {
+      return getUserIdFromEmail(normalized);
+    }
+    try {
+      final usersData = await _syncService.downloadJsonFile('users.json');
+      if (usersData != null && usersData is Map) {
+        for (final entry in (usersData as Map).entries) {
+          final uid = entry.key.toString();
+          final info = entry.value;
+          if (info is Map) {
+            final un = (info['username'] ?? '').toString().trim().toLowerCase();
+            if (un == normalized) return uid;
+          }
+        }
+      }
+    } catch (e) {
+      print('Error buscando usuario por username: $e');
+    }
+    return null;
   }
 
   String _generateUserIdFromEmail(String email) {

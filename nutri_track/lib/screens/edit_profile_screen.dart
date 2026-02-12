@@ -256,6 +256,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     });
   }
 
+  /// Guarda todos los campos pendientes (al salir con atrás)
+  Future<void> _flushPendingSaves() async {
+    _firstNameDebounce?.cancel();
+    _lastNameDebounce?.cancel();
+    _addressDebounce?.cancel();
+    _phoneDebounce?.cancel();
+    _firstNameDebounce = _lastNameDebounce = _addressDebounce = _phoneDebounce = null;
+    await _saveProfileField('first_name', _firstNameController.text.trim());
+    await _saveProfileField('last_name', _lastNameController.text.trim());
+    await _saveProfileField('address', _addressController.text.trim());
+    await _savePhone(_phoneController.text.trim());
+  }
+
   Future<void> _saveProfileField(String key, String value) async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
@@ -461,7 +474,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 60,
-                backgroundColor: AppTheme.primary,
+                backgroundColor: AppTheme.surface,
                 backgroundImage: _getAvatarImage(),
                 child: _getAvatarImage() == null
                     ? Text(
@@ -512,13 +525,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
     }
     
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Editar perfil'),
-        backgroundColor: AppTheme.primary,
-        foregroundColor: Colors.white,
-      ),
-      body: SingleChildScrollView(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _flushPendingSaves();
+        if (mounted) Navigator.of(context).pop();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Editar perfil'),
+          backgroundColor: AppTheme.primary,
+          foregroundColor: Colors.white,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              await _flushPendingSaves();
+              if (mounted) Navigator.of(context).pop();
+            },
+          ),
+        ),
+        body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -530,12 +557,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Nombre, apellidos, dirección (opcionales, auto-guardado)
             TextField(
               controller: _firstNameController,
+              style: const TextStyle(color: Colors.black87),
               keyboardType: TextInputType.name,
               textCapitalization: TextCapitalization.words,
               onChanged: _onFirstNameChanged,
               decoration: InputDecoration(
                 labelText: 'Nombre',
-                prefixIcon: const Icon(Icons.badge),
+                labelStyle: const TextStyle(color: Colors.black87),
+                hintStyle: const TextStyle(color: Colors.black54),
+                prefixIcon: const Icon(Icons.badge, color: Colors.black54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -545,12 +575,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _lastNameController,
+              style: const TextStyle(color: Colors.black87),
               keyboardType: TextInputType.name,
               textCapitalization: TextCapitalization.words,
               onChanged: _onLastNameChanged,
               decoration: InputDecoration(
                 labelText: 'Apellidos',
-                prefixIcon: const Icon(Icons.badge_outlined),
+                labelStyle: const TextStyle(color: Colors.black87),
+                hintStyle: const TextStyle(color: Colors.black54),
+                prefixIcon: const Icon(Icons.badge_outlined, color: Colors.black54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -560,12 +593,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 12),
             TextField(
               controller: _addressController,
+              style: const TextStyle(color: Colors.black87),
               keyboardType: TextInputType.streetAddress,
               maxLines: 2,
               onChanged: _onAddressChanged,
               decoration: InputDecoration(
                 labelText: 'Dirección',
-                prefixIcon: const Icon(Icons.location_on),
+                labelStyle: const TextStyle(color: Colors.black87),
+                hintStyle: const TextStyle(color: Colors.black54),
+                prefixIcon: const Icon(Icons.location_on, color: Colors.black54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -582,11 +618,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Teléfono (editable, se guarda automáticamente)
             TextField(
               controller: _phoneController,
+              style: const TextStyle(color: Colors.black87),
               keyboardType: TextInputType.phone,
               onChanged: _onPhoneChanged,
               decoration: InputDecoration(
                 labelText: 'Teléfono',
-                prefixIcon: const Icon(Icons.phone),
+                labelStyle: const TextStyle(color: Colors.black87),
+                hintStyle: const TextStyle(color: Colors.black54),
+                prefixIcon: const Icon(Icons.phone, color: Colors.black54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -694,6 +733,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }

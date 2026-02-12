@@ -185,28 +185,23 @@ class AuthService extends ChangeNotifier {
     }
   }
   
-  /// Login desde Firestore (sin backend)
-  Future<Map<String, dynamic>> _loginFirebase(String email, String password) async {
+  /// Login desde Firestore (sin backend) - acepta email o nombre de usuario
+  Future<Map<String, dynamic>> _loginFirebase(String login, String password) async {
     try {
-      final normalizedEmail = email.toLowerCase().trim();
+      final normalizedLogin = login.toLowerCase().trim();
       final passwordHash = _hashPassword(password);
-      
-      // Verificar credenciales en Firestore Storage
-      // Usamos el hash de la contraseña para mantener compatibilidad
-      final isValid = await _firebaseUserService.verifyUser(normalizedEmail, passwordHash);
-      
-      if (isValid) {
-        // Obtener userId
-        final userId = await _firebaseUserService.getUserIdFromEmail(normalizedEmail);
-        if (userId == null) {
-          throw Exception('Usuario no encontrado en Firestore');
-        }
-        
-        // Obtener datos del usuario
-        final userData = await _firebaseUserService.getUser(userId);
-        final username = userData?['username'] ?? normalizedEmail.split('@')[0];
-        
-        // Intentar hacer login en el backend para obtener JWT válido
+
+      // Verificar por email o username
+      final verified = await _firebaseUserService.verifyUserByLogin(normalizedLogin, passwordHash);
+      if (verified == null) {
+        return await _loginLocal(login, password);
+      }
+
+      final userId = verified['user_id'] as String;
+      final normalizedEmail = (verified['email'] ?? '').toString().toLowerCase();
+      final username = verified['username'] ?? normalizedEmail.split('@')[0];
+
+      // Intentar hacer login en el backend para obtener JWT válido
         String? jwtToken;
         try {
           final url = await baseUrl;
@@ -279,14 +274,9 @@ class AuthService extends ChangeNotifier {
           'firestore': true,
           'jwt_token': jwtToken != null,  // Indicar si se obtuvo JWT válido
         };
-      } else {
-        // Si no es válido en Firestore, intentar login local
-        return await _loginLocal(email, password);
-      }
     } catch (e) {
       print('Error en login Firestore: $e');
-      // Fallback a login local
-      return await _loginLocal(email, password);
+      return await _loginLocal(login, password);
     }
   }
   

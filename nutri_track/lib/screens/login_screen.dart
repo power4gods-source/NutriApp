@@ -216,15 +216,22 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 40),
-              // Logo
-              const Text(
-                'CooKind',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.primary,
+              // Logo Cookind
+              Center(
+                child: Image.asset(
+                  'assets/images/Cookind.png',
+                  height: 80,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Text(
+                    'CooKind',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 40),
               
@@ -282,9 +289,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           // Acepta email o nombre de usuario
           TextFormField(
             controller: _loginEmailController,
+            style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               labelText: 'Email o nombre de usuario',
-              hintText: 'ejemplo@correo.com o miusuario',
+              labelStyle: const TextStyle(color: Colors.black87),
+              hintText: 'Email o nombre de usuario',
+              hintStyle: const TextStyle(color: Colors.black54),
               filled: true,
               fillColor: Colors.grey[50],
               border: OutlineInputBorder(
@@ -320,8 +330,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           TextFormField(
             controller: _loginPasswordController,
             obscureText: _obscurePassword,
+            style: const TextStyle(color: Colors.black),
             decoration: InputDecoration(
               labelText: 'Contraseña',
+              labelStyle: const TextStyle(color: Colors.black87),
               filled: true,
               fillColor: Colors.grey[50],
               border: OutlineInputBorder(
@@ -410,7 +422,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           const SizedBox(height: 24),
           
           // Social login
-          _buildSocialButton(context, 'G Continuar con Google', Icons.login, isGoogle: true),
+          _buildSocialButton(context, 'Continuar con Google', Icons.login, isGoogle: true),
           const SizedBox(height: 12),
           _buildSocialButton(context, 'Continuar con Apple', Icons.phone_iphone, isGoogle: false),
         ],
@@ -441,7 +453,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             // Username field
             TextFormField(
               controller: _registerUsernameController,
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
+                labelStyle: const TextStyle(color: Colors.black87),
                 labelText: 'Username',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -458,7 +472,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             // Email field
             TextFormField(
               controller: _registerEmailController,
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
+                labelStyle: const TextStyle(color: Colors.black87),
                 labelText: 'Email',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -486,9 +502,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             TextFormField(
               controller: _registerPasswordController,
               obscureText: _obscurePassword,
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 labelText: 'Contraseña',
+                labelStyle: const TextStyle(color: Colors.black87),
                 hintText: 'Mín. 8 chars, 1 mayúscula, 1 especial',
+                hintStyle: const TextStyle(color: Colors.black54),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: AppTheme.primary),
@@ -635,9 +654,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: const Color(0xFF4CAF50)),
+          Icon(icon, color: const Color(0xFF9E9E9E)),
           const SizedBox(width: 8),
-          Text(text, style: const TextStyle(color: AppTheme.primary)),
+          Text(text, style: const TextStyle(color: Color(0xFF9E9E9E))),
         ],
       ),
     );
