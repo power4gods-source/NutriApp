@@ -782,7 +782,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                       children: [
                         CircularProgressIndicator(),
                         SizedBox(height: 16),
-                        Text('Generando recetas con ChatGPT...'),
+                        Text('Generando recetas con CookAInd...'),
                         SizedBox(height: 8),
                         Text(
                           'Esto puede tardar unos segundos',

@@ -1,4 +1,7 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import 'recipe_detail_screen.dart';
 
@@ -148,104 +151,53 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Header
+              // Header: back button (shifted left) + sort icon (right)
               Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.fromLTRB(4, 12, 16, 8),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
                       onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                     ),
-                    Expanded(
-                      child: Text(
-                        'Resultados de Búsqueda',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(width: 48),
-                  ],
-                ),
-              ),
-              
-              // Results count and sort
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '$totalResults recetas encontradas',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[700],
+                    const Spacer(),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.sort, color: Colors.white, size: 28),
+                      onSelected: (value) {
+                        setState(() => _currentSortBy = value);
+                        _sortRecipes();
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 'matches',
+                          child: Row(
+                            children: [
+                              if (_currentSortBy == 'matches') const Icon(Icons.check, color: AppTheme.primary, size: 20),
+                              if (_currentSortBy == 'matches') const SizedBox(width: 8),
+                              const Text('Coincidencias'),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Ordenar por:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Text('Coincidencias'),
-                            selected: _currentSortBy == 'matches',
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() => _currentSortBy = 'matches');
-                                _sortRecipes();
-                              }
-                            },
-                            selectedColor: AppTheme.primary,
+                        PopupMenuItem(
+                          value: 'time',
+                          child: Row(
+                            children: [
+                              if (_currentSortBy == 'time') const Icon(Icons.check, color: AppTheme.primary, size: 20),
+                              if (_currentSortBy == 'time') const SizedBox(width: 8),
+                              const Text('Tiempo'),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Text('Tiempo'),
-                            selected: _currentSortBy == 'time',
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() => _currentSortBy = 'time');
-                                _sortRecipes();
-                              }
-                            },
-                            selectedColor: AppTheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Text('Dificultad'),
-                            selected: _currentSortBy == 'difficulty',
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() => _currentSortBy = 'difficulty');
-                                _sortRecipes();
-                              }
-                            },
-                            selectedColor: AppTheme.primary,
+                        PopupMenuItem(
+                          value: 'difficulty',
+                          child: Row(
+                            children: [
+                              if (_currentSortBy == 'difficulty') const Icon(Icons.check, color: AppTheme.primary, size: 20),
+                              if (_currentSortBy == 'difficulty') const SizedBox(width: 8),
+                              const Text('Dificultad'),
+                            ],
                           ),
                         ),
                       ],
@@ -253,8 +205,6 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                   ],
                 ),
               ),
-              
-              const SizedBox(height: 16),
               
               // Results list
               Expanded(
@@ -271,14 +221,14 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.search_off, size: 60, color: Colors.grey[300]),
+                                Icon(Icons.search_off, size: 60, color: Colors.white70),
                                 const SizedBox(height: 16),
                                 Text(
                                   'No se encontraron recetas',
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.grey[600],
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 8),
@@ -286,7 +236,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                                   'Intenta con otros filtros o ingredientes',
                                   style: TextStyle(
                                     fontSize: 14,
-                                    color: Colors.grey[500],
+                                    color: Colors.white70,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -298,11 +248,12 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                           padding: const EdgeInsets.all(16),
                           children: [
                             if (_sortedGeneral.isNotEmpty) ...[
-                              const Text(
+                              Text(
                                 'Recetas Generales:',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -310,13 +261,14 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
                               const SizedBox(height: 24),
                             ],
                             if (_sortedPublic.isNotEmpty) ...[
-                              const Divider(),
+                              Divider(color: Colors.white38),
                               const SizedBox(height: 8),
-                              const Text(
+                              Text(
                                 'Recetas Públicas:',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.white,
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -334,31 +286,37 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
   }
 
   Widget _buildRecipeCard(Map<String, dynamic> recipe) {
+    final imageUrl = recipe['image_url']?.toString().trim();
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+    final displayImageUrl = hasImage ? imageUrl! : AppConfig.backupPhotoFirebaseUrl;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
-        leading: recipe['image_url'] != null && recipe['image_url'].toString().isNotEmpty
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  recipe['image_url'],
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(Icons.restaurant, size: 40, color: Color(0xFF4CAF50));
-                  },
-                ),
-              )
-            : const Icon(Icons.restaurant, size: 40, color: Color(0xFF4CAF50)),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: SizedBox(
+            width: 60,
+            height: 60,
+            child: hasImage
+                ? Image.network(
+                    displayImageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _buildDefaultRecipeImage(),
+                  )
+                : _buildDefaultRecipeImage(),
+          ),
+        ),
         title: Text(
           recipe['title'] ?? 'Sin título',
           style: const TextStyle(
             fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
         ),
         subtitle: Column(
@@ -367,21 +325,22 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
             const SizedBox(height: 4),
             Text(
               '${recipe['time_minutes'] ?? 0} min • ${recipe['difficulty'] ?? 'N/A'}',
+              style: const TextStyle(color: Colors.black54),
             ),
             if (widget.selectedIngredients.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 'Coincidencias: ${_countMatchingIngredients(recipe, widget.selectedIngredients.map((ing) => ing.toLowerCase()).toList())}',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: Colors.black45,
                   fontStyle: FontStyle.italic,
                 ),
               ),
             ],
           ],
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black54),
         onTap: () {
           Navigator.push(
             context,
@@ -390,6 +349,27 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDefaultRecipeImage() {
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 0.8, sigmaY: 0.8),
+      child: Opacity(
+        opacity: 0.92,
+        child: Image.network(
+          AppConfig.backupPhotoFirebaseUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 60,
+              height: 60,
+              color: AppTheme.primary.withOpacity(0.2),
+              child: const Icon(Icons.restaurant, size: 32, color: Color(0xFF4CAF50)),
+            );
+          },
+        ),
       ),
     );
   }

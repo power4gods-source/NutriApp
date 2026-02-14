@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,10 +37,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _obscureCurrent = true;
   bool _obscureNew = true;
   bool _obscureConfirm = true;
-  Timer? _phoneDebounce;
-  Timer? _firstNameDebounce;
-  Timer? _lastNameDebounce;
-  Timer? _addressDebounce;
   
   @override
   void initState() {
@@ -51,10 +46,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   
   @override
   void dispose() {
-    _phoneDebounce?.cancel();
-    _firstNameDebounce?.cancel();
-    _lastNameDebounce?.cancel();
-    _addressDebounce?.cancel();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _addressController.dispose();
@@ -250,45 +241,56 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
-  void _onFirstNameChanged(String value) {
-    _firstNameDebounce?.cancel();
-    _firstNameDebounce = Timer(const Duration(seconds: 2), () {
-      _saveProfileField('first_name', value.trim());
-    });
-  }
-
-  void _onLastNameChanged(String value) {
-    _lastNameDebounce?.cancel();
-    _lastNameDebounce = Timer(const Duration(seconds: 2), () {
-      _saveProfileField('last_name', value.trim());
-    });
-  }
-
-  void _onAddressChanged(String value) {
-    _addressDebounce?.cancel();
-    _addressDebounce = Timer(const Duration(seconds: 2), () {
-      _saveProfileField('address', value.trim());
-    });
-  }
-
-  void _onPhoneChanged(String value) {
-    _phoneDebounce?.cancel();
-    _phoneDebounce = Timer(const Duration(seconds: 2), () {
-      _savePhone(value.trim());
-    });
-  }
-
-  /// Guarda todos los campos pendientes (al salir con atrás)
-  Future<void> _flushPendingSaves() async {
-    _firstNameDebounce?.cancel();
-    _lastNameDebounce?.cancel();
-    _addressDebounce?.cancel();
-    _phoneDebounce?.cancel();
-    _firstNameDebounce = _lastNameDebounce = _addressDebounce = _phoneDebounce = null;
-    await _saveProfileField('first_name', _firstNameController.text.trim());
-    await _saveProfileField('last_name', _lastNameController.text.trim());
-    await _saveProfileField('address', _addressController.text.trim());
-    await _savePhone(_phoneController.text.trim());
+  /// Guarda nombre, apellidos, dirección y teléfono en una sola petición y retrocede
+  Future<void> _saveAllAndPop() async {
+    setState(() => _isSaving = true);
+    try {
+      final headers = await _authService.getAuthHeaders();
+      final url = await AppConfig.getBackendUrl();
+      final body = jsonEncode({
+        'first_name': _firstNameController.text.trim().isEmpty ? null : _firstNameController.text.trim(),
+        'last_name': _lastNameController.text.trim().isEmpty ? null : _lastNameController.text.trim(),
+        'address': _addressController.text.trim().isEmpty ? null : _addressController.text.trim(),
+        'phone': _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+      });
+      final response = await http.put(
+        Uri.parse('$url/profile'),
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: body,
+      ).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        await _authService.reloadAuthData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Perfil guardado'), backgroundColor: Colors.green),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        final err = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${err['detail'] ?? 'Error'}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   Future<void> _saveProfileField(String key, String value) async {
@@ -609,12 +611,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
     
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
-        await _flushPendingSaves();
-        if (mounted) Navigator.of(context).pop();
-      },
+      canPop: true,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Editar perfil'),
@@ -622,11 +619,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           foregroundColor: Colors.white,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () async {
-              await _flushPendingSaves();
-              if (mounted) Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12),
+              child: Center(
+                child: GestureDetector(
+                  onTap: _isSaving ? null : _saveAllAndPop,
+                  child: Text(
+                    'Guardar',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _isSaving ? Colors.white54 : Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -637,13 +649,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             _buildAvatarSection(),
             const SizedBox(height: 32),
             
-            // Nombre, apellidos, dirección (opcionales, auto-guardado)
+            // Nombre, apellidos, dirección (se guardan al pulsar Guardar)
             TextField(
               controller: _firstNameController,
               style: const TextStyle(color: _darkGray),
               keyboardType: TextInputType.name,
               textCapitalization: TextCapitalization.words,
-              onChanged: _onFirstNameChanged,
               decoration: _inputDecoration('Nombre', Icons.badge, 'Opcional'),
             ),
             const SizedBox(height: 12),
@@ -652,7 +663,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               style: const TextStyle(color: _darkGray),
               keyboardType: TextInputType.name,
               textCapitalization: TextCapitalization.words,
-              onChanged: _onLastNameChanged,
               decoration: _inputDecoration('Apellidos', Icons.badge_outlined, 'Opcional'),
             ),
             const SizedBox(height: 12),
@@ -662,7 +672,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               keyboardType: TextInputType.streetAddress,
               minLines: 1,
               maxLines: 3,
-              onChanged: _onAddressChanged,
               decoration: _inputDecoration('Dirección', Icons.location_on, 'Opcional'),
             ),
             const SizedBox(height: 24),
@@ -672,13 +681,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 12),
             _buildInfoRow(Icons.email, 'Email', _authService.email ?? ''),
             const SizedBox(height: 12),
-            // Teléfono (editable, se guarda automáticamente)
+            // Teléfono (se guarda al pulsar Guardar)
             TextField(
               controller: _phoneController,
               style: const TextStyle(color: _darkGray),
               keyboardType: TextInputType.phone,
-              onChanged: _onPhoneChanged,
-              decoration: _inputDecoration('Teléfono', Icons.phone, 'Se guarda automáticamente al escribir'),
+              decoration: _inputDecoration('Teléfono', Icons.phone, 'Opcional'),
             ),
             const SizedBox(height: 24),
             

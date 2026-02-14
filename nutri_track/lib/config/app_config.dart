@@ -13,10 +13,9 @@ class AppConfig {
   static String get logoFirebaseUrl =>
       'https://firebasestorage.googleapis.com/v0/b/nutritrack-aztqd.firebasestorage.app/o/data%2FCookind.png?alt=media&v=$_logoVersion';
 
-  /// Imagen por defecto para recetas sin foto - data/backup_photo en Firebase Storage
-  /// Si el archivo tiene extensión (ej. backup_photo.png), usa data%2Fbackup_photo.png
+  /// Imagen por defecto para recetas sin foto - data/backup.png en Firebase Storage
   static const String backupPhotoFirebaseUrl =
-      'https://firebasestorage.googleapis.com/v0/b/nutritrack-aztqd.firebasestorage.app/o/data%2Fbackup_photo?alt=media';
+      'https://firebasestorage.googleapis.com/v0/b/nutritrack-aztqd.firebasestorage.app/o/data%2Fbackup.png?alt=media';
   
   // URLs por defecto según la plataforma
   static String get defaultBackendUrl {

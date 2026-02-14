@@ -495,18 +495,19 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
               
               const SizedBox(height: 16),
               
-              // Main content card
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.cardBackground,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: SingleChildScrollView(
+              // Main content card - autosize, stretches down when adding ingredients
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.cardBackground,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                         Text(
@@ -533,15 +534,23 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                 Expanded(
                                   child: TextField(
                                     controller: _ingredientController,
+                                    style: const TextStyle(color: Colors.black87),
                                     decoration: InputDecoration(
                                       hintText: 'Añadir ingrediente',
+                                      hintStyle: const TextStyle(color: Colors.black54),
+                                      filled: true,
+                                      fillColor: Colors.white,
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
-                                        borderSide: const BorderSide(color: Color(0xFF4CAF50)),
+                                        borderSide: const BorderSide(color: Colors.black38),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
                                         borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(color: Colors.black38),
                                       ),
                                     ),
                                     textInputAction: TextInputAction.done,
@@ -569,7 +578,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                 const SizedBox(width: 8),
                                 if (_ingredientController.text.isNotEmpty)
                                   IconButton(
-                                    icon: const Icon(Icons.close, color: Colors.grey),
+                                    icon: const Icon(Icons.close, color: Colors.black54),
                                     onPressed: () {
                                       _ingredientController.clear();
                                       setState(() => _ingredientSuggestions = []);
@@ -602,6 +611,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.black26),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.1),
@@ -617,7 +627,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                       leading: const Icon(Icons.restaurant_menu, size: 20, color: Color(0xFF4CAF50)),
                                       title: Text(
                                         food['name'] ?? '',
-                                        style: const TextStyle(fontSize: 14),
+                                        style: const TextStyle(fontSize: 14, color: Colors.black87),
                                       ),
                                       onTap: () {
                                         // Agregar el alimento como ingrediente
@@ -652,22 +662,17 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                             style: TextStyle(color: AppTheme.textSecondary(context)),
                           )
                         else
-                          SizedBox(
-                            height: 60,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: _selectedIngredients.map((ingredient) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: Chip(
-                                    label: Text(ingredient),
-                                    onDeleted: () => _removeIngredient(ingredient),
-                                    deleteIcon: const Icon(Icons.close, size: 18),
-                                    backgroundColor: Colors.purple[100],
-                                  ),
-                                );
-                              }).toList(),
-                            ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _selectedIngredients.map((ingredient) {
+                              return Chip(
+                                label: Text(ingredient, style: const TextStyle(color: Colors.black87)),
+                                onDeleted: () => _removeIngredient(ingredient),
+                                deleteIcon: const Icon(Icons.close, size: 18, color: Colors.black54),
+                                backgroundColor: Colors.purple[100],
+                              );
+                            }).toList(),
                           ),
                         const SizedBox(height: 24),
                         
@@ -677,12 +682,16 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                           children: [
                             TextField(
                               controller: _queryController,
+                              style: const TextStyle(color: Colors.black87),
                               decoration: InputDecoration(
                                 hintText: 'Buscar por nombre de receta...',
+                                hintStyle: const TextStyle(color: Colors.black54),
+                                filled: true,
+                                fillColor: Colors.white,
                                 prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
                                 suffixIcon: _queryController.text.isNotEmpty || _foodSuggestions.isNotEmpty
                                     ? IconButton(
-                                        icon: const Icon(Icons.clear, color: Colors.grey),
+                                        icon: const Icon(Icons.clear, color: Colors.black54),
                                         onPressed: () {
                                           _queryController.clear();
                                           setState(() => _foodSuggestions = []);
@@ -691,6 +700,15 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                     : null,
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.black38),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Colors.black38),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
                                 ),
                               ),
                               onChanged: (value) {
@@ -704,6 +722,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.black26),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.1),
@@ -719,7 +738,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                       leading: const Icon(Icons.restaurant_menu, size: 20, color: Color(0xFF4CAF50)),
                                       title: Text(
                                         food['name'] ?? '',
-                                        style: const TextStyle(fontSize: 14),
+                                        style: const TextStyle(fontSize: 14, color: Colors.black87),
                                       ),
                                       onTap: () {
                                         // Agregar el alimento como ingrediente
@@ -744,16 +763,26 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                             Expanded(
                               child: DropdownButtonFormField<String>(
                                 value: _selectedDifficulty,
+                                dropdownColor: Colors.white,
+                                style: const TextStyle(color: Colors.black87, fontSize: 16),
                                 decoration: InputDecoration(
                                   labelText: 'Dificultad',
+                                  labelStyle: const TextStyle(color: Colors.black54),
+                                  filled: true,
+                                  fillColor: Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Colors.black38),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Colors.black38),
                                   ),
                                 ),
                                 items: ['Fácil', 'Media', 'Difícil'].map((d) {
                                   return DropdownMenuItem(
                                     value: d.toLowerCase(),
-                                    child: Text(d),
+                                    child: Text(d, style: const TextStyle(color: Colors.black87)),
                                   );
                                 }).toList(),
                                 onChanged: (value) {
@@ -765,10 +794,20 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: TextField(
+                                style: const TextStyle(color: Colors.black87),
                                 decoration: InputDecoration(
                                   labelText: 'Tiempo máx (min)',
+                                  labelStyle: const TextStyle(color: Colors.black54),
+                                  hintStyle: const TextStyle(color: Colors.black54),
+                                  filled: true,
+                                  fillColor: Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Colors.black38),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(color: Colors.black38),
                                   ),
                                 ),
                                 keyboardType: TextInputType.number,

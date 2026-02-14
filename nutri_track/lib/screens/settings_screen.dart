@@ -116,7 +116,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           const Divider(),
           
           // Danger Zone
-          _buildSectionHeader('Zona de peligro'),
           _buildSettingsTile(
             context,
             icon: Icons.delete_forever,
@@ -166,10 +165,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.bold,
-          color: Colors.grey[600],
+          color: Colors.black,
           letterSpacing: 0.5,
         ),
       ),
@@ -186,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool showPronto = false,
   }) {
     return ListTile(
-      leading: Icon(icon, color: textColor ?? AppTheme.primary),
+      leading: Icon(icon, color: textColor ?? Colors.grey.shade600),
       title: Text(
         title,
         style: TextStyle(
@@ -221,6 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppTheme.primary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -241,52 +241,81 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   height: 4,
                   margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Colors.white54,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
               const Text(
                 'Más información',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 20),
-              _buildQaItem(
+              _buildFeatureBlockIcon(
+                context,
+                Icons.info_outline,
                 '¿Qué es CooKind?',
-                'CooKind es una aplicación para gestionar tu nutrición: recetas, seguimiento de calorías, ingredientes favoritos y lista de la compra.',
+                'Cookind es el asistente definitivo que transforma tu cocina en un espacio de creatividad e inteligencia nutricional. Con un catálogo infinito de recetas y una IA avanzada, hacemos que conviertas cualquier ingrediente olvidado en un banquete digno de restaurante. Olvídate de las conjeturas: cada bocado se traduce en un seguimiento preciso de tus macronutrientes para que alcances tus metas físicas sin sacrificar el sabor. Podrás construir tu propia biblioteca culinaria digital, diciendo adiós para siempre al caos de las capturas de pantalla perdidas. Además, la experiencia se vuelve social al permitirte influir en tu comunidad y descubrir las recomendaciones favoritas de tu círculo cercano. Es la herramienta perfecta para quienes buscan variedad, control total sobre sus objetivos y una pizca de inspiración diaria. Todo lo que necesitas para dominar tu alimentación está a un solo toque de distancia. Cocina con propósito, come con placer y comparte tu éxito con el mundo.',
               ),
-              _buildQaItem(
-                '¿Cómo añado consumo?',
-                'Desde el icono de calorías en la barra superior, o en Seguimiento > Agregar consumo. Puedes registrar comidas por fecha y tipo.',
+              _buildMoreInfoDivider(),
+              _buildFeatureBlockIcon(
+                context,
+                Icons.restaurant_menu,
+                'De ingredientes a banquete',
+                '"Vacía tu nevera sin tirar nada." Solo dinos qué tienes muerto de risa en el cajón de las verduras o la nevera, y nuestra IA cocinará por ti. Convierte tres ingredientes olvidados en una cena digna de restaurante en segundos. Encuéntralo en Inicio > Buscador de recetas o en la pestaña Recetas.',
               ),
-              _buildQaItem(
-                '¿Dónde están mis favoritos?',
-                'Tus recetas favoritas están en Perfil > Favoritos, y también en Recetas > Filtro Favoritas.',
+              _buildMoreInfoDivider(),
+              _buildFeatureBlockIcon(
+                context,
+                Icons.pie_chart_outline,
+                'Tu cuerpo, bajo control',
+                '"Come con propósito, no con dudas." Olvídate de las conjeturas; obtén un desglose preciso de proteínas, grasas y carbohidratos en cada bocado. Registra lo que comes para alcanzar tus metas físicas mientras disfrutas de la comida, sabiendo exactamente qué hay en tu plato. Ve a Seguimiento > Agregar consumo. Busca o escanea alimentos y registra tus comidas para ver el desglose al instante.',
               ),
-              _buildQaItem(
-                '¿Cómo cambio mi foto de perfil?',
-                'Ve a Perfil > Editar perfil. Pulsa el icono de cámara sobre tu foto para seleccionar una imagen nueva.',
+              _buildMoreInfoDivider(),
+              _buildFeatureBlockIcon(
+                context,
+                Icons.menu_book,
+                'Tu recetario personal',
+                '"Crea la biblioteca culinaria de tus sueños." Despídete de los pantallazos perdidos en la galería de fotos. Guarda, organiza y revive esos platos que te enamoraron con un solo toque, listos para cuando el hambre apriete.',
+              ),
+              _buildMoreInfoDivider(),
+              _buildFeatureBlockIcon(
+                context,
+                Icons.group,
+                'Cocina en comunidad',
+                '"Presume de plato y contagia el sabor." No guardes el secreto de esa salsa increíble solo para ti. Envía tus mejores descubrimientos a tus amigos o familia con un clic y disfruta con tu grupo.',
               ),
               const SizedBox(height: 24),
               const Text(
                 '¿Necesitas ayuda o tienes sugerencias?',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Escríbenos y te responderemos lo antes posible.',
-                style: TextStyle(color: Color(0xFF424242), fontSize: 14),
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 12),
               TextField(
                 maxLines: 4,
-                style: const TextStyle(color: Colors.black87, fontSize: 15),
+                style: const TextStyle(color: Colors.black87),
                 decoration: InputDecoration(
                   hintText: 'Escribe tu consulta, sugerencia o lo que necesites...',
-                  hintStyle: const TextStyle(color: Colors.black87),
+                  hintStyle: const TextStyle(color: Colors.black54),
                   filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -466,27 +495,44 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildQaItem(String question, String answer) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            question,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2D6A4F),
+  Widget _buildFeatureBlockIcon(BuildContext context, IconData icon, String title, String description) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: Colors.white70, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          description,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.white70,
+            height: 1.5,
           ),
-          const SizedBox(height: 6),
-          Text(
-            answer,
-            style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.4),
-          ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMoreInfoDivider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Divider(color: Colors.white24, thickness: 1, height: 1),
     );
   }
 

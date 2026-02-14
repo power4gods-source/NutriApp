@@ -294,7 +294,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: CustomScrollView(
         slivers: [
-          // AppBar con imagen (solo si hay foto válida; si no, barra mínima sin espacio vacío)
+          // AppBar con imagen (si no hay foto válida, barra mínima sin espacio vacío)
+          // Para recetas IA: recortar parte superior (alignment bottom) y no dejar espacio vacío
           SliverAppBar(
             expandedHeight: hasValidImage ? 250 : 56,
             pinned: true,
@@ -303,8 +304,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     background: Image.network(
                       imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(color: const Color(0xFFF0F4F0)),
+                      alignment: isAi ? Alignment(0, 1) : Alignment.center,
+                      errorBuilder: (context, error, stackTrace) => Image.network(
+                        AppConfig.backupPhotoFirebaseUrl,
+                        fit: BoxFit.cover,
+                        alignment: isAi ? Alignment(0, 1) : Alignment.center,
+                        errorBuilder: (_, __, ___) => Container(color: const Color(0xFFF0F4F0)),
+                      ),
                     ),
                   )
                 : null,

@@ -488,7 +488,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
@@ -510,17 +510,19 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
             child: const Text(
               'Guardar',
               style: TextStyle(
-                color: Color(0xFF4CAF50),
+                color: AppTheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      body: Container(
+        color: Colors.white,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             // Date and meal type selector
             Container(
               padding: const EdgeInsets.all(20),
@@ -531,13 +533,14 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                     onTap: _selectDate,
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today, color: Color(0xFF4CAF50)),
+                        const Icon(Icons.calendar_today, color: AppTheme.primary),
                         const SizedBox(width: 12),
                         Text(
                           DateFormat('dd/MM/yyyy').format(DateTime.parse(_selectedDate)),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
+                            color: Colors.black87,
                           ),
                         ),
                       ],
@@ -581,18 +584,18 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             decoration: BoxDecoration(
-                              color: _activeSearchTab == 0 ? const Color(0xFF4CAF50) : Colors.grey[200],
+                              color: _activeSearchTab == 0 ? AppTheme.primary : Colors.grey.shade200,
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(8),
                                 bottomLeft: Radius.circular(8),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Alimentos',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: _activeSearchTab == 0 ? Colors.white : Colors.black87,
                               ),
                             ),
                           ),
@@ -609,18 +612,18 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             decoration: BoxDecoration(
-                              color: _activeSearchTab == 1 ? const Color(0xFF4CAF50) : Colors.grey[200],
+                              color: _activeSearchTab == 1 ? AppTheme.primary : Colors.grey.shade200,
                               borderRadius: const BorderRadius.only(
                                 topRight: Radius.circular(8),
                                 bottomRight: Radius.circular(8),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Recetas',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                                color: _activeSearchTab == 1 ? Colors.white : Colors.black87,
                               ),
                             ),
                           ),
@@ -632,11 +635,20 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                   // Search field
                   TextField(
                     controller: _activeSearchTab == 0 ? _foodSearchController : _recipeSearchController,
+                    style: const TextStyle(color: Colors.black87, fontSize: 16),
                     decoration: InputDecoration(
                       hintText: _activeSearchTab == 0 ? 'Buscar alimento...' : 'Buscar receta...',
-                      prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
+                      hintStyle: const TextStyle(color: Colors.black54),
+                      filled: true,
+                      fillColor: Colors.white,
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.primary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.black26),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.black26),
                       ),
                     ),
                   ),
@@ -650,8 +662,9 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                     Container(
                       margin: const EdgeInsets.only(top: 8),
                       decoration: BoxDecoration(
-                        color: Colors.grey[50],
+                        color: Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: Column(
                         children: _foodSuggestions.map((food) {
@@ -659,9 +672,9 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                           final foodName = food['name'] ?? '';
                           
                           return ListTile(
-                            title: Text(foodName),
-                            subtitle: Text('${food['nutrition_per_100g']?['calories'] ?? 0} kcal/100g'),
-                            trailing: const Icon(Icons.add_circle, color: Color(0xFF4CAF50)),
+                            title: Text(foodName, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
+                            subtitle: Text('${food['nutrition_per_100g']?['calories'] ?? 0} kcal/100g', style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
+                            trailing: const Icon(Icons.add_circle, color: AppTheme.primary),
                             onTap: () {
                               if (foodId.toString().isEmpty) {
                                 _findFoodIdByName(foodName, 100.0, 'gramos');
@@ -678,8 +691,9 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                     Container(
                       margin: const EdgeInsets.only(top: 8),
                       decoration: BoxDecoration(
-                        color: Colors.grey[50],
+                        color: Colors.grey.shade50,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: Column(
                         children: _recipeSuggestions.map((recipe) {
@@ -698,15 +712,15 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                                       width: 50,
                                       height: 50,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, size: 30),
+                                      errorBuilder: (_, __, ___) => const Icon(Icons.restaurant, size: 30, color: AppTheme.primary),
                                     ),
                                   )
-                                : const Icon(Icons.restaurant, size: 30, color: Color(0xFF4CAF50)),
-                            title: Text(title),
+                                : const Icon(Icons.restaurant, size: 30, color: AppTheme.primary),
+                            title: Text(title, style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w500)),
                             subtitle: Text(caloriesPerServing > 0 
                                 ? '$caloriesPerServing kcal/ración' 
-                                : 'Sin información nutricional'),
-                            trailing: const Icon(Icons.add_circle, color: Color(0xFF4CAF50)),
+                                : 'Sin información nutricional', style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
+                            trailing: const Icon(Icons.add_circle, color: AppTheme.primary),
                             onTap: () => _addRecipeAsConsumption(recipe),
                           );
                         }).toList(),
@@ -730,6 +744,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -741,7 +756,8 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                   ],
                 ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -755,18 +771,19 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey[100],
+            color: isSelected ? AppTheme.primary : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(12),
+            border: isSelected ? null : Border.all(color: Colors.grey.shade300),
           ),
           child: Column(
             children: [
-              Icon(icon, color: isSelected ? Colors.white : Colors.grey[600], size: 20),
+              Icon(icon, color: isSelected ? Colors.white : Colors.grey.shade700, size: 20),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.grey[600],
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.white : Colors.black87,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   fontSize: 12,
                 ),
               ),
@@ -785,14 +802,14 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isRecipe ? Colors.orange.withValues(alpha: 0.1) : Colors.grey[50],
+        color: isRecipe ? Colors.orange.withValues(alpha: 0.08) : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(12),
-        border: isRecipe ? Border.all(color: Colors.orange, width: 1) : null,
+        border: isRecipe ? Border.all(color: Colors.orange.shade700, width: 1) : Border.all(color: Colors.grey.shade300),
       ),
       child: Row(
         children: [
           if (isRecipe)
-            const Icon(Icons.restaurant_menu, color: Colors.orange, size: 20),
+            Icon(Icons.restaurant_menu, color: Colors.orange.shade700, size: 20),
           if (isRecipe) const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -802,6 +819,8 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                   food['name'],
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                    fontSize: 15,
                   ),
                 ),
                 Row(
@@ -820,14 +839,14 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                           children: [
                             Text(
                               '${food['quantity']} ${food['unit']}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.blue,
+                                color: Colors.blue.shade700,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(width: 4),
-                            const Icon(Icons.edit, size: 14, color: Colors.blue),
+                            Icon(Icons.edit, size: 14, color: Colors.blue.shade700),
                           ],
                         ),
                       ),
@@ -838,8 +857,8 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
                   Text(
                     '${calories.toInt()} kcal',
                     style: TextStyle(
-                      fontSize: 11,
-                      color: isRecipe ? Colors.orange : Colors.grey[600],
+                      fontSize: 12,
+                      color: isRecipe ? Colors.orange.shade700 : Colors.grey.shade700,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -847,7 +866,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
+            icon: Icon(Icons.delete, color: Colors.red.shade700),
             onPressed: () => _removeFood(index),
           ),
         ],
@@ -862,26 +881,38 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
     
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
+        builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text('Editar cantidad: ${food['name']}'),
+          backgroundColor: Colors.white,
+          title: Text('Editar cantidad: ${food['name']}', style: const TextStyle(color: Colors.black87)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: quantityController,
+                style: const TextStyle(color: Colors.black87),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Cantidad',
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: Colors.black54),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
                 ),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: selectedUnit,
-                decoration: const InputDecoration(
+                dropdownColor: Colors.white,
+                style: const TextStyle(color: Colors.black87),
+                decoration: InputDecoration(
                   labelText: 'Unidad',
-                  border: OutlineInputBorder(),
+                  labelStyle: const TextStyle(color: Colors.black54),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
+                  enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
                 ),
                 items: [
                   const DropdownMenuItem(value: 'gramos', child: Text('gramos')),
@@ -904,7 +935,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
+              child: Text('Cancelar', style: TextStyle(color: Colors.grey.shade700)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -965,24 +996,36 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Agregar ${food['name']}'),
+        backgroundColor: Colors.white,
+        title: Text('Agregar ${food['name']}', style: const TextStyle(color: Colors.black87)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: quantityController,
+              style: const TextStyle(color: Colors.black87),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Cantidad',
-                border: OutlineInputBorder(),
+                labelStyle: const TextStyle(color: Colors.black54),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
               ),
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: selectedUnit,
-              decoration: const InputDecoration(
+              dropdownColor: Colors.white,
+              style: const TextStyle(color: Colors.black87),
+              decoration: InputDecoration(
                 labelText: 'Unidad',
-                border: OutlineInputBorder(),
+                labelStyle: const TextStyle(color: Colors.black54),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Colors.black26)),
               ),
               items: _getUnitItems(food),
               onChanged: (value) {
@@ -994,7 +1037,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar', style: TextStyle(color: Colors.grey.shade700)),
           ),
           ElevatedButton(
             onPressed: () {

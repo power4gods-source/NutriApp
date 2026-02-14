@@ -404,10 +404,12 @@ class _TrackingScreenState extends State<TrackingScreen> {
     );
   }
 
+  static const Color _selectedPeriodBg = Color(0xFFE8F4E5); // Gris claro verdoso
+
   Widget _buildPeriodSelector() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      color: AppTheme.cardColor(context),
+      color: AppTheme.primary,
       child: Row(
         children: [
           Expanded(
@@ -438,17 +440,21 @@ class _TrackingScreenState extends State<TrackingScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primary : AppTheme.fillLight(context),
+          color: isSelected ? _selectedPeriodBg : Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? Colors.white : AppTheme.textSecondary(context), size: 20),
+            Icon(
+              icon,
+              color: isSelected ? AppTheme.primary : Colors.white,
+              size: 20,
+            ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : AppTheme.textSecondary(context),
+                color: isSelected ? AppTheme.primary : Colors.white,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 fontSize: 12,
               ),
