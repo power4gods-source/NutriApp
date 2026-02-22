@@ -5,6 +5,7 @@ import '../services/auth_service.dart';
 import '../services/tracking_service.dart';
 import '../config/app_config.dart';
 import '../config/app_theme.dart';
+import '../utils/ingredient_normalizer.dart';
 import 'recipe_detail_screen.dart';
 
 class AIRecipeGeneratorScreen extends StatefulWidget {
@@ -151,8 +152,9 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
       final url = await AppConfig.getBackendUrl();
       
       final selectedList = _selectedIngredients.toList();
-      // Determinar lógica de ingredientes
+      // Lógica: 1-3 ingredientes -> must_include_all. 4+ -> strict_ingredients_only (solo esos + condimentos)
       final mustIncludeAll = selectedList.length <= 3;
+      final strictIngredientsOnly = selectedList.length >= 4;
       
       final response = await http.post(
         Uri.parse('$url/ai/generate-recipes'),
@@ -164,10 +166,11 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
           'meal_type': _mealType ?? 'Comida',
           'ingredients': selectedList,
           'num_recipes': 5,
-          'must_include_all': mustIncludeAll, // Si hay 3 o menos, deben aparecer todos
+          'must_include_all': mustIncludeAll,
+          'strict_ingredients_only': strictIngredientsOnly,
           'difficulty': _selectedDifficulty,
           'max_time': _maxTime,
-          'save_to_private': true, // Guardar automáticamente como recetas privadas + dedupe
+          'save_to_private': true,
         }),
       ).timeout(const Duration(seconds: 60));
 
@@ -430,186 +433,312 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppTheme.surface,
-        elevation: 0,
-        title: const Text(
-          'Generador de Recetas',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppTheme.primary,
+              AppTheme.primary.withOpacity(0.7),
+            ],
           ),
         ),
-        actions: [
-          if (!_isGenerating && _recipes.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.black),
-              onPressed: _generateRecipes,
-              tooltip: 'Generar nuevas recetas',
-            ),
-        ],
-      ),
-      body: _isLoadingIngredients
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Filtros (similar a recipe_finder_screen)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    color: Colors.white,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Ingredientes disponibles (seleccionables)
-                        const Text(
-                          'Ingredientes disponibles:',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header (igual que Buscar Recetas)
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    Expanded(
+                      child: Text(
+                        'Genera recetas con CookAInd',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 8),
-                        if (_availableIngredients.isNotEmpty)
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _availableIngredients.map((ing) {
-                              final isSelected = _selectedIngredients.contains(ing);
-                              return InkWell(
-                                onTap: () {
-                                  if (isSelected) {
-                                    _removeIngredient(ing);
-                                  } else {
-                                    _addIngredient(ing);
-                                  }
-                                },
-                                child: Chip(
-                                  label: Text(ing),
-                                  backgroundColor: isSelected
-                                      ? const Color(0xFF4CAF50)
-                                      : const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                                  deleteIcon: isSelected
-                                      ? const Icon(Icons.check, size: 18, color: Colors.white)
-                                      : null,
-                                  onDeleted: isSelected ? () => _removeIngredient(ing) : null,
-                                  labelStyle: TextStyle(
-                                    color: isSelected ? Colors.white : Colors.black87,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    if (!_isGenerating && _recipes.isNotEmpty)
+                      IconButton(
+                        icon: const Icon(Icons.refresh, color: Colors.white),
+                        onPressed: _generateRecipes,
+                        tooltip: 'Generar nuevas recetas',
+                      )
+                    else
+                      const SizedBox(width: 38),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 8),
+              // Contenido en tarjeta
+              Flexible(
+                child: _isLoadingIngredients
+                    ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                    : _isGenerating
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const CircularProgressIndicator(color: AppTheme.primary),
+                                const SizedBox(height: 20),
+                                Text(
+                                  'Generando recetas con CookAInd...',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textPrimary(context),
                                   ),
                                 ),
-                              );
-                            }).toList(),
-                          )
-                        else
-                          Text(
-                            'No tienes ingredientes guardados. Usa el buscador para añadir.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        const SizedBox(height: 16),
-                        
-                        // Buscador de nuevos ingredientes
-                        const Text(
-                          'Añadir ingrediente:',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _ingredientSearchController,
-                          decoration: InputDecoration(
-                            hintText: 'Buscar o escribir nuevo ingrediente...',
-                            prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                          ),
-                          onSubmitted: (value) {
-                            if (value.trim().isNotEmpty) {
-                              if (_ingredientSuggestions.isNotEmpty) {
-                                final first = _ingredientSuggestions.first['name'] ?? '';
-                                if (first.isNotEmpty) {
-                                  _addIngredient(first);
-                                } else {
-                                  _addIngredient(value);
-                                }
-                              } else {
-                                _addIngredient(value);
-                              }
-                            }
-                          },
-                        ),
-                        // Sugerencias de autocompletado
-                        if (_ingredientSuggestions.isNotEmpty)
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.1),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Esto puede tardar unos segundos',
+                                  style: TextStyle(
+                                    color: AppTheme.textSecondary(context),
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ],
                             ),
+                          )
+                        : SingleChildScrollView(
+                        child: Container(
+                          margin: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.cardBackground,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
                             child: Column(
-                              children: _ingredientSuggestions.map((food) {
-                                return ListTile(
-                                  dense: true,
-                                  leading: const Icon(Icons.restaurant_menu, size: 20, color: Color(0xFF4CAF50)),
-                                  title: Text(
-                                    food['name'] ?? '',
-                                    style: const TextStyle(fontSize: 14),
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 16),
+                                // Dificultad + Tiempo máx
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: DropdownButtonFormField<String>(
+                                        value: _selectedDifficulty,
+                                        dropdownColor: Colors.white,
+                                        style: const TextStyle(color: Colors.black87, fontSize: 16),
+                                        decoration: InputDecoration(
+                                          labelText: 'Dificultad',
+                                          labelStyle: const TextStyle(color: Colors.black54),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                            borderSide: const BorderSide(color: Colors.black38),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                            borderSide: const BorderSide(color: Colors.black38),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                                        ),
+                                        items: const [
+                                          DropdownMenuItem(value: null, child: Text('Todas')),
+                                          DropdownMenuItem(value: 'Fácil', child: Text('Fácil')),
+                                          DropdownMenuItem(value: 'Media', child: Text('Media')),
+                                          DropdownMenuItem(value: 'Difícil', child: Text('Difícil')),
+                                        ],
+                                        onChanged: (value) => setState(() => _selectedDifficulty = value),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: TextField(
+                                        style: const TextStyle(color: Colors.black87),
+                                        decoration: InputDecoration(
+                                          labelText: 'Tiempo máx (min)',
+                                          labelStyle: const TextStyle(color: Colors.black54),
+                                          hintStyle: const TextStyle(color: Colors.black54),
+                                          filled: true,
+                                          fillColor: Colors.white,
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                            borderSide: const BorderSide(color: Colors.black38),
+                                          ),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(12),
+                                            borderSide: const BorderSide(color: Colors.black38),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                                        ),
+                                        keyboardType: TextInputType.number,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _maxTime = value.isEmpty ? null : int.tryParse(value);
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                // Buscador
+                                TextField(
+                                  controller: _ingredientSearchController,
+                                  style: const TextStyle(color: Colors.black87, fontSize: 16),
+                                  decoration: InputDecoration(
+                                    hintText: 'Añade ingredientes...',
+                                    hintStyle: const TextStyle(color: Colors.black54),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: Colors.black38),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: Colors.black38),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                   ),
-                                  onTap: () {
-                                    final name = food['name'] ?? '';
-                                    if (name.isNotEmpty) {
-                                      _addIngredient(name);
+                                  onSubmitted: (value) {
+                                    if (value.trim().isNotEmpty) {
+                                      if (_ingredientSuggestions.isNotEmpty) {
+                                        final first = _ingredientSuggestions.first['name'] ?? '';
+                                        if (first.isNotEmpty) {
+                                          _addIngredient(first);
+                                        } else {
+                                          _addIngredient(value);
+                                        }
+                                      } else {
+                                        _addIngredient(value);
+                                      }
                                     }
                                   },
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        const SizedBox(height: 16),
-                        
-                        // Ingredientes seleccionados
-                        if (_selectedIngredients.isNotEmpty) ...[
-                          const Text(
-                            'Ingredientes seleccionados:',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _selectedIngredients.map((ing) {
-                              return Chip(
-                                label: Text(ing),
-                                backgroundColor: const Color(0xFF4CAF50),
-                                deleteIcon: const Icon(Icons.close, size: 18, color: Colors.white),
-                                onDeleted: () => _removeIngredient(ing),
-                                labelStyle: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 8),
-                          if (_selectedIngredients.length <= 3)
+                                if (_ingredientSuggestions.isNotEmpty)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      children: _ingredientSuggestions.map((food) {
+                                        return ListTile(
+                                          dense: true,
+                                          leading: const Icon(Icons.restaurant_menu, size: 20, color: Color(0xFF4CAF50)),
+                                          title: Text(
+                                            IngredientNormalizer.toSingular((food['name'] ?? '').toString()),
+                                            style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                          ),
+                                          onTap: () {
+                                            final name = food['name'] ?? '';
+                                            if (name.isNotEmpty) _addIngredient(name);
+                                          },
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                const SizedBox(height: 16),
+                                // Mis ingredientes
+                                Text(
+                                  'Combina los que ya tienes:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textPrimary(context),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                if (_availableIngredients.isNotEmpty)
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: _availableIngredients.map((ing) {
+                                      final isSelected = _selectedIngredients.contains(ing);
+                                      return InkWell(
+                                        onTap: () {
+                                          if (isSelected) {
+                                            _removeIngredient(ing);
+                                          } else {
+                                            _addIngredient(ing);
+                                          }
+                                        },
+                                        child: Chip(
+                                          label: Text(IngredientNormalizer.toSingular(ing), style: const TextStyle(color: Colors.black87)),
+                                          backgroundColor: isSelected ? Colors.purple[100]! : AppTheme.cardBackground,
+                                          side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                                          labelStyle: TextStyle(
+                                            color: Colors.black87,
+                                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  )
+                                else
+                                  Text(
+                                    'No tienes ingredientes guardados. Usa el buscador para añadir.',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppTheme.textSecondary(context),
+                                    ),
+                                  ),
+                                const SizedBox(height: 16),
+                                // Seleccionados
+                                Text(
+                                  'Seleccionados:',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textPrimary(context),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                if (_selectedIngredients.isEmpty)
+                                  Text(
+                                    'No hay ingredientes seleccionados',
+                                    style: TextStyle(color: AppTheme.textSecondary(context)),
+                                  )
+                                else
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: _selectedIngredients.map((ing) {
+                                      return InkWell(
+                                        onTap: () => _removeIngredient(ing),
+                                        child: Chip(
+                                          label: Text(IngredientNormalizer.toSingular(ing), style: const TextStyle(color: Colors.black87)),
+                                          backgroundColor: Colors.purple[100]!,
+                                          side: const BorderSide(color: AppTheme.primary, width: 1.5),
+                                          labelStyle: const TextStyle(
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                const SizedBox(height: 8),
+                                if (_selectedIngredients.length <= 3)
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
@@ -631,9 +760,9 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                                   ),
                                 ],
                               ),
-                            )
-                          else
-                            Container(
+                                  )
+                                else
+                                  Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: Colors.orange.withValues(alpha: 0.1),
@@ -645,7 +774,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Las recetas combinarán estos ingredientes',
+                                      'Las recetas usarán ÚNICAMENTE estos ingredientes (más condimentos básicos)',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.orange[700],
@@ -654,227 +783,133 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
                                   ),
                                 ],
                               ),
-                            ),
-                          const SizedBox(height: 16),
-                        ],
-                      
-                      // Tipo de comida
-                      const Text(
-                        'Tipo de comida:',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _buildFilterChip(
-                              'Desayuno',
-                              _mealType == 'Desayuno',
-                              () => setState(() => _mealType = _mealType == 'Desayuno' ? null : 'Desayuno'),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildFilterChip(
-                              'Comida',
-                              _mealType == 'Comida',
-                              () => setState(() => _mealType = _mealType == 'Comida' ? null : 'Comida'),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _buildFilterChip(
-                              'Cena',
-                              _mealType == 'Cena',
-                              () => setState(() => _mealType = _mealType == 'Cena' ? null : 'Cena'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      
-                      // Fila de filtros: Dificultad, Tiempo, Dulce/Salado
-                      Row(
-                        children: [
-                          // Dificultad
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedDifficulty,
-                              decoration: InputDecoration(
-                                labelText: 'Dificultad',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                              ),
-                              items: const [
-                                DropdownMenuItem(value: null, child: Text('Todas')),
-                                DropdownMenuItem(value: 'Fácil', child: Text('Fácil')),
-                                DropdownMenuItem(value: 'Media', child: Text('Media')),
-                                DropdownMenuItem(value: 'Difícil', child: Text('Difícil')),
-                              ],
-                              onChanged: (value) => setState(() => _selectedDifficulty = value),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          // Tiempo máximo
-                          Expanded(
-                            child: TextFormField(
-                              decoration: InputDecoration(
-                                labelText: 'Tiempo máx (min)',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                              ),
-                              keyboardType: TextInputType.number,
-                              onChanged: (value) {
-                                setState(() {
-                                  _maxTime = value.isEmpty ? null : int.tryParse(value);
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Botón generar
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _selectedIngredients.isEmpty || _isGenerating ? null : _generateRecipes,
-                          icon: _isGenerating
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
                                   ),
-                                )
-                              : const Icon(Icons.auto_awesome),
-                          label: Text(_isGenerating ? 'Generando...' : 'Generar sugerencias'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4CAF50),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                                const SizedBox(height: 24),
+                                // Botón generar (llamativo, contraste con fondo claro)
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: _selectedIngredients.isEmpty || _isGenerating ? null : _generateRecipes,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppTheme.primary,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 18),
+                                      elevation: 4,
+                                      shadowColor: AppTheme.primary.withValues(alpha: 0.5),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: _isGenerating
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Generar sugerencias',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                
+                                // Resultados / Error
+                                if (_error != null)
+                                  Container(
+                                    padding: const EdgeInsets.all(40),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.error_outline,
+                                            size: 64, color: Colors.red[300]),
+                                        const SizedBox(height: 16),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                                          child: Text(
+                                            _error!,
+                                            style: TextStyle(color: Colors.red[700]),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        ElevatedButton(
+                                          onPressed: _generateRecipes,
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppTheme.primary,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          child: const Text('Reintentar'),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else if (_recipes.isEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(Icons.restaurant_menu,
+                                            size: 64, color: Colors.grey[400]),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'Haz clic en "Generar sugerencias" para comenzar',
+                                          style: TextStyle(
+                                            color: AppTheme.textSecondary(context),
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                else
+                                                  Padding(
+                                    padding: EdgeInsets.zero,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          margin: const EdgeInsets.only(bottom: 16),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withValues(alpha: 0.1),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              const Icon(Icons.info_outline, color: Colors.blue),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  '${_recipes.length} recetas generadas. Toca una receta para ver los detalles.',
+                                                  style: const TextStyle(color: Colors.blue, fontSize: 13),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        ..._recipes.map((recipe) => _buildRecipeCard(recipe)),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            disabledBackgroundColor: Colors.grey[300],
-                            disabledForegroundColor: Colors.grey[600],
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                
-                // Resultados (scroll down completo)
-                if (_isGenerating)
-                  Container(
-                    padding: const EdgeInsets.all(40),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Generando recetas con CookAInd...'),
-                        SizedBox(height: 8),
-                        Text(
-                          'Esto puede tardar unos segundos',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else if (_error != null)
-                  Container(
-                    padding: const EdgeInsets.all(40),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline,
-                            size: 64, color: Colors.red[300]),
-                        const SizedBox(height: 16),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Text(
-                            _error!,
-                            style: TextStyle(color: Colors.red[700]),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _generateRecipes,
-                          child: const Text('Reintentar'),
-                        ),
-                      ],
-                    ),
-                  )
-                else if (_recipes.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(40),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.restaurant_menu,
-                            size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Haz clic en "Generar sugerencias" para comenzar',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.info_outline,
-                                  color: Colors.blue),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  '${_recipes.length} recetas generadas. Toca una receta para ver los detalles.',
-                                  style: const TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        ..._recipes.map((recipe) => _buildRecipeCard(recipe)),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-          ),
+              ),
     );
   }
 
@@ -885,7 +920,7 @@ class _AIRecipeGeneratorScreenState extends State<AIRecipeGeneratorScreen> {
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF4CAF50)
+              ? AppTheme.primary
               : Colors.grey[200],
           borderRadius: BorderRadius.circular(12),
         ),

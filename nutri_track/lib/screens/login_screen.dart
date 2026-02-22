@@ -5,6 +5,7 @@ import '../config/app_theme.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../utils/password_validator.dart';
+import '../utils/snackbar_utils.dart';
 import '../main.dart';
 import 'forgot_password_screen.dart';
 import 'terms_and_conditions_screen.dart';
@@ -92,28 +93,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         }
       }
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: 'OK',
-            onPressed: () {},
-          ),
-        ),
-      );
+      showErrorSnackBar(context, errorMessage);
     }
   }
 
   Future<void> _handleRegister() async {
     if (!_registerFormKey.currentState!.validate()) return;
-    if (!_acceptTerms || !_isOver14) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Debes aceptar los Términos y la Política de Privacidad, y declarar que eres mayor de 14 años.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      if (!_acceptTerms || !_isOver14) {
+      showErrorSnackBar(context, 'Debes aceptar los Términos y la Política de Privacidad, y declarar que eres mayor de 14 años.',
+          backgroundColor: Colors.orange);
       return;
     }
 
@@ -159,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             SnackBar(
               content: Text(result['error'] ?? 'Backend no disponible. Por favor, intenta hacer login.'),
               backgroundColor: Colors.orange,
-              duration: const Duration(seconds: 4),
+              duration: kErrorSnackBarDuration,
               action: SnackBarAction(
                 label: 'Hacer Login',
                 textColor: Colors.white,
@@ -178,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             SnackBar(
               content: Text(errorMessage.toString()),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
+              duration: kErrorSnackBarDuration,
               action: isEmailTaken
                   ? SnackBarAction(
                       label: 'Iniciar sesión',
@@ -195,13 +183,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       print('Stack trace: $stackTrace');
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al registrar: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error al registrar: $e');
       }
     }
   }
@@ -220,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               // Logo Cookind (desde Firebase para reflejar actualizaciones)
               Center(
                 child: Image.network(
-                  AppConfig.logoFirebaseUrl,
+                  AppConfig.logoUrl,
                   height: 80,
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => Image.asset(
@@ -614,7 +596,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           const SizedBox(height: 24),
           
           // Social login buttons
-          _buildSocialButton(context, 'G Continuar con Google', Icons.login, isGoogle: true),
+          _buildSocialButton(context, 'Continuar con Google', Icons.login, isGoogle: true),
           const SizedBox(height: 12),
           _buildSocialButton(context, 'Continuar con Apple', Icons.phone_iphone, isGoogle: false),
           const SizedBox(height: 24),
@@ -638,12 +620,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         (route) => false,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['error'] ?? 'Error al iniciar sesión'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showErrorSnackBar(context, result['error'] ?? 'Error al iniciar sesión');
     }
   }
 

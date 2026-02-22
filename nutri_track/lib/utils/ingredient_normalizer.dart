@@ -9,6 +9,7 @@ class IngredientNormalizer {
     // Reglas específicas para ingredientes comunes
     final specificRules = {
       'pollos': 'pollo',
+      'carnes': 'carne',
       'cebollas': 'cebolla',
       'patatas': 'patata',
       'zanahorias': 'zanahoria',

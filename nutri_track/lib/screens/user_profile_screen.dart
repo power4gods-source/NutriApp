@@ -108,7 +108,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           backgroundColor: AppTheme.surface,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black87),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.pop(context),
           ),
           title: const Text('Perfil', style: TextStyle(color: Colors.black87)),
@@ -128,7 +128,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         backgroundColor: AppTheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -278,7 +278,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final difficulty = (recipe['difficulty'] ?? '-').toString();
     final recipeImg = (recipe['image_url']?.toString() ?? '').trim();
     final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
-    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoUrl;
 
     return Card(
       elevation: 2,

@@ -7,6 +7,8 @@ import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
 import '../utils/nutrition_parser.dart';
+import '../utils/ingredient_normalizer.dart';
+import '../utils/snackbar_utils.dart';
 import 'add_recipe_screen.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
@@ -118,23 +120,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
         );
       } else {
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Error al guardar: ${resp.body}'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, '❌ Error al guardar: ${resp.body}');
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Error al guardar: $e'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      showErrorSnackBar(context, '❌ Error al guardar: $e');
     } finally {
       if (mounted) setState(() => _isSavingAiRecipe = false);
     }
@@ -228,23 +218,11 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           const SnackBar(content: Text('✅ Receta compartida'), backgroundColor: AppTheme.primary),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-          content: Text('❌ Error al compartir: ${resp.body}'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-        );
+        showErrorSnackBar(context, '❌ Error al compartir: ${resp.body}');
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('❌ Error al compartir: $e'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      showErrorSnackBar(context, '❌ Error al compartir: $e');
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }
@@ -287,7 +265,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     final ingredientsDetailed = recipe['ingredients_detailed'] as List<dynamic>?;
 
     final recipeImageUrl = recipe['image_url']?.toString().trim() ?? '';
-    final imageUrl = recipeImageUrl.isNotEmpty ? recipeImageUrl : AppConfig.backupPhotoFirebaseUrl;
+    final imageUrl = recipeImageUrl.isNotEmpty ? recipeImageUrl : AppConfig.backupPhotoUrl;
     final hasValidImage = true; // Siempre hay imagen: receta o backup_photo
 
     return Scaffold(
@@ -306,7 +284,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       fit: BoxFit.cover,
                       alignment: isAi ? Alignment(0, 1) : Alignment.center,
                       errorBuilder: (context, error, stackTrace) => Image.network(
-                        AppConfig.backupPhotoFirebaseUrl,
+                        AppConfig.backupPhotoUrl,
                         fit: BoxFit.cover,
                         alignment: isAi ? Alignment(0, 1) : Alignment.center,
                         errorBuilder: (_, __, ___) => Container(color: const Color(0xFFF0F4F0)),
@@ -315,7 +293,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   )
                 : null,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: hasValidImage ? Colors.white : Colors.black87),
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Navigator.pop(context),
             ),
             backgroundColor: hasValidImage ? null : AppTheme.cardBackground,
@@ -444,14 +422,15 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         description,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[700],
+                          color: Colors.black,
                           height: 1.5,
                         ),
                       ),
@@ -464,12 +443,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                     const SizedBox(height: 12),
                     if (ingredientsDetailed != null && ingredientsDetailed.isNotEmpty)
                       ...ingredientsDetailed.map((ing) {
-                        final name = ing['name'] ?? '';
+                        final name = IngredientNormalizer.toSingular((ing['name'] ?? '').toString());
                         final quantity = ing['quantity'] ?? '';
                         final unit = ing['unit'] ?? '';
                         return Padding(
@@ -481,7 +461,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               Expanded(
                                 child: Text(
                                   '$name: $quantity $unit',
-                                  style: const TextStyle(fontSize: 14),
+                                  style: const TextStyle(fontSize: 14, color: Colors.black),
                                 ),
                               ),
                             ],
@@ -490,7 +470,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       })
                     else
                       ...ingredients.map((ing) {
-                        if (ing.trim().isEmpty) return const SizedBox.shrink();
+                        final singular = IngredientNormalizer.toSingular(ing.trim());
+                        if (singular.isEmpty) return const SizedBox.shrink();
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Row(
@@ -499,8 +480,8 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  ing.trim(),
-                                  style: const TextStyle(fontSize: 14),
+                                  singular,
+                                  style: const TextStyle(fontSize: 14, color: Colors.black),
                                 ),
                               ),
                             ],
@@ -516,6 +497,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -552,6 +534,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                   style: const TextStyle(
                                     fontSize: 14,
                                     height: 1.5,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -583,6 +566,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
+                                  color: Colors.black,
                                 ),
                               ),
                               const SizedBox(height: 16),

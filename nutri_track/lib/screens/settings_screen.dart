@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/app_theme.dart';
+import '../utils/snackbar_utils.dart';
 import '../services/auth_service.dart';
 import '../widgets/pronto_badge.dart';
 import 'login_screen.dart';
@@ -581,12 +582,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   } else {
                     if (context.mounted) {
                       setState(() => _isDeleting = false);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(result['error'] ?? 'Error al eliminar la cuenta'),
-                          backgroundColor: AppTheme.vividRed,
-                        ),
-                      );
+                      showErrorSnackBar(context, result['error'] ?? 'Error al eliminar la cuenta',
+                          backgroundColor: AppTheme.vividRed);
                     }
                   }
                 },

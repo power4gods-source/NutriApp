@@ -662,17 +662,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Nueva Receta',
           style: TextStyle(
-            color: Colors.black87,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -689,7 +689,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 : Text(
                     _isEditing ? 'Actualizar' : 'Guardar',
                     style: const TextStyle(
-                      color: Color(0xFF4CAF50),
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

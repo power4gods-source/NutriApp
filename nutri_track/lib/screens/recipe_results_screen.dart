@@ -288,7 +288,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
   Widget _buildRecipeCard(Map<String, dynamic> recipe) {
     final imageUrl = recipe['image_url']?.toString().trim();
     final hasImage = imageUrl != null && imageUrl.isNotEmpty;
-    final displayImageUrl = hasImage ? imageUrl! : AppConfig.backupPhotoFirebaseUrl;
+    final displayImageUrl = hasImage ? imageUrl! : AppConfig.backupPhotoUrl;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -359,7 +359,7 @@ class _RecipeResultsScreenState extends State<RecipeResultsScreen> {
       child: Opacity(
         opacity: 0.92,
         child: Image.network(
-          AppConfig.backupPhotoFirebaseUrl,
+          AppConfig.backupPhotoUrl,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             return Container(

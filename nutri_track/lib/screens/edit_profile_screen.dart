@@ -10,6 +10,7 @@ import '../services/firebase_storage_paths.dart';
 import '../config/app_config.dart';
 import '../config/app_theme.dart';
 import '../utils/password_validator.dart';
+import '../utils/snackbar_utils.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -110,13 +111,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al seleccionar imagen: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error al seleccionar imagen: $e');
       }
     }
   }
@@ -144,24 +139,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         }
       } else if (mounted) {
         setState(() => _selectedImageBytes = null);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al subir la imagen'),
-            backgroundColor: Colors.orange,
-            duration: Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error al subir la imagen', backgroundColor: Colors.orange);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _selectedImageBytes = null);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -206,13 +189,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al revertir: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error al revertir: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -297,24 +274,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       } else {
         final err = jsonDecode(response.body);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${err['detail'] ?? 'Error'}'),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          showErrorSnackBar(context, 'Error: ${err['detail'] ?? 'Error'}');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -340,24 +305,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       } else {
         final err = jsonDecode(response.body);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${err['detail'] ?? 'Error'}'),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          showErrorSnackBar(context, 'Error: ${err['detail'] ?? 'Error'}');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -385,24 +338,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       } else {
         final err = jsonDecode(response.body);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${err['detail'] ?? 'Error'}'),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          showErrorSnackBar(context, 'Error: ${err['detail'] ?? 'Error'}');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -412,24 +353,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _changePassword() async {
     final pwdError = PasswordValidator.validate(_newPasswordController.text);
     if (pwdError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(pwdError),
-          backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 3),
-        ),
-      );
+      showErrorSnackBar(context, pwdError, backgroundColor: Colors.orange);
       return;
     }
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Las contraseñas no coinciden'),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
-        ),
-      );
+      showErrorSnackBar(context, 'Las contraseñas no coinciden', backgroundColor: Colors.orange);
       return;
     }
     
@@ -469,25 +398,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       } else {
         final error = jsonDecode(response.body);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: ${error['detail'] ?? 'Error al cambiar contraseña'}'),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          showErrorSnackBar(context, 'Error: ${error['detail'] ?? 'Error al cambiar contraseña'}');
         }
       }
     } catch (e) {
       print('Error changing password: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        showErrorSnackBar(context, 'Error: $e');
       }
     } finally {
       setState(() => _isSaving = false);
@@ -646,7 +563,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
           actions: [

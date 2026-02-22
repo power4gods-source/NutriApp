@@ -374,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 225, maxHeight: 58),
           child: Image.network(
-            AppConfig.logoFirebaseUrl,
+            AppConfig.logoUrl,
             fit: BoxFit.contain,
             errorBuilder: (_, __, ___) => Image.asset(
               'assets/images/Cookind.png',
@@ -1260,7 +1260,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ? (recipe['calories'] / recipe['servings']).round() : 0);
     final recipeImg = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
     final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
-    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoUrl;
 
     return Container(
       width: isHorizontal ? 200 : double.infinity,
@@ -1433,7 +1433,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final time = recipe['time_minutes'] ?? 0;
     final recipeImg = (recipe['image_url'] ?? recipe['image'] ?? '').toString().trim();
     final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
-    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoUrl;
     // Obtener calorías por porción
     final caloriesPerServing = recipe['calories_per_serving'] ?? 
                                (recipe['calories'] != null && recipe['servings'] != null 

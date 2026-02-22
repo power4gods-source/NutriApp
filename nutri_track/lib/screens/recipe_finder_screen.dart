@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../config/app_theme.dart';
+import '../utils/ingredient_normalizer.dart';
+import '../utils/snackbar_utils.dart';
 import '../services/recipe_service.dart';
 import '../services/tracking_service.dart';
 import 'recipe_results_screen.dart';
@@ -203,9 +205,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
       print('Stack trace: $stackTrace');
       setState(() => _isSearching = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al buscar recetas: $e')),
-        );
+        showErrorSnackBar(context, 'Error al buscar recetas: $e');
       }
     }
   }
@@ -626,7 +626,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                       dense: true,
                                       leading: const Icon(Icons.restaurant_menu, size: 20, color: Color(0xFF4CAF50)),
                                       title: Text(
-                                        food['name'] ?? '',
+                                        IngredientNormalizer.toSingular((food['name'] ?? '').toString()),
                                         style: const TextStyle(fontSize: 14, color: Colors.black87),
                                       ),
                                       onTap: () {
@@ -667,7 +667,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                             runSpacing: 8,
                             children: _selectedIngredients.map((ingredient) {
                               return Chip(
-                                label: Text(ingredient, style: const TextStyle(color: Colors.black87)),
+                                label: Text(IngredientNormalizer.toSingular(ingredient), style: const TextStyle(color: Colors.black87)),
                                 onDeleted: () => _removeIngredient(ingredient),
                                 deleteIcon: const Icon(Icons.close, size: 18, color: Colors.black54),
                                 backgroundColor: Colors.purple[100],
@@ -737,7 +737,7 @@ class _RecipeFinderScreenState extends State<RecipeFinderScreen> {
                                       dense: true,
                                       leading: const Icon(Icons.restaurant_menu, size: 20, color: Color(0xFF4CAF50)),
                                       title: Text(
-                                        food['name'] ?? '',
+                                        IngredientNormalizer.toSingular((food['name'] ?? '').toString()),
                                         style: const TextStyle(fontSize: 14, color: Colors.black87),
                                       ),
                                       onTap: () {

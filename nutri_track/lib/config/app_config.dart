@@ -8,12 +8,13 @@ import 'dart:async';
 class AppConfig {
   static const String _backendUrlKey = 'backend_url';
 
-  /// Logo de la app en Firebase Storage - data/Cookind.png (incrementar _logoVersion al actualizar)
-  static const int _logoVersion = 2;
-  static String get logoFirebaseUrl =>
-      'https://firebasestorage.googleapis.com/v0/b/nutritrack-aztqd.firebasestorage.app/o/data%2FCookind.png?alt=media&v=$_logoVersion';
+  /// Logo de la app en Supabase Storage - bucket data, public/Cookind_white.jpeg
+  static String get logoUrl => '$supabaseUrl/storage/v1/object/public/data/public/Cookind_white.jpeg';
 
-  /// Imagen por defecto para recetas sin foto - data/backup.png en Firebase Storage
+  /// Imagen por defecto para recetas sin foto - Supabase bucket data, public/backup.png
+  static String get backupPhotoUrl =>
+      '$supabaseUrl/storage/v1/object/public/data/public/backup.png';
+  @Deprecated('Usar backupPhotoUrl (Supabase). Mantener como fallback temporal.')
   static const String backupPhotoFirebaseUrl =
       'https://firebasestorage.googleapis.com/v0/b/nutritrack-aztqd.firebasestorage.app/o/data%2Fbackup.png?alt=media';
 

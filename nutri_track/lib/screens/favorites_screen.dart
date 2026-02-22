@@ -120,7 +120,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final description = recipe['description'] ?? '';
     final recipeImg = recipe['image_url']?.toString().trim() ?? '';
     final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
-    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoUrl;
 
     return GestureDetector(
       onTap: () async {

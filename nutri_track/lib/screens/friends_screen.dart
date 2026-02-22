@@ -6,6 +6,7 @@ import '../services/auth_service.dart';
 import '../config/app_config.dart';
 import '../main.dart';
 import '../config/app_theme.dart';
+import '../utils/snackbar_utils.dart';
 import 'chat_screen.dart';
 import 'user_profile_screen.dart';
 import 'chats_list_screen.dart';
@@ -30,6 +31,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
   int _followersCount = 0;
   int _connectionsCount = 0;
   Set<String> _connectionIds = {};
+  bool _isPublic = true;  // true = público (visible en Explorar), false = oculto
 
   @override
   void initState() {
@@ -66,6 +68,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
         _loadFollowingProfiles(),
         _loadStats(),
         _loadConnections(),
+        _loadMyVisibility(),
       ]);
     } catch (e) {
       print('❌ Error cargando datos: $e');
@@ -157,6 +160,47 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
     }
   }
 
+  Future<void> _loadMyVisibility() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      final resp = await http.get(Uri.parse('$url/profile'), headers: headers).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        final data = json.decode(resp.body);
+        final v = (data['visibility'] ?? 'public').toString().toLowerCase();
+        setState(() => _isPublic = v != 'hidden');
+      }
+    } catch (e) {
+      print('❌ Error cargando visibilidad: $e');
+    }
+  }
+
+  Future<void> _updateVisibility(bool isPublic) async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      final resp = await http.put(
+        Uri.parse('$url/profile'),
+        headers: {...headers, 'Content-Type': 'application/json'},
+        body: json.encode({'visibility': isPublic ? 'public' : 'hidden'}),
+      ).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        setState(() => _isPublic = isPublic);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(isPublic ? 'Ahora otros pueden encontrarte en Explorar' : 'Ahora estás oculto en Explorar'),
+              backgroundColor: Colors.green,
+              duration: kErrorSnackBarDuration,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) showErrorSnackBar(context, 'Error al actualizar visibilidad');
+    }
+  }
+
   Future<void> _loadStats() async {
     try {
       final url = await AppConfig.getBackendUrl();
@@ -215,12 +259,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
     } catch (e) {
       print('❌ Error al seguir/dejar de seguir: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Error al actualizar seguimiento'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showErrorSnackBar(context, 'Error al actualizar seguimiento');
       }
     }
   }
@@ -413,9 +452,9 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
 
   Widget _buildStatsHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: AppTheme.primary,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -425,10 +464,27 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          // Izquierda: switch activar/desactivar
+          Switch.adaptive(
+            value: _isPublic,
+            onChanged: (v) => _updateVisibility(v),
+            activeColor: Colors.white,
+          ),
+          const SizedBox(width: 8),
+          // Centro: texto Abierto/Privado
+          Text(
+            _isPublic ? 'Abierto' : 'Privado',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Spacer(),
+          // Derecha: contadores
           _buildStatItem(context, 'Te siguen', _followersCount),
-          const SizedBox(width: 24),
+          const SizedBox(width: 20),
           _buildStatItem(context, 'Conexiones', _connectionsCount),
         ],
       ),
@@ -437,21 +493,22 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
 
   Widget _buildStatItem(BuildContext context, String label, int value) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           '$value',
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: AppTheme.primary,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
-            color: AppTheme.textSecondary(context),
+            color: Colors.white70,
           ),
         ),
       ],
@@ -463,11 +520,11 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onSurface),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             final mainNavState = MainNavigationScreen.of(context);
             if (mainNavState != null) {
@@ -477,10 +534,10 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
             }
           },
         ),
-        title: Text(
+        title: const Text(
           'Comunidad',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -488,51 +545,49 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Color(0xFF4CAF50)),
+            icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _loadData,
             tooltip: 'Actualizar',
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(150),
-          child: Column(
-            children: [
-              _buildStatsHeader(context),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Buscar amigos o explorar...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    filled: true,
-                    fillColor: AppTheme.fillLight(context),
-                  ),
-                  onChanged: (_) => setState(() {}),
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildStatsHeader(context),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Buscar amigos o explorar...',
+                hintStyle: const TextStyle(color: Color(0xFF333333)),
+                prefixIcon: Icon(Icons.search, color: Colors.grey[700]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                filled: true,
+                fillColor: Colors.white,
               ),
-              TabBar(
-                controller: _tabController,
-                labelColor: const Color(0xFF4CAF50),
-                unselectedLabelColor: AppTheme.textSecondary(context),
-                indicatorColor: const Color(0xFF4CAF50),
-                indicatorWeight: 3,
-                tabs: const [
-                  Tab(text: 'Tu círculo'),
-                  Tab(text: 'Explorar'),
-                ],
-              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          TabBar(
+            controller: _tabController,
+            labelColor: const Color(0xFF4CAF50),
+            unselectedLabelColor: const Color(0xFFE8E8E8),
+            indicatorColor: const Color(0xFF4CAF50),
+            indicatorWeight: 3,
+            tabs: const [
+              Tab(text: 'Tu círculo'),
+              Tab(text: 'Explorar'),
             ],
           ),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Stack(
               children: [
                 TabBarView(
                   controller: _tabController,
@@ -546,23 +601,23 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                             Icon(
                               _searchQuery.isEmpty ? Icons.person_add_outlined : Icons.search_off,
                               size: 80,
-                              color: AppTheme.textTertiary(context),
+                              color: const Color(0xFFE0E0E0),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               _searchQuery.isEmpty ? 'Aún no sigues a nadie' : 'No hay coincidencias',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
-                                color: AppTheme.textSecondary(context),
+                                color: Color(0xFFE8E8E8),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               _searchQuery.isEmpty ? 'Explora usuarios y comienza a seguir' : 'Prueba con otro término de búsqueda',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 14,
-                                color: AppTheme.textSecondary(context),
+                                color: Color(0xFFE8E8E8),
                               ),
                             ),
                           ],
@@ -590,23 +645,23 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                             Icon(
                               _searchQuery.isEmpty ? Icons.people_outline : Icons.search_off,
                               size: 80,
-                              color: AppTheme.textTertiary(context),
+                              color: const Color(0xFFE0E0E0),
                             ),
                             const SizedBox(height: 16),
                             Text(
                               _searchQuery.isEmpty ? 'No hay perfiles disponibles' : 'No hay coincidencias',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
-                                color: AppTheme.textSecondary(context),
+                                color: Color(0xFFE8E8E8),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               _searchQuery.isEmpty ? 'Los perfiles de usuarios aparecerán aquí' : 'Prueba con otro término de búsqueda',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 14,
-                                color: AppTheme.textSecondary(context),
+                                color: Color(0xFFE8E8E8),
                               ),
                             ),
                           ],
@@ -642,6 +697,9 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
                 ),
               ],
             ),
+          ),
+        ],
+      ),
     );
   }
 }

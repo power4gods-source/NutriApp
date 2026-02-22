@@ -36,7 +36,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             if (mounted && Navigator.canPop(context)) {
               Navigator.of(context).pop();
@@ -62,25 +62,6 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Por lo que tienes en tu nevera',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: const Color.fromARGB(255, 255, 255, 255),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _buildMealFilter('Desayuno', _selectedMealTypes.contains('Desayuno')),
-                    const SizedBox(width: 10),
-                    _buildMealFilter('Comida', _selectedMealTypes.contains('Comida')),
-                    const SizedBox(width: 10),
-                    _buildMealFilter('Cena', _selectedMealTypes.contains('Cena')),
-                  ],
-                ),
-                const SizedBox(height: 20),
                 // Generate suggestions button - creates meal plan from ingredients
                 SizedBox(
                   width: double.infinity,
@@ -97,7 +78,6 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                         );
                         return;
                       }
-
                       // Navegar a pantalla de generación de recetas con IA
                       Navigator.push(
                         context,
@@ -112,7 +92,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primary,
+                      backgroundColor: const Color.fromARGB(255, 57, 135, 78),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       elevation: 3,
@@ -179,7 +159,7 @@ class _IngredientsScreenState extends State<IngredientsScreen> {
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: isSelected ? Colors.white : Colors.grey[700],
+              color: isSelected ? Colors.white : Colors.black87,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               fontSize: 13,
             ),
@@ -768,11 +748,12 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
             children: [
               TextField(
                 controller: _ingredientController,
+                style: const TextStyle(color: Colors.black87, fontSize: 16),
                 decoration: InputDecoration(
                   hintText: 'Agregar ingredientes (cebolla, pollo, fresas...)',
-                  hintStyle: TextStyle(color: Colors.grey[500]),
+                  hintStyle: TextStyle(color: Colors.grey[600]),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16),
                     borderSide: BorderSide(color: Colors.grey[300]!),
@@ -792,7 +773,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                   prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
                   suffixIcon: _ingredientController.text.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          icon: const Icon(Icons.clear, color: Colors.black54),
                           onPressed: () {
                             _ingredientController.clear();
                             setState(() {});
@@ -862,12 +843,12 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                           child: Row(
                             children: [
                               Icon(Icons.check_circle_outline,
-                                  size: 20, color: Colors.grey[600]),
+                                  size: 20, color: const Color(0xFF1B5E20)),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   suggestion,
-                                  style: const TextStyle(fontSize: 15),
+                                  style: const TextStyle(fontSize: 15, color: Colors.black87),
                                 ),
                               ),
                             ],
@@ -942,7 +923,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
+                                color: Colors.black87,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -950,7 +931,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                               'Agrega ingredientes que tienes en casa',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[500],
+                                color: Colors.black54,
                               ),
                             ),
                           ],
@@ -998,7 +979,7 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ingredient.name,
+                  IngredientNormalizer.toSingular(ingredient.name),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -1008,9 +989,9 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                 const SizedBox(height: 4),
                 Text(
                   '${ingredient.quantity} ${ingredient.unit}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Colors.black87,
                   ),
                 ),
               ],
@@ -1052,8 +1033,12 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
               Expanded(
                 child: TextField(
                   controller: nameController,
+                  style: const TextStyle(color: Colors.black87, fontSize: 16),
                   decoration: InputDecoration(
                     labelText: 'Nombre',
+                    labelStyle: TextStyle(color: Colors.grey[700]),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -1070,8 +1055,12 @@ class _IngredientsTabContentState extends State<_IngredientsTabContent> {
                 child: TextField(
                   controller: quantityController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  style: const TextStyle(color: Colors.black87, fontSize: 16),
                   decoration: InputDecoration(
                     labelText: 'Cantidad',
+                    labelStyle: TextStyle(color: Colors.grey[700]),
+                    filled: true,
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

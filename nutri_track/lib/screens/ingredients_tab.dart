@@ -566,11 +566,12 @@ class _IngredientsTabState extends State<IngredientsTab> {
                   children: [
                     TextField(
                       controller: _ingredientController,
+                      style: const TextStyle(color: Colors.black87, fontSize: 16),
                       decoration: InputDecoration(
                         hintText: 'Agregar ingrediente (ej: pollo, nata, bacon...)',
-                        hintStyle: TextStyle(color: Colors.grey[500]),
+                        hintStyle: TextStyle(color: Colors.grey[600]),
                         filled: true,
-                        fillColor: Colors.grey[50],
+                        fillColor: Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(color: Colors.grey[300]!),
@@ -590,7 +591,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
                         prefixIcon: const Icon(Icons.search, color: Color(0xFF4CAF50)),
                         suffixIcon: _ingredientController.text.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear, color: Colors.grey),
+                                icon: const Icon(Icons.clear, color: Colors.black54),
                                 onPressed: () {
                                   _ingredientController.clear();
                                   setState(() => _suggestions = []);
@@ -637,12 +638,12 @@ class _IngredientsTabState extends State<IngredientsTab> {
                                 child: Row(
                                   children: [
                                     Icon(Icons.check_circle_outline,
-                                        size: 20, color: Colors.grey[600]),
+                                        size: 20, color: const Color(0xFF1B5E20)),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
                                         suggestion,
-                                        style: const TextStyle(fontSize: 15),
+                                        style: const TextStyle(fontSize: 15, color: Colors.black87),
                                       ),
                                     ),
                                   ],
@@ -749,7 +750,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.grey[700],
+                                color: Colors.black87,
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -757,7 +758,7 @@ class _IngredientsTabState extends State<IngredientsTab> {
                               'Agrega ingredientes que tienes en casa',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[500],
+                                color: Colors.black54,
                               ),
                             ),
                           ],
@@ -811,12 +812,13 @@ class _IngredientsTabState extends State<IngredientsTab> {
         style: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 16,
+          color: Colors.black87,
         ),
       ),
       subtitle: Text(
         '${ingredient.quantity} ${ingredient.unit}',
-        style: TextStyle(
-          color: Colors.grey[600],
+        style: const TextStyle(
+          color: Colors.black87,
           fontSize: 14,
         ),
       ),
@@ -856,10 +858,12 @@ class _IngredientsTabState extends State<IngredientsTab> {
                 child: TextField(
                   controller: nameController,
                   autofocus: true,
+                  style: const TextStyle(color: Colors.black87, fontSize: 16),
                   decoration: InputDecoration(
                     labelText: 'Nombre',
+                    labelStyle: TextStyle(color: Colors.grey[700]),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -884,10 +888,12 @@ class _IngredientsTabState extends State<IngredientsTab> {
                 child: TextField(
                   controller: quantityController,
                   keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.black87, fontSize: 16),
                   decoration: InputDecoration(
                     labelText: 'Cantidad',
+                    labelStyle: TextStyle(color: Colors.grey[700]),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: Colors.grey[300]!),
@@ -911,10 +917,12 @@ class _IngredientsTabState extends State<IngredientsTab> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: currentUnit,
+                  style: const TextStyle(color: Colors.black87, fontSize: 16),
                   decoration: InputDecoration(
                     labelText: 'Unidad',
+                    labelStyle: TextStyle(color: Colors.grey[700]),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(color: Colors.grey[300]!),

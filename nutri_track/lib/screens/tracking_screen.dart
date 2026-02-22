@@ -1061,13 +1061,16 @@ class _TrackingScreenState extends State<TrackingScreen> {
     final goal = _goalCalories;
     const marginKcal = 500.0;
     final maxDayCalories = _weeklyDailyData.map((d) => d['calories'] as double).fold<double>(0, (a, b) => a > b ? a : b);
-    // Eje Y: base = objetivo + 500; si algún día lo supera, se autoajusta
+    // Media de días con consumo registrado (semanal)
+    final daysWithConsumption = _weeklyDailyData.where((d) => (d['calories'] as double) > 0).toList();
+    final weeklyAvg = daysWithConsumption.isEmpty ? 0.0 : daysWithConsumption.map((d) => d['calories'] as double).reduce((a, b) => a + b) / daysWithConsumption.length;
+    final maxForY = [maxDayCalories, goal, weeklyAvg].reduce((a, b) => a > b ? a : b);
     final baseMax = goal + marginKcal;
-    final maxY = maxDayCalories > baseMax ? maxDayCalories + 100 : baseMax;
+    final maxY = maxForY > baseMax ? maxForY + 100 : baseMax;
     final barHeight = 250.0;
     final barWidth = 35.0;
     
-    // Barra extra para Objetivo al final (7 días + Objetivo = 8 grupos)
+    // Barra extra para Objetivo/Media al final (7 días + Objetivo = 8 grupos)
     final barGroups = <BarChartGroupData>[];
     for (int i = 0; i < _weeklyDailyData.length; i++) {
       final dayData = _weeklyDailyData[i];
@@ -1088,8 +1091,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
       x: _weeklyDailyData.length,
       barRods: [
         BarChartRodData(
-          toY: goal,
-          color: Colors.grey[400]!,
+          toY: weeklyAvg,
+          color: AppTheme.primary,
           width: barWidth,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
         ),
@@ -1147,7 +1150,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       }
                       if (groupIndex == _weeklyDailyData.length) {
                         return BarTooltipItem(
-                          'Objetivo\n${goal.toInt()} kcal',
+                          'Media (días con consumo)\n${weeklyAvg.toStringAsFixed(0)} kcal',
                           TextStyle(
                             color: Colors.grey[800],
                             fontWeight: FontWeight.bold,
@@ -1179,7 +1182,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              'Objetivo',
+                              'Media',
                               style: TextStyle(color: Colors.grey[600], fontSize: 10, fontWeight: FontWeight.w600),
                             ),
                           );
@@ -1239,13 +1242,16 @@ class _TrackingScreenState extends State<TrackingScreen> {
     final goal = _goalCalories;
     const marginKcal = 500.0;
     final maxDayCalories = _monthlyDailyData.map((d) => d['calories'] as double).fold<double>(0, (a, b) => a > b ? a : b);
-    // Eje Y: base = objetivo + 500; si algún día lo supera, se autoajusta
+    // Media de días con consumo registrado (mensual)
+    final monthDaysWithConsumption = _monthlyDailyData.where((d) => (d['calories'] as double) > 0).toList();
+    final monthlyAvg = monthDaysWithConsumption.isEmpty ? 0.0 : monthDaysWithConsumption.map((d) => d['calories'] as double).reduce((a, b) => a + b) / monthDaysWithConsumption.length;
+    final maxForY = [maxDayCalories, goal, monthlyAvg].reduce((a, b) => a > b ? a : b);
     final baseMax = goal + marginKcal;
-    final maxY = maxDayCalories > baseMax ? maxDayCalories + 100 : baseMax;
+    final maxY = maxForY > baseMax ? maxForY + 100 : baseMax;
     final barHeight = 250.0;
     
     final availableWidth = MediaQuery.of(context).size.width - 80;
-    final totalGroups = _monthlyDailyData.length + 1; // días + Objetivo
+    final totalGroups = _monthlyDailyData.length + 1; // días + Media
     final dailyBarWidth = totalGroups > 0 ? (availableWidth / totalGroups).clamp(6.0, 16.0) : 8.0;
     
     final barGroups = <BarChartGroupData>[];
@@ -1268,9 +1274,9 @@ class _TrackingScreenState extends State<TrackingScreen> {
       x: _monthlyDailyData.length,
       barRods: [
         BarChartRodData(
-          toY: goal,
-          color: Colors.grey[400]!,
-          width: dailyBarWidth * 1.5, // Barra objetivo un poco más ancha
+          toY: monthlyAvg,
+          color: AppTheme.primary,
+          width: dailyBarWidth * 1.5, // Barra media un poco más ancha
           borderRadius: const BorderRadius.vertical(top: Radius.circular(2)),
         ),
       ],
@@ -1374,7 +1380,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                       }
                       if (groupIndex == _monthlyDailyData.length) {
                         return BarTooltipItem(
-                          'Objetivo\n${goal.toInt()} kcal',
+                          'Media (días con consumo)\n${monthlyAvg.toStringAsFixed(0)} kcal',
                           TextStyle(
                             color: Colors.grey[800],
                             fontWeight: FontWeight.bold,
@@ -1414,7 +1420,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              ' ',
+                              'Media',
                               style: TextStyle(color: Colors.grey[600], fontSize: 9, fontWeight: FontWeight.w600),
                             ),
                           );

@@ -7,6 +7,7 @@ import '../services/tracking_service.dart';
 import '../services/recipe_service.dart';
 import '../main.dart';
 import '../config/app_theme.dart';
+import '../utils/ingredient_normalizer.dart';
 
 class AddConsumptionScreen extends StatefulWidget {
   const AddConsumptionScreen({super.key});
@@ -488,17 +489,17 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.primary,
         elevation: 0,
         shadowColor: Colors.black.withValues(alpha: 0.1),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Agregar Consumo',
           style: TextStyle(
-            color: Colors.black87,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -510,7 +511,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
             child: const Text(
               'Guardar',
               style: TextStyle(
-                color: AppTheme.primary,
+                color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -816,7 +817,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  food['name'],
+                  IngredientNormalizer.toSingular((food['name'] ?? '').toString()),
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     color: Colors.black87,
@@ -884,7 +885,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
         builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: Colors.white,
-          title: Text('Editar cantidad: ${food['name']}', style: const TextStyle(color: Colors.black87)),
+          title: Text('Editar cantidad: ${IngredientNormalizer.toSingular((food['name'] ?? '').toString())}', style: const TextStyle(color: Colors.black87)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -997,7 +998,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.white,
-        title: Text('Agregar ${food['name']}', style: const TextStyle(color: Colors.black87)),
+        title: Text('Agregar ${IngredientNormalizer.toSingular((food['name'] ?? '').toString())}', style: const TextStyle(color: Colors.black87)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

@@ -6,6 +6,7 @@ import '../services/recipe_service.dart';
 import '../services/auth_service.dart';
 import '../services/firebase_recipe_service.dart';
 import '../utils/nutrition_parser.dart';
+import '../utils/ingredient_normalizer.dart';
 import '../main.dart';
 import 'add_recipe_screen.dart';
 import 'recipe_finder_screen.dart';
@@ -1006,7 +1007,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
           builder: (context) {
             final recipeImg = recipe['image_url']?.toString().trim() ?? '';
             final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
-            final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
+            final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoUrl;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1169,19 +1170,19 @@ class _RecipesScreenState extends State<RecipesScreen> {
                   // Ingredients (collapsed view)
                   Text(
                     'Ingredientes:',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
+                      color: Colors.black,
                       fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    ingredients.take(5).join(', ') +
+                    ingredients.take(5).map((i) => IngredientNormalizer.toSingular(i.trim())).where((s) => s.isNotEmpty).join(', ') +
                         (ingredients.length > 5 ? '...' : ''),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                    style: const TextStyle(color: Colors.black, fontSize: 13),
                   ),
                   const SizedBox(height: 8),
                   if (description.isNotEmpty)
@@ -1189,7 +1190,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                      style: const TextStyle(color: Colors.black, fontSize: 13),
                     ),
                 ],
               ),
@@ -1211,7 +1212,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
     final ingredientsDetailed = recipe['ingredients_detailed'] as List<dynamic>?;
     final recipeImg = recipe['image_url']?.toString().trim() ?? '';
     final useRecipeImage = recipeImg.isNotEmpty && !_failedImageIds.contains(recipeId);
-    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoFirebaseUrl;
+    final imageUrl = useRecipeImage ? recipeImg : AppConfig.backupPhotoUrl;
 
     return Card(
       elevation: 8,
@@ -1524,36 +1525,36 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       const SizedBox(height: 20),
                       const Divider(),
                       const SizedBox(height: 12),
-                      Text(
+                      const Text(
                         'Descripción',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
+                          color: Colors.black,
                           fontSize: 18,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         description,
-                        style: TextStyle(color: Colors.grey[700], fontSize: 15),
+                        style: const TextStyle(color: Colors.black, fontSize: 15),
                       ),
                     ],
                     // Ingredients
                     const SizedBox(height: 20),
                     const Divider(),
                     const SizedBox(height: 12),
-                    Text(
+                    const Text(
                       'Ingredientes',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[800],
+                        color: Colors.black,
                         fontSize: 18,
                       ),
                     ),
                     const SizedBox(height: 12),
                     if (ingredientsDetailed != null && ingredientsDetailed.isNotEmpty)
                       ...ingredientsDetailed.map((ing) {
-                        final name = ing['name'] ?? '';
+                        final name = IngredientNormalizer.toSingular((ing['name'] ?? '').toString());
                         final quantity = ing['quantity'] ?? 0;
                         final unit = ing['unit'] ?? '';
                         final notes = ing['notes'] ?? '';
@@ -1562,11 +1563,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('• ', style: TextStyle(fontSize: 18)),
+                              const Text('• ', style: TextStyle(fontSize: 18, color: Colors.black)),
                               Expanded(
                                 child: Text(
                                   '$name: $quantity $unit${notes.isNotEmpty ? ' ($notes)' : ''}',
-                                  style: TextStyle(color: Colors.grey[700], fontSize: 15),
+                                  style: const TextStyle(color: Colors.black, fontSize: 15),
                                 ),
                               ),
                             ],
@@ -1575,16 +1576,18 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       }).toList()
                     else
                       ...ingredients.map((ing) {
+                        final singular = IngredientNormalizer.toSingular(ing.trim());
+                        if (singular.isEmpty) return const SizedBox.shrink();
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('• ', style: TextStyle(fontSize: 18)),
+                              const Text('• ', style: TextStyle(fontSize: 18, color: Colors.black)),
                               Expanded(
                                 child: Text(
-                                  ing.trim(),
-                                  style: TextStyle(color: Colors.grey[700], fontSize: 15),
+                                  singular,
+                                  style: const TextStyle(color: Colors.black, fontSize: 15),
                                 ),
                               ),
                             ],
@@ -1596,11 +1599,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       const SizedBox(height: 20),
                       const Divider(),
                       const SizedBox(height: 12),
-                      Text(
+                      const Text(
                         'Instrucciones',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
+                          color: Colors.black,
                           fontSize: 18,
                         ),
                       ),
@@ -1635,7 +1638,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                               Expanded(
                                 child: Text(
                                   instruction,
-                                  style: TextStyle(color: Colors.grey[700], fontSize: 15),
+                                  style: const TextStyle(color: Colors.black, fontSize: 15),
                                 ),
                               ),
                             ],
@@ -1648,18 +1651,18 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       const SizedBox(height: 20),
                       const Divider(),
                       const SizedBox(height: 12),
-                      Text(
+                      const Text(
                         'Información Nutricional',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Colors.grey[800],
+                          color: Colors.black,
                           fontSize: 18,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         recipe['nutrients'].toString(),
-                        style: TextStyle(color: Colors.grey[700], fontSize: 15),
+                        style: const TextStyle(color: Colors.grey, fontSize: 15),
                       ),
                     ],
                   ],

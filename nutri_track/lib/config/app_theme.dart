@@ -50,7 +50,7 @@ class AppTheme {
 
   // Dark mode - texto (blanco/gris según contraste)
   static const Color darkTextPrimary = Color(0xFFF5F5F5);
-  static const Color darkTextSecondary = Color(0xFFB0B0B0);
+  static const Color darkTextSecondary = Color(0xFFD4D4D4);
   static const Color darkTextTertiary = Color(0xFF808080);
 
   /// Colores según el tema actual (light/dark)
