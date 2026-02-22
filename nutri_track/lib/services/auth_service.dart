@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:crypto/crypto.dart';
 import '../config/app_config.dart';
 import '../utils/password_validator.dart';
+import 'fcm_service.dart';
 import 'social_auth_google_apple.dart';
 import 'firebase_user_service.dart';
 
@@ -107,6 +108,7 @@ class AuthService extends ChangeNotifier {
     _role = userRole;
     print('✅ Datos de autenticación guardados: token=${token.substring(0, token.length > 20 ? 20 : token.length)}..., role=$userRole');
     notifyListeners();
+    FcmService.registerFcmToken(this);
   }
 
   /// Verifica si el backend está disponible

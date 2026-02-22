@@ -5,11 +5,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>CooKind</string>
+	<string>Cookind</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>CooKind usa la galería para compartir fotos de recetas.</string>
+	<string>Cookind usa la galería para compartir fotos de recetas.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>CooKind usa la cámara para añadir fotos de tus platos.</string>
+	<string>Cookind usa la cámara para añadir fotos de tus platos.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -17,7 +17,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>nutri_track</string>
+	<string>Cookind</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

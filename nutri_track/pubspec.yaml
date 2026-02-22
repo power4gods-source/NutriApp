@@ -1,5 +1,5 @@
-name: nutri_track
-description: A food recipe app with social features
+name: cookind
+description: Cookind - Recetas, nutrición y cocina en comunidad
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -32,16 +32,20 @@ dependencies:
   # Charts
   fl_chart: ^1.1.1
   
-  # Firebase (Spark)
+  # Supabase Auth (Google OAuth)
+  supabase_flutter: ^2.8.0
+
+  # Firebase (Spark) - Crashlytics, Storage, FCM
   firebase_core: ^3.8.1
   firebase_crashlytics: ^4.1.3
+  firebase_messaging: ^15.0.0
   cloud_firestore: ^5.4.4
   firebase_storage: ^12.3.4
   
   # Image Picker
   image_picker: ^1.0.7
   
-  # Auth: Google & Apple (opcional). Para activar: descomenta y ejecuta flutter pub get en nutri_track
+  # Auth: Google & Apple (opcional). Para activar: descomenta y ejecuta flutter pub get
   # google_sign_in: ^6.2.2
   # sign_in_with_apple: ^6.1.3
 

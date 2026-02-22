@@ -11,7 +11,7 @@ plugins {
 }
 
 android {
-    namespace = "com.mycompany.nutrirecipeapp"
+    namespace = "com.cookind.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -25,8 +25,8 @@ android {
     }
 
     defaultConfig {
-        // Application ID único: cambiar a tu dominio para Play Store (ej. com.tudominio.cookind)
-        applicationId = "com.mycompany.nutrirecipeapp"
+        // Application ID para Cookind
+        applicationId = "com.cookind.app"
         minSdk = flutter.minSdkVersion  // Android 5.0+ para máxima compatibilidad
         targetSdk = 34  // Requerido por Play Store 2024+
         versionCode = flutter.versionCode

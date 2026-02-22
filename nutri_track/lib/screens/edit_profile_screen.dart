@@ -122,11 +122,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   /// Sube la imagen y guarda automáticamente en el perfil
+  /// Prioridad: backend (Supabase Storage), fallback a Firebase
   Future<void> _uploadAndSaveAvatar(Uint8List imageBytes) async {
     setState(() => _isSaving = true);
     try {
-      final uploadedUrl = await _uploadImageToFirebase(imageBytes);
-      if (uploadedUrl != null && mounted) {
+      String? uploadedUrl = await _uploadImageViaBackend(imageBytes);
+      uploadedUrl ??= await _uploadImageToFirebase(imageBytes);
+      if (uploadedUrl != null && uploadedUrl.isNotEmpty && mounted) {
         await _saveAvatarToProfile(uploadedUrl);
         setState(() {
           _currentAvatarUrl = uploadedUrl;
@@ -217,8 +219,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
-  /// Sube la imagen a Firebase Storage: data/users/{userId}/avatar/{timestamp}.jpg
-  /// La URL devuelta es persistente y se guarda en el backend (profiles.json → Firestore)
+  /// Intenta subir avatar vía backend (Supabase Storage). Retorna URL o null.
+  Future<String?> _uploadImageViaBackend(Uint8List imageBytes) async {
+    try {
+      final headers = await _authService.getAuthHeaders();
+      final url = await AppConfig.getBackendUrl();
+      final uri = Uri.parse('$url/profile/avatar/upload');
+      final request = http.MultipartRequest('POST', uri);
+      request.headers.addAll({
+        'Authorization': headers['Authorization'] ?? '',
+      });
+      request.files.add(http.MultipartFile.fromBytes(
+        'file',
+        imageBytes,
+        filename: 'avatar.jpg',
+      ));
+      final streamed = await request.send().timeout(const Duration(seconds: 15));
+      final response = await http.Response.fromStream(streamed);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['avatar_url']?.toString();
+      }
+    } catch (e) {
+      debugPrint('Upload vía backend: $e');
+    }
+    return null;
+  }
+
+  /// Fallback: sube a Firebase Storage: data/users/{userId}/avatar/{timestamp}.jpg
   Future<String?> _uploadImageToFirebase(Uint8List imageBytes) async {
     try {
       final userId = _authService.userId ?? '';

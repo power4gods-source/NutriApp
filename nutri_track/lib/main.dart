@@ -7,8 +7,11 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
+import 'config/app_config.dart';
 import 'services/auth_service.dart';
+import 'services/fcm_service.dart';
 import 'services/firebase_sync_service.dart';
 import 'services/firebase_user_service.dart';
 import 'config/app_config.dart';
@@ -49,10 +52,21 @@ void main() async {
       await FirebaseFirestore.instance.enableNetwork();
     } catch (_) {}
   } catch (e) {
-    print('⚠️ Firebase no inicializado (ejecuta flutterfire configure en nutri_track): $e');
+    print('⚠️ Firebase no inicializado (ejecuta flutterfire configure en Cookind): $e');
   }
 
-  // 2. Locale data para DateFormat
+  // 2. Supabase Auth (Google OAuth)
+  try {
+    await Supabase.initialize(
+      url: AppConfig.supabaseUrl,
+      anonKey: AppConfig.supabaseAnonKey,
+    );
+    print('✅ Supabase inicializado');
+  } catch (e) {
+    print('⚠️ Supabase no inicializado (verifica supabaseUrl y supabaseAnonKey en AppConfig): $e');
+  }
+
+  // 3. Locale data para DateFormat
   try {
     await initializeDateFormatting('es', null);
     print('✅ Locale data inicializado (español)');
@@ -274,7 +288,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       print('⚠️ Error al inicializar FirebaseSyncService: $e');
     }
     
-    // 5. Si hay usuario autenticado, cargar solo SUS datos desde el backend
+    // 5. Si hay usuario autenticado, cargar datos y registrar FCM
     if (_isAuthenticated && userId != null) {
       try {
         print('👤 Cargando datos del usuario desde el backend...');
@@ -284,6 +298,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         }).catchError((e) {
           print('⚠️ Error cargando datos del usuario: $e');
         });
+        FcmService.registerFcmToken(authService);
       } catch (e) {
         print('⚠️ Error al cargar datos del usuario: $e');
       }

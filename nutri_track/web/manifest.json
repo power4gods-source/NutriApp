@@ -1,6 +1,6 @@
 {
-    "name": "nutri_track",
-    "short_name": "nutri_track",
+    "name": "Cookind",
+    "short_name": "Cookind",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -16,6 +16,10 @@ class AppConfig {
   /// Imagen por defecto para recetas sin foto - data/backup.png en Firebase Storage
   static const String backupPhotoFirebaseUrl =
       'https://firebasestorage.googleapis.com/v0/b/nutritrack-aztqd.firebasestorage.app/o/data%2Fbackup.png?alt=media';
+
+  /// Supabase - Auth (Google OAuth). Reemplaza con tu proyecto.
+  static const String supabaseUrl = 'https://gxdzybyszpebhlspwiyz.supabase.co';
+  static const String supabaseAnonKey = 'TU_SUPABASE_ANON_KEY'; // Settings → API → anon public
   
   // URLs por defecto según la plataforma
   static String get defaultBackendUrl {
@@ -55,7 +59,8 @@ class AppConfig {
     
     // 2. URLs comunes para diferentes entornos
     urlsToTry.addAll([
-      'https://nutriapp-470k.onrender.com', // Render (producción)
+      // 'https://nutriapp-470k.onrender.com', // Render (producción)
+      'https://cookind-production.up.railway.app', // Railway (producción) 
       'http://10.0.2.2:8000', // Android Emulator
       'http://localhost:8000', // Web / Local
       'http://127.0.0.1:8000', // Localhost alternativo
