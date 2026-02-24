@@ -98,34 +98,53 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
     }
   }
 
-  void _addRecipeAsConsumption(Map<String, dynamic> recipe) {
-    // Obtener calorías por porción
-    final caloriesPerServing = recipe['calories_per_serving'] ?? 
-                               (recipe['calories'] != null && recipe['servings'] != null 
-                                 ? (recipe['calories'] / recipe['servings']).round() 
-                                 : 0);
-    
+  void _addRecipeAsConsumption(Map<String, dynamic> recipe) async {
+    final recipeTitle = recipe['title'] ?? 'Receta';
+    double caloriesPerServing = 0;
+    Map<String, dynamic>? perServing;
+    if (recipe['ingredients_detailed'] != null && (recipe['ingredients_detailed'] as List).isNotEmpty) {
+      try {
+        final result = await _recipeService.calculateRecipeNutrition(recipe);
+        if (result != null && result['per_serving'] != null) {
+          perServing = Map<String, dynamic>.from(result['per_serving'] as Map);
+          final c = perServing!['calories'];
+          caloriesPerServing = (c is num ? c.toDouble() : double.tryParse(c?.toString() ?? '0') ?? 0);
+        }
+      } catch (_) {}
+    }
     if (caloriesPerServing <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Esta receta no tiene información nutricional calculada'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      caloriesPerServing = (recipe['calories_per_serving'] is num
+              ? (recipe['calories_per_serving'] as num).toDouble()
+              : 0) ??
+          (recipe['calories'] != null && recipe['servings'] != null
+              ? (recipe['calories'] / recipe['servings']).roundToDouble()
+              : 0);
+    }
+    if (caloriesPerServing <= 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Esta receta no tiene información nutricional calculada'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
       return;
     }
-    
-    // Añadir la receta como un "alimento" especial con las calorías y nutrientes
-    final recipeTitle = recipe['title'] ?? 'Receta';
+    if (perServing != null) {
+      recipe = Map<String, dynamic>.from(recipe);
+      recipe['calculated_nutrition_per_serving'] = perServing;
+    }
+    if (!mounted) return;
     setState(() {
       _selectedFoods.add({
         'food_id': 'recipe_${recipeTitle.replaceAll(' ', '_')}',
         'name': recipeTitle,
         'quantity': 1.0,
         'unit': 'ración',
-        'calories': caloriesPerServing.toDouble(),
+        'calories': caloriesPerServing,
         'is_recipe': true,
-        'recipe_data': recipe, // Incluir toda la receta para que el backend pueda parsear nutrientes
+        'recipe_data': recipe,
       });
     });
     
@@ -136,7 +155,7 @@ class _AddConsumptionScreenState extends State<AddConsumptionScreen> {
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Receta "$recipeTitle" añadida: $caloriesPerServing kcal/ración'),
+        content: Text('Receta "$recipeTitle" añadida: ${caloriesPerServing.round()} kcal/ración'),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 2),
       ),

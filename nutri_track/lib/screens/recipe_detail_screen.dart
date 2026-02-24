@@ -29,11 +29,34 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   Set<String> _favoriteIds = {};
   bool _isSavingAiRecipe = false;
   bool _isSharing = false;
+  Map<String, dynamic>? _calculatedPerServing;
+  Map<String, dynamic>? _calculatedTotal;
 
   @override
   void initState() {
     super.initState();
     _loadFavorites();
+    _loadCalculatedNutrition();
+  }
+
+  Future<void> _loadCalculatedNutrition() async {
+    final ingredients = widget.recipe['ingredients_detailed'] as List?;
+    if (ingredients == null || ingredients.isEmpty) return;
+    try {
+      final result = await _recipeService.calculateRecipeNutrition(widget.recipe);
+      if (mounted && result != null) {
+        setState(() {
+          _calculatedPerServing = result['per_serving'] != null
+              ? Map<String, dynamic>.from(result['per_serving'] as Map)
+              : null;
+          _calculatedTotal = result['total'] != null
+              ? Map<String, dynamic>.from(result['total'] as Map)
+              : null;
+        });
+      }
+    } catch (e) {
+      print('Error loading calculated nutrition: $e');
+    }
   }
 
   Future<void> _loadFavorites() async {
@@ -377,12 +400,18 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                             Icons.people,
                             '${recipe['servings']} porciones',
                           ),
-                        // Calorías por ración
+                        // Calorías por ración (prioridad: calculado desde ingredientes, luego parseado)
                         Builder(
                           builder: (context) {
-                            final nutrition = NutritionParser.getNutritionPerServing(recipe);
-                            final caloriesPerServing = nutrition['calories']?.round() ?? 
-                                                       (recipe['calories_per_serving'] ?? 0);
+                            final nutrition = _calculatedPerServing != null
+                                ? _calculatedPerServing!
+                                : NutritionParser.getNutritionPerServing(recipe);
+                            var cal = nutrition['calories'];
+                            int caloriesPerServing = (cal is num ? (cal as num).round() : double.tryParse(cal?.toString() ?? '0')?.round() ?? 0);
+                            if (caloriesPerServing <= 0) {
+                              final cps = recipe['calories_per_serving'];
+                              caloriesPerServing = cps is int ? cps : (cps is num ? (cps as num).round() : int.tryParse(cps?.toString() ?? '0') ?? 0);
+                            }
                             if (caloriesPerServing > 0) {
                               return Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -545,81 +574,52 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       const SizedBox(height: 20),
                     ],
                     
-                    // Información nutricional
-                    // Información nutricional parseada
+                    // Información nutricional (total + por ración)
                     Builder(
                       builder: (context) {
-                        final nutrition = NutritionParser.getNutritionPerServing(recipe);
-                        final hasNutrition = nutrition['calories']! > 0 || 
-                                           nutrition['protein']! > 0 || 
-                                           nutrition['carbohydrates']! > 0 || 
-                                           nutrition['fat']! > 0;
-                        if (hasNutrition) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 20),
-                              const Divider(),
-                              const SizedBox(height: 12),
+                        final perServing = _calculatedPerServing ?? NutritionParser.getNutritionPerServing(recipe);
+                        final totalMap = _calculatedTotal;
+                        double _v(Map<String, dynamic> m, String k) =>
+                            (m[k] is num ? (m[k] as num).toDouble() : 0.0) ?? 0.0;
+                        final sc = _v(perServing, 'calories');
+                        final sp = _v(perServing, 'protein');
+                        final scarb = _v(perServing, 'carbohydrates');
+                        final sf = _v(perServing, 'fat');
+                        final sfib = _v(perServing, 'fiber');
+                        final hasPerServing = sc > 0 || sp > 0 || scarb > 0 || sf > 0;
+                        final hasTotal = totalMap != null && (_v(totalMap, 'calories') > 0 || _v(totalMap, 'protein') > 0);
+                        if (!hasPerServing && !hasTotal) return const SizedBox.shrink();
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 20),
+                            const Divider(),
+                            const SizedBox(height: 12),
+                            if (hasTotal) ...[
                               const Text(
-                                'Información Nutricional (por ración)',
+                                'Total receta',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black,
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              Wrap(
-                                spacing: 12,
-                                runSpacing: 12,
-                                children: [
-                                  if (nutrition['calories']! > 0)
-                                    _buildNutritionCard(
-                                      'Calorías',
-                                      '${nutrition['calories']!.round()}',
-                                      'kcal',
-                                      Colors.orange,
-                                      Icons.local_fire_department,
-                                    ),
-                                  if (nutrition['protein']! > 0)
-                                    _buildNutritionCard(
-                                      'Proteína',
-                                      '${nutrition['protein']!.toStringAsFixed(1)}',
-                                      'g',
-                                      Colors.purple,
-                                      Icons.fitness_center,
-                                    ),
-                                  if (nutrition['carbohydrates']! > 0)
-                                    _buildNutritionCard(
-                                      'Carbohidratos',
-                                      '${nutrition['carbohydrates']!.toStringAsFixed(1)}',
-                                      'g',
-                                      Colors.blue,
-                                      Icons.energy_savings_leaf,
-                                    ),
-                                  if (nutrition['fat']! > 0)
-                                    _buildNutritionCard(
-                                      'Grasas',
-                                      '${nutrition['fat']!.toStringAsFixed(1)}',
-                                      'g',
-                                      Colors.red,
-                                      Icons.water_drop,
-                                    ),
-                                  if (nutrition['fiber']! > 0)
-                                    _buildNutritionCard(
-                                      'Fibra',
-                                      '${nutrition['fiber']!.toStringAsFixed(1)}',
-                                      'g',
-                                      Colors.green,
-                                      Icons.eco,
-                                    ),
-                                ],
-                              ),
+                              const SizedBox(height: 12),
+                              _buildNutritionCards(totalMap!),
+                              const SizedBox(height: 20),
                             ],
-                          );
-                        }
-                        return const SizedBox.shrink();
+                            const Text(
+                              'Por ración',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildNutritionCards(perServing),
+                          ],
+                        );
                       },
                     ),
                   ],
@@ -656,6 +656,26 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     );
   }
   
+  Widget _buildNutritionCards(Map<String, dynamic> nutrition) {
+    double v(String k) => (nutrition[k] is num ? (nutrition[k] as num).toDouble() : 0.0) ?? 0.0;
+    final c = v('calories');
+    final p = v('protein');
+    final carb = v('carbohydrates');
+    final f = v('fat');
+    final fib = v('fiber');
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        if (c > 0) _buildNutritionCard('Calorías', '${c.round()}', 'kcal', Colors.orange, Icons.local_fire_department),
+        if (p > 0) _buildNutritionCard('Proteína', p.toStringAsFixed(1), 'g', Colors.purple, Icons.fitness_center),
+        if (carb > 0) _buildNutritionCard('Carbohidratos', carb.toStringAsFixed(1), 'g', Colors.blue, Icons.energy_savings_leaf),
+        if (f > 0) _buildNutritionCard('Grasas', f.toStringAsFixed(1), 'g', Colors.red, Icons.water_drop),
+        if (fib > 0) _buildNutritionCard('Fibra', fib.toStringAsFixed(1), 'g', Colors.green, Icons.eco),
+      ],
+    );
+  }
+
   Widget _buildNutritionCard(String label, String value, String unit, Color color, IconData icon) {
     return Container(
       width: 100,

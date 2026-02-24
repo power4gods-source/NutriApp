@@ -24,16 +24,13 @@ class AppConfig {
   
   // URLs por defecto según la plataforma
   static String get defaultBackendUrl {
-    // Usar Render como backend principal (siempre disponible)
-    const String renderUrl = 'https://nutriapp-470k.onrender.com';
+    // Railway como backend principal
+    const String railwayUrl = 'https://cookind-production.up.railway.app';
     
     if (kIsWeb) {
-      // En web, usar Render directamente
-      return renderUrl;
+      return railwayUrl;
     } else {
-      // En móvil, usar Render directamente
-      // La app intentará Render primero, luego fallback a local si es necesario
-      return renderUrl;
+      return railwayUrl;
       
       // Nota: Si quieres usar backend local para desarrollo, puedes cambiar esto a:
       // return 'http://10.0.2.2:8000'; // Android Emulator

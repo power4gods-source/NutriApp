@@ -792,6 +792,32 @@ class RecipeService {
     }
   }
 
+  /// Calcula la nutrición de una receta a partir de ingredients_detailed (backend).
+  /// Retorna { total: {...}, per_serving: {...} } o null si falla.
+  Future<Map<String, dynamic>?> calculateRecipeNutrition(Map<String, dynamic> recipe) async {
+    if (recipe['ingredients_detailed'] == null ||
+        (recipe['ingredients_detailed'] as List).isEmpty) {
+      return null;
+    }
+    try {
+      final url = await baseUrl;
+      final response = await http.post(
+        Uri.parse('$url/recipes/calculate-nutrition'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(recipe),
+      ).timeout(const Duration(seconds: 10));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        if (data['per_serving'] != null && data['total'] != null) {
+          return data;
+        }
+      }
+    } catch (e) {
+      print('Error calculating recipe nutrition: $e');
+    }
+    return null;
+  }
+
   // Search recipes
   Future<Map<String, dynamic>> searchRecipes({
     String? query,

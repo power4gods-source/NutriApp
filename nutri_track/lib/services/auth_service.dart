@@ -413,7 +413,7 @@ class AuthService extends ChangeNotifier {
                     if (termsVersion != null) 'terms_version': termsVersion,
                   }),
                 )
-                .timeout(const Duration(seconds: 60)); // Timeout más largo para Render
+                .timeout(const Duration(seconds: 60)); // Timeout más largo para Railway
             
             if (response.statusCode == 200 || response.statusCode == 201) {
               break; // Éxito, salir del loop
