@@ -52,10 +52,43 @@ class NutritionParser {
     return result;
   }
   
-  /// Obtiene nutrientes por ración desde una receta (null-safe; tolera API con nulls).
+  /// Convierte nutrients en formato objeto (calories_kcal, protein_g, etc.) a mapa estándar.
+  static Map<String, double> _parseNutrientsMap(Map<String, dynamic>? m) {
+    final result = <String, double>{
+      'calories': 0.0, 'protein': 0.0, 'carbohydrates': 0.0, 'fat': 0.0,
+      'fiber': 0.0, 'sugar': 0.0, 'sodium': 0.0,
+    };
+    if (m == null) return result;
+    result['calories'] = _num(m['calories_kcal']) ?? _num(m['calories']) ?? 0.0;
+    result['protein'] = _num(m['protein_g']) ?? _num(m['protein']) ?? 0.0;
+    result['carbohydrates'] = _num(m['carbs_g']) ?? _num(m['carbohydrates']) ?? _num(m['carbs']) ?? 0.0;
+    result['fat'] = _num(m['fat_g']) ?? _num(m['fat']) ?? 0.0;
+    result['fiber'] = _num(m['fiber_g']) ?? _num(m['fiber']) ?? 0.0;
+    result['sugar'] = _num(m['sugar_g']) ?? _num(m['sugar']) ?? 0.0;
+    result['sodium'] = _num(m['sodium_mg']) ?? _num(m['sodium']) ?? 0.0;
+    return result;
+  }
+
+  static double? _num(dynamic v) {
+    if (v == null) return null;
+    if (v is num) return v.toDouble();
+    return double.tryParse(v.toString());
+  }
+
+  /// Obtiene nutrientes por ración desde una receta (null-safe).
+  /// Acepta nutrients como String (legacy) o como Map (calories_kcal, protein_g, carbs_g, fat_g).
   static Map<String, double> getNutritionPerServing(Map<String, dynamic> recipe) {
     try {
       final rawNutrients = recipe['nutrients'];
+      if (rawNutrients is Map) {
+        final perServing = _parseNutrientsMap(Map<String, dynamic>.from(rawNutrients as Map));
+        if ((perServing['calories'] ?? 0) > 0 ||
+            (perServing['protein'] ?? 0) > 0 ||
+            (perServing['carbohydrates'] ?? 0) > 0 ||
+            (perServing['fat'] ?? 0) > 0) {
+          return perServing;
+        }
+      }
       final nutrientsStr = rawNutrients == null
           ? ''
           : (rawNutrients is String ? rawNutrients : rawNutrients.toString());

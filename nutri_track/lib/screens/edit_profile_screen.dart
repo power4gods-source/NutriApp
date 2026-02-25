@@ -246,40 +246,41 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
   
-  /// Guarda nombre, apellidos, dirección y teléfono en una sola petición y retrocede
+  /// Guarda nombre, apellidos, dirección y teléfono en el backend (Supabase) y retrocede
   Future<void> _saveAllAndPop() async {
     setState(() => _isSaving = true);
     try {
       final headers = await _authService.getAuthHeaders();
       final url = await AppConfig.getBackendUrl();
-      final body = jsonEncode({
-        'first_name': _firstNameController.text.trim().isEmpty ? null : _firstNameController.text.trim(),
-        'last_name': _lastNameController.text.trim().isEmpty ? null : _lastNameController.text.trim(),
-        'address': _addressController.text.trim().isEmpty ? null : _addressController.text.trim(),
-        'phone': _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-      });
+      final body = {
+        'first_name': _firstNameController.text.trim(),
+        'last_name': _lastNameController.text.trim(),
+        'address': _addressController.text.trim(),
+        'phone': _phoneController.text.trim(),
+      };
       final response = await http.put(
         Uri.parse('$url/profile'),
         headers: {...headers, 'Content-Type': 'application/json'},
-        body: body,
-      ).timeout(const Duration(seconds: 10));
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
-        await _authService.reloadAuthData();
+        await _authService.refreshUserDataFromBackend();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Perfil guardado'), backgroundColor: Colors.green),
+            const SnackBar(content: Text('Perfil guardado en la nube'), backgroundColor: Colors.green),
           );
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
         }
       } else {
-        final err = jsonDecode(response.body);
+        final bodyStr = response.body;
+        final err = bodyStr.isNotEmpty ? jsonDecode(bodyStr) : null;
         if (mounted) {
-          showErrorSnackBar(context, 'Error: ${err['detail'] ?? 'Error'}');
+          showErrorSnackBar(context, 'Error: ${err is Map ? err['detail'] ?? response.statusCode : response.statusCode}');
         }
       }
     } catch (e) {
       if (mounted) {
-        showErrorSnackBar(context, 'Error: $e');
+        showErrorSnackBar(context, 'Error de conexión: $e');
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
