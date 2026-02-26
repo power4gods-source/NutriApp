@@ -43,6 +43,17 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  Future<void> _markAsRead() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      await http.post(
+        Uri.parse('$url/chat/${widget.otherUserId}/read'),
+        headers: headers,
+      ).timeout(const Duration(seconds: 10));
+    } catch (_) {}
+  }
+
   Future<void> _loadChat() async {
     setState(() => _loading = true);
     try {
@@ -59,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
         setState(() {
           _messages = mapped;
         });
+        await _markAsRead();
       } else {
         setState(() {
           _messages = [];
@@ -244,8 +256,32 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: ListView.builder(
                       controller: _scroll,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      itemCount: _messages.length,
-                      itemBuilder: (context, index) => _buildBubble(_messages[index]),
+                      itemCount: _messages.length + (_messages.length > 5 ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        const int recentThreshold = 5;
+                        final int dividerIndex = _messages.length - recentThreshold;
+                        final bool showDivider = _messages.length > recentThreshold && index == dividerIndex;
+                        if (showDivider) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              children: [
+                                Expanded(child: Divider(color: Colors.grey[400], thickness: 1)),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: Text(
+                                    'Mensajes recientes',
+                                    style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                                Expanded(child: Divider(color: Colors.grey[400], thickness: 1)),
+                              ],
+                            ),
+                          );
+                        }
+                        final int msgIndex = index > dividerIndex ? index - 1 : index;
+                        return _buildBubble(_messages[msgIndex]);
+                      },
                     ),
                   ),
           ),

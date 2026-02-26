@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/auth_service.dart';
 import '../config/app_config.dart';
+import '../main.dart';
 import 'chat_screen.dart';
 
 /// Pantalla que muestra la lista de todos los chats abiertos (conversaciones).
@@ -190,7 +191,10 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
               otherUsername: otherUsername,
             ),
           ),
-        ).then((_) => _loadInbox());
+        ).then((_) {
+          _loadInbox();
+          MainNavigationScreen.of(context)?.refreshUnreadChatsCount();
+        });
       },
     );
   }

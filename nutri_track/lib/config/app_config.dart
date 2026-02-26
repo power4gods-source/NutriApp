@@ -11,11 +11,9 @@ class AppConfig {
   /// Logo de la app en Supabase Storage - bucket data, public/Cookind_white.jpeg
   static String get logoUrl => '$supabaseUrl/storage/v1/object/public/data/public/Cookind_white.jpeg';
 
-  /// Imagen por defecto para recetas sin foto - Supabase bucket data, public/backup.png
-  static String get backupPhotoUrl =>
-      '$supabaseUrl/storage/v1/object/public/data/public/backup.png';
-  @Deprecated('Usar backupPhotoUrl (Supabase). Mantener como fallback temporal.')
-  static const String backupPhotoFirebaseUrl =
+  /// Imagen por defecto para recetas sin foto - Firebase Storage carpeta data/backup.png
+  /// Cuando el usuario actualiza la foto de la receta, se guarda su imagen y se usa la última.
+  static const String backupPhotoUrl =
       'https://firebasestorage.googleapis.com/v0/b/nutritrack-aztqd.firebasestorage.app/o/data%2Fbackup.png?alt=media';
 
   /// Supabase - Auth (Google OAuth). Reemplaza con tu proyecto.

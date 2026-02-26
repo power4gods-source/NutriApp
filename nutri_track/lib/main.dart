@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -344,6 +346,8 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 2; // Start at "Inicio" (index 2)
+  int _unreadChatsCount = 0;
+  final AuthService _authService = AuthService();
 
   final List<Widget> _screens = [
     const RecipesScreen(),        // Index 0: Recetas
@@ -356,7 +360,32 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   void setCurrentIndex(int index) {
     setState(() {
       _currentIndex = index;
+      if (index == 3) refreshUnreadChatsCount();
     });
+  }
+
+  Future<void> refreshUnreadChatsCount() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      final resp = await http.get(Uri.parse('$url/chat/inbox'), headers: headers).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200 && mounted) {
+        final data = json.decode(resp.body);
+        final list = (data['conversations'] as List?) ?? [];
+        int total = 0;
+        for (final c in list) {
+          final m = c is Map ? Map<String, dynamic>.from(c) : <String, dynamic>{};
+          total += (m['unread_count'] ?? 0) as int;
+        }
+        setState(() => _unreadChatsCount = total);
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => refreshUnreadChatsCount());
   }
 
   @override
@@ -384,6 +413,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             onTap: (index) {
               setState(() {
                 _currentIndex = index;
+                if (index == 3) refreshUnreadChatsCount();
               });
             },
             type: BottomNavigationBarType.fixed,
@@ -393,24 +423,33 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             elevation: 0,
             selectedFontSize: 12,
             unselectedFontSize: 12,
-            items: const [
-              BottomNavigationBarItem(
+            items: [
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.menu_book),
                 label: 'Recetas',
               ),
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.track_changes),
                 label: 'Seguimiento',
               ),
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.home),
                 label: 'Inicio',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.people),
+                icon: _unreadChatsCount > 0
+                    ? Badge(
+                        label: Text(
+                          _unreadChatsCount > 99 ? '99+' : '$_unreadChatsCount',
+                          style: const TextStyle(fontSize: 10, color: Colors.white),
+                        ),
+                        backgroundColor: Colors.red,
+                        child: const Icon(Icons.people),
+                      )
+                    : const Icon(Icons.people),
                 label: 'Amigos',
               ),
-              BottomNavigationBarItem(
+              const BottomNavigationBarItem(
                 icon: Icon(Icons.camera_alt),
                 label: 'Compartir',
               ),

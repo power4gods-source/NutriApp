@@ -3,6 +3,9 @@
 class FirebaseStoragePaths {
   FirebaseStoragePaths._();
 
+  /// Imagen por defecto para recetas sin foto. Subir a Firebase Storage en esta ruta.
+  static const String recipeBackup = 'data/backup.png';
+
   /// Avatares de perfil: data/users/{userId}/avatar/{timestamp}.jpg
   static String userAvatar(String userId, [String extension = 'jpg']) =>
       'data/users/$userId/avatar/${DateTime.now().millisecondsSinceEpoch}.$extension';

@@ -430,8 +430,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           ? _calculatedNutrition!['calories'] as int 
           : 0;
 
-      // Resolver imagen: subir si hay bytes nuevos, usar existente o por defecto
-      String imageUrl = _recipeImageUrl ?? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';
+      // Resolver imagen: subir si hay bytes nuevos, usar existente o backup.png de Firebase (data/backup.png)
+      String imageUrl = _recipeImageUrl ?? AppConfig.backupPhotoUrl;
       if (_selectedImageBytes != null) {
         final uploaded = await _uploadRecipeImage(_selectedImageBytes!);
         if (uploaded != null) imageUrl = uploaded;
@@ -669,9 +669,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Nueva Receta',
-          style: TextStyle(
+        title: Text(
+          _isEditing ? 'Editar receta' : 'Nueva Receta',
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -706,8 +706,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               // Título
               TextFormField(
                 controller: _titleController,
+                style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   labelText: 'Título *',
+                  labelStyle: const TextStyle(color: Colors.black87),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -744,9 +746,9 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.add_photo_alternate, size: 40, color: Colors.grey.shade600),
+                                const Icon(Icons.add_photo_alternate, size: 40, color: Colors.black87),
                                 const SizedBox(width: 12),
-                                Text('Añadir foto de receta', style: TextStyle(color: Colors.grey.shade600)),
+                                const Text('Añadir foto de receta', style: TextStyle(color: Colors.black87)),
                               ],
                             ),
                 ),
@@ -759,8 +761,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _timeController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Tiempo (min) *',
+                        labelStyle: const TextStyle(color: Colors.black87),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -780,12 +784,13 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                       value: _difficulty,
                       decoration: InputDecoration(
                         labelText: 'Dificultad *',
+                        labelStyle: const TextStyle(color: Colors.black87),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       items: ['Fácil', 'Media', 'Difícil']
-                          .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                          .map((d) => DropdownMenuItem(value: d, child: Text(d, style: const TextStyle(color: Colors.black87))))
                           .toList(),
                       onChanged: (value) {
                         setState(() => _difficulty = value!);
@@ -799,8 +804,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               // Porciones
               TextFormField(
                 controller: _servingsController,
+                style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   labelText: 'Porciones',
+                  labelStyle: const TextStyle(color: Colors.black87),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -812,8 +819,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               // Descripción (opcional)
               TextFormField(
                 controller: _descriptionController,
+                style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   labelText: 'Descripción',
+                  labelStyle: const TextStyle(color: Colors.black87),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -825,8 +834,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
               // Instrucciones (obligatorio)
               TextFormField(
                 controller: _instructionsController,
+                style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   labelText: 'Instrucciones *',
+                  labelStyle: const TextStyle(color: Colors.black87),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -847,6 +858,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 12),
@@ -858,8 +870,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                     flex: 2,
                     child: TextFormField(
                       controller: _ingredientNameController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Nombre',
+                        labelStyle: const TextStyle(color: Colors.black87),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -875,8 +889,10 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _ingredientQuantityController,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         labelText: 'Cantidad',
+                        labelStyle: const TextStyle(color: Colors.black87),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -901,7 +917,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         ),
                       ),
                       items: ['gramos', 'unidades', 'tazas', 'cucharadas']
-                          .map((u) => DropdownMenuItem(value: u, child: Text(u)))
+                          .map((u) => DropdownMenuItem(value: u, child: Text(u, style: const TextStyle(color: Colors.black87))))
                           .toList(),
                       onChanged: (value) {
                         setState(() => _ingredientUnit = value!);
@@ -936,6 +952,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                         Expanded(
                           child: Text(
                             '${ingredient['name']} - ${ingredient['quantity']} ${ingredient['unit']}',
+                            style: const TextStyle(color: Colors.black87),
                           ),
                         ),
                         IconButton(
@@ -983,6 +1000,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -1010,8 +1028,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(color: Colors.grey[700])),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(color: Colors.black87)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87)),
         ],
       ),
     );

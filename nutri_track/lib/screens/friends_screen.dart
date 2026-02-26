@@ -32,6 +32,8 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
   int _connectionsCount = 0;
   Set<String> _connectionIds = {};
   bool _isPublic = true;  // true = público (visible en Explorar), false = oculto
+  /// user_id -> número de mensajes no leídos en ese chat
+  Map<String, int> _unreadByUserId = {};
 
   @override
   void initState() {
@@ -69,11 +71,34 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
         _loadStats(),
         _loadConnections(),
         _loadMyVisibility(),
+        _loadChatInbox(),
       ]);
     } catch (e) {
       print('❌ Error cargando datos: $e');
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _loadChatInbox() async {
+    try {
+      final url = await AppConfig.getBackendUrl();
+      final headers = await _authService.getAuthHeaders();
+      final resp = await http.get(Uri.parse('$url/chat/inbox'), headers: headers).timeout(const Duration(seconds: 10));
+      if (resp.statusCode == 200) {
+        final data = json.decode(resp.body);
+        final list = (data['conversations'] as List?) ?? [];
+        final map = <String, int>{};
+        for (final c in list) {
+          final m = c is Map ? Map<String, dynamic>.from(c) : <String, dynamic>{};
+          final otherId = (m['other_user_id'] ?? '').toString();
+          final unread = (m['unread_count'] ?? 0) as int;
+          if (otherId.isNotEmpty) map[otherId] = unread;
+        }
+        setState(() => _unreadByUserId = map);
+      }
+    } catch (e) {
+      print('❌ Error cargando inbox: $e');
     }
   }
 
@@ -318,6 +343,40 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
     );
   }
 
+  void _openProfile(Map<String, dynamic> profile) {
+    final username = profile['username'] ??
+        profile['display_name'] ??
+        profile['email']?.split('@')[0] ??
+        'Usuario';
+    final userId = profile['user_id'] ?? '';
+    final avatarUrl = profile['avatar_url'] ?? '';
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => UserProfileScreen(
+          targetUserId: userId,
+          targetUsername: username.toString(),
+          avatarUrl: avatarUrl.toString().isNotEmpty ? avatarUrl.toString() : null,
+        ),
+      ),
+    ).then((_) => _loadData());
+  }
+
+  void _openChat(String userId, String username) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(
+          otherUserId: userId,
+          otherUsername: username,
+        ),
+      ),
+    ).then((_) {
+      _loadData();
+      MainNavigationScreen.of(context)?.refreshUnreadChatsCount();
+    });
+  }
+
   Widget _buildProfileCard(Map<String, dynamic> profile) {
     final username = profile['username'] ??
         profile['display_name'] ??
@@ -329,6 +388,7 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
     final publicRecipesCount = profile['public_recipes_count'] ?? 0;
     final isFollowing = profile['is_following'] ?? false;
     final isConnection = _connectionIds.contains(userId);
+    final unreadCount = _unreadByUserId[userId] ?? 0;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -340,89 +400,118 @@ class _FriendsScreenState extends State<FriendsScreen> with SingleTickerProvider
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            _buildAvatar(avatarUrl, username, userId),
+            InkWell(
+              onTap: () => _openProfile(profile),
+              borderRadius: BorderRadius.circular(28),
+              child: _buildAvatar(avatarUrl, username, userId),
+            ),
             const SizedBox(width: 16),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: InkWell(
+                onTap: () => _openProfile(profile),
+                borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      username,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.people, size: 14, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$followersCount seguidores',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 16),
+                        Row(
+                          children: [
+                            Icon(Icons.restaurant_menu, size: 14, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$publicRecipesCount recetas',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Acciones: si es conexión → Siguiendo + icono chat (con badge); si no → Seguir/Siguiendo
+            if (isConnection)
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    username,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black87,
+                  ElevatedButton(
+                    onPressed: () => _toggleFollow(userId, isFollowing),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.textTertiary(context),
+                      foregroundColor: Colors.black87,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Siguiendo',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Row(
+                  Stack(
+                    clipBehavior: Clip.none,
                     children: [
-                      Row(
-                        children: [
-                          Icon(Icons.people, size: 14, color: Colors.grey[600]),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$followersCount seguidores',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
+                      IconButton(
+                        icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4CAF50), size: 28),
+                        tooltip: 'Chatear',
+                        onPressed: () => _openChat(userId, username.toString()),
                       ),
-                      const SizedBox(width: 16),
-                      Row(
-                        children: [
-                          Icon(Icons.restaurant_menu, size: 14, color: Colors.grey[600]),
-                          const SizedBox(width: 4),
-                          Text(
-                            '$publicRecipesCount recetas',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
+                      if (unreadCount > 0)
+                        Positioned(
+                          top: 2,
+                          right: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  // Ver perfil - visible para todos
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UserProfileScreen(
-                            targetUserId: userId,
-                            targetUsername: username.toString(),
-                            avatarUrl: avatarUrl.toString().isNotEmpty ? avatarUrl.toString() : null,
+                            constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                            child: Text(
+                              unreadCount > 99 ? '99+' : '$unreadCount',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
-                      ).then((_) => _loadData());
-                    },
-                    icon: const Icon(Icons.person_outline, size: 18, color: Color(0xFF4CAF50)),
-                    label: const Text('Ver perfil', style: TextStyle(color: Color(0xFF4CAF50), fontWeight: FontWeight.w600)),
+                    ],
                   ),
                 ],
-              ),
-            ),
-            // Acciones: si es conexión solo icono de chat; si no, botón Seguir/Siguiendo
-            if (isConnection)
-              IconButton(
-                icon: const Icon(Icons.chat_bubble_outline, color: Color(0xFF4CAF50), size: 28),
-                tooltip: 'Chatear',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChatScreen(
-                        otherUserId: userId,
-                        otherUsername: username.toString(),
-                      ),
-                    ),
-                  );
-                },
               )
             else
               ElevatedButton(

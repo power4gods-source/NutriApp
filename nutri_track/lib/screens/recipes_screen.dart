@@ -32,6 +32,8 @@ class _RecipesScreenState extends State<RecipesScreen> {
   final TextEditingController _nameSearchController = TextEditingController();
   String _nameQuery = '';
   String _sortBy = 'relevance'; // relevance, duration, az
+  /// En modo "Mis recetas": 'all' | 'mine' | 'ai' (Todas, Creadas por mi, Creadas con IA)
+  String _myRecipesSubFilter = 'all';
 
   @override
   void initState() {
@@ -68,6 +70,15 @@ class _RecipesScreenState extends State<RecipesScreen> {
       final ingMatch = ingStr.contains(query);
       return titleMatch || ingMatch;
     }).toList();
+
+    // En "Mis recetas": filtrar por Creadas por mi / Creadas con IA
+    if (_isMyRecipesMode) {
+      if (_myRecipesSubFilter == 'mine') {
+        list = list.where((r) => r['is_ai_generated'] != true).toList();
+      } else if (_myRecipesSubFilter == 'ai') {
+        list = list.where((r) => r['is_ai_generated'] == true).toList();
+      }
+    }
 
     // Ordenar: prioridad título, luego ingredientes (coincidencias exactas primero)
     if (_nameQuery.isNotEmpty) {
@@ -736,6 +747,85 @@ class _RecipesScreenState extends State<RecipesScreen> {
         ),
         centerTitle: true,
         actions: [
+          if (_isMyRecipesMode)
+            IconButton(
+              icon: const Icon(Icons.filter_list, color: Colors.white),
+              tooltip: 'Filtrar: Creadas por mi / Creadas con IA',
+              onPressed: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  backgroundColor: Colors.white,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                  ),
+                  builder: (ctx) => SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Mostrar recetas',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ListTile(
+                            title: const Text('Todas', style: TextStyle(color: Colors.black)),
+                            leading: Radio<String>(
+                              value: 'all',
+                              groupValue: _myRecipesSubFilter,
+                              onChanged: (v) {
+                                setState(() => _myRecipesSubFilter = v ?? 'all');
+                                Navigator.pop(ctx);
+                              },
+                            ),
+                            onTap: () {
+                              setState(() => _myRecipesSubFilter = 'all');
+                              Navigator.pop(ctx);
+                            },
+                          ),
+                          ListTile(
+                            title: const Text('Creadas por mi', style: TextStyle(color: Colors.black)),
+                            leading: Radio<String>(
+                              value: 'mine',
+                              groupValue: _myRecipesSubFilter,
+                              onChanged: (v) {
+                                setState(() => _myRecipesSubFilter = v ?? 'mine');
+                                Navigator.pop(ctx);
+                              },
+                            ),
+                            onTap: () {
+                              setState(() => _myRecipesSubFilter = 'mine');
+                              Navigator.pop(ctx);
+                            },
+                          ),
+                          ListTile(
+                            title: const Text('Creadas con IA', style: TextStyle(color: Colors.black)),
+                            leading: Radio<String>(
+                              value: 'ai',
+                              groupValue: _myRecipesSubFilter,
+                              onChanged: (v) {
+                                setState(() => _myRecipesSubFilter = v ?? 'ai');
+                                Navigator.pop(ctx);
+                              },
+                            ),
+                            onTap: () {
+                              setState(() => _myRecipesSubFilter = 'ai');
+                              Navigator.pop(ctx);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.menu_book, color: Colors.white),
             tooltip: 'Buscador de recetas',
@@ -785,9 +875,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                   child: TextField(
                     controller: _nameSearchController,
+                    style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Buscar recetas...',
-                      prefixIcon: const Icon(Icons.search),
+                      hintStyle: const TextStyle(color: Colors.black54),
+                      prefixIcon: const Icon(Icons.search, color: Colors.black54),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true,
                       fillColor: AppTheme.fillLight(context),
@@ -819,19 +911,20 @@ class _RecipesScreenState extends State<RecipesScreen> {
                     children: [
                       Text(
                         '${_filteredRecipes.length} recetas',
-                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        style: const TextStyle(fontSize: 13, color: Colors.black87),
                       ),
                       Row(
                         children: [
-                          Text('Ordenar: ', style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                          const Text('Ordenar: ', style: TextStyle(fontSize: 13, color: Colors.black87)),
                           DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
                               value: _sortBy,
                               isDense: true,
+                              dropdownColor: Colors.white,
                               items: const [
-                                DropdownMenuItem(value: 'relevance', child: Text('Relevancia')),
-                                DropdownMenuItem(value: 'duration', child: Text('Duración')),
-                                DropdownMenuItem(value: 'az', child: Text('A-Z')),
+                                DropdownMenuItem(value: 'relevance', child: Text('Relevancia', style: TextStyle(color: Colors.black87))),
+                                DropdownMenuItem(value: 'duration', child: Text('Duración', style: TextStyle(color: Colors.black87))),
+                                DropdownMenuItem(value: 'az', child: Text('A-Z', style: TextStyle(color: Colors.black87))),
                               ],
                               onChanged: (v) {
                                 if (v != null) setState(() => _sortBy = v);
@@ -855,13 +948,13 @@ class _RecipesScreenState extends State<RecipesScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Icon(Icons.restaurant_menu,
-                                          size: 64, color: Colors.grey[400]),
+                                          size: 64, color: Colors.black54),
                                       const SizedBox(height: 16),
-                                      Text(
+                                      const Text(
                                         'No hay recetas disponibles',
                                         style: TextStyle(
                                           fontSize: 16,
-                                          color: Colors.grey[600],
+                                          color: Colors.black87,
                                         ),
                                       ),
                                     ],
@@ -1104,22 +1197,22 @@ class _RecipesScreenState extends State<RecipesScreen> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.access_time, size: 18, color: Colors.grey[600]),
+                          const Icon(Icons.access_time, size: 18, color: Colors.black87),
                           const SizedBox(width: 4),
                           Text(
                             '${recipe['time_minutes'] ?? 0} min',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                            style: const TextStyle(color: Colors.black87, fontSize: 14),
                           ),
                         ],
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.trending_up, size: 18, color: Colors.grey[600]),
+                          const Icon(Icons.trending_up, size: 18, color: Colors.black87),
                           const SizedBox(width: 4),
                           Text(
                             recipe['difficulty'] ?? 'N/A',
-                            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                            style: const TextStyle(color: Colors.black87, fontSize: 14),
                           ),
                         ],
                       ),
@@ -1127,11 +1220,11 @@ class _RecipesScreenState extends State<RecipesScreen> {
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.people, size: 18, color: Colors.grey[600]),
+                            const Icon(Icons.people, size: 18, color: Colors.black87),
                             const SizedBox(width: 4),
                             Text(
                               '${recipe['servings']} porciones',
-                              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                              style: const TextStyle(color: Colors.black87, fontSize: 14),
                             ),
                           ],
                         ),
@@ -1327,6 +1420,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
                         ),
